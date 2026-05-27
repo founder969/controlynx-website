@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controlynx — AI Project Controls Platform for Construction</title>
+<meta name="description" content="Controlynx automates the most time-consuming reporting tasks for planning engineers — daily reports, weekly updates, monthly summaries, and client presentations. Built for construction.">
+<meta property="og:title" content="Controlynx — AI Project Controls Platform">
+<meta property="og:description" content="Stop spending Sundays on reports. Controlynx automates project controls reporting for construction teams.">
+<meta property="og:url" content="https://controlynx.ai">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D2137;
+  --navy-2:#0F2A45;
+  --teal:#1D9E75;
+  --teal-dark:#0A5C47;
+  --teal-light:#E1F5EE;
+  --white:#FFFFFF;
+  --off-white:#F4F2EB;
+  --gray:#8A8880;
+  --gray-light:#D3D1C7;
+  --text-dark:#0D2137;
+  --text-muted:#5F5E5A;
+  --border:#E8E6DF;
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;color:var(--text-dark);background:var(--white);overflow-x:hidden}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 5%;height:68px;display:flex;align-items:center;justify-content:space-between;background:rgba(13,33,55,0.95);backdrop-filter:blur(12px);border-bottom:0.5px solid rgba(29,158,117,0.15)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-logo svg{width:36px;height:36px}
+.nav-logo-text{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--white);letter-spacing:-0.3px}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:13px;color:rgba(255,255,255,0.65);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{padding:8px 20px;background:var(--teal);color:var(--white);border:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:background .2s}
+.nav-cta:hover{background:#16875F}
+
+/* HERO */
+.hero{min-height:100vh;background:var(--navy);display:flex;flex-direction:column;justify-content:center;padding:120px 5% 80px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px, rgba(29,158,117,0.08) 1px, transparent 0);background-size:40px 40px;pointer-events:none}
+.hero::after{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(29,158,117,0.07) 0%,transparent 70%);pointer-events:none}
+.hero-diamond{position:absolute;bottom:-80px;left:-80px;width:400px;height:400px;border:1.5px solid rgba(29,158,117,0.12);transform:rotate(45deg);border-radius:8px}
+.hero-diamond-2{position:absolute;bottom:-40px;left:-40px;width:300px;height:300px;border:1px solid rgba(29,158,117,0.08);transform:rotate(45deg);border-radius:6px}
+.hero-content{max-width:820px;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(29,158,117,0.12);border:0.5px solid rgba(29,158,117,0.3);border-radius:20px;margin-bottom:32px}
+.hero-badge-dot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.hero-badge span{font-size:12px;color:var(--teal);font-weight:500;letter-spacing:0.05em}
+.hero-headline{font-family:'Syne',sans-serif;font-size:clamp(36px,5.5vw,68px);font-weight:800;color:var(--white);line-height:1.08;letter-spacing:-1.5px;margin-bottom:24px}
+.hero-headline em{color:var(--teal);font-style:normal}
+.hero-sub{font-size:clamp(16px,2vw,19px);color:rgba(255,255,255,0.6);line-height:1.7;max-width:580px;margin-bottom:44px;font-weight:300}
+.hero-form{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px}
+.hero-input{flex:1;min-width:240px;height:52px;padding:0 18px;background:rgba(255,255,255,0.07);border:0.5px solid rgba(255,255,255,0.15);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none;transition:border-color .2s}
+.hero-input::placeholder{color:rgba(255,255,255,0.35)}
+.hero-input:focus{border-color:rgba(29,158,117,0.6)}
+.hero-btn{height:52px;padding:0 28px;background:var(--teal);color:var(--white);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;white-space:nowrap}
+.hero-btn:hover{background:#16875F;transform:translateY(-1px)}
+.hero-note{font-size:12px;color:rgba(255,255,255,0.3)}
+.hero-stats{display:flex;gap:40px;margin-top:56px;flex-wrap:wrap}
+.hero-stat-num{font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--white);line-height:1}
+.hero-stat-label{font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;line-height:1.4}
+
+/* SECTION SHARED */
+section{padding:96px 5%}
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--teal);margin-bottom:16px}
+.section-title{font-family:'Syne',sans-serif;font-size:clamp(28px,3.5vw,44px);font-weight:700;color:var(--text-dark);line-height:1.15;letter-spacing:-0.5px;margin-bottom:20px}
+.section-sub{font-size:17px;color:var(--text-muted);line-height:1.7;max-width:580px;font-weight:300}
+
+/* PROBLEM */
+.problem{background:var(--off-white)}
+.problem-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2px;margin-top:56px}
+.problem-card{background:var(--white);padding:36px 32px;position:relative;overflow:hidden}
+.problem-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.problem-card:hover::before{transform:scaleX(1)}
+.problem-num{font-family:'Syne',sans-serif;font-size:56px;font-weight:800;color:rgba(13,33,55,0.06);line-height:1;margin-bottom:16px}
+.problem-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text-dark);margin-bottom:12px;line-height:1.3}
+.problem-desc{font-size:14px;color:var(--text-muted);line-height:1.7}
+.problem-quote{font-size:13px;color:var(--teal-dark);font-style:italic;margin-top:16px;padding:12px 16px;background:var(--teal-light);border-radius:6px;line-height:1.5}
+
+/* HOW IT WORKS */
+.how{background:var(--white)}
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:32px;margin-top:56px}
+.how-card{text-align:center;padding:32px 24px}
+.how-icon{width:56px;height:56px;background:var(--teal-light);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:24px}
+.how-step{font-size:11px;font-weight:500;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
+.how-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--text-dark);margin-bottom:10px}
+.how-desc{font-size:13px;color:var(--text-muted);line-height:1.6}
+.how-arrow{display:flex;align-items:center;justify-content:center;color:var(--gray-light);font-size:20px;padding-top:56px}
+
+/* FEATURES */
+.features{background:var(--navy);position:relative;overflow:hidden}
+.features::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(29,158,117,0.05) 1px,transparent 0);background-size:40px 40px}
+.features .section-title{color:var(--white)}
+.features .section-sub{color:rgba(255,255,255,0.5)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:56px;position:relative;z-index:1}
+.feature-card{background:rgba(255,255,255,0.04);border:0.5px solid rgba(255,255,255,0.08);border-radius:12px;padding:28px;transition:all .25s}
+.feature-card:hover{background:rgba(255,255,255,0.07);border-color:rgba(29,158,117,0.3);transform:translateY(-2px)}
+.feature-tag{display:inline-block;font-size:10px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);background:rgba(29,158,117,0.12);padding:4px 10px;border-radius:4px;margin-bottom:16px}
+.feature-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--white);margin-bottom:10px;line-height:1.3}
+.feature-desc{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.6;margin-bottom:16px}
+.feature-list{list-style:none}
+.feature-list li{font-size:12px;color:rgba(255,255,255,0.4);padding:4px 0;display:flex;align-items:center;gap:8px}
+.feature-list li::before{content:'';width:4px;height:4px;background:var(--teal);border-radius:50%;flex-shrink:0}
+
+/* WHO */
+.who{background:var(--off-white)}
+.who-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:56px}
+.who-card{background:var(--white);border-radius:12px;padding:28px 24px;border:0.5px solid var(--border)}
+.who-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:var(--teal);background:var(--teal-light)}
+.who-role{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text-dark);margin-bottom:8px}
+.who-desc{font-size:12px;color:var(--text-muted);line-height:1.6}
+
+/* SAVING */
+.saving{background:var(--white)}
+.saving-inner{max-width:900px;margin:0 auto;text-align:center}
+.saving-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:2px;margin-top:56px;border:0.5px solid var(--border)}
+.saving-stat{padding:40px 24px;text-align:center;border:0.5px solid var(--border)}
+.saving-num{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:var(--navy);line-height:1;margin-bottom:8px}
+.saving-num span{color:var(--teal)}
+.saving-label{font-size:13px;color:var(--text-muted);line-height:1.5}
+
+/* CTA */
+.cta-section{background:var(--teal-dark);padding:96px 5%;text-align:center;position:relative;overflow:hidden}
+.cta-section::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(255,255,255,0.04) 1px,transparent 0);background-size:32px 32px}
+.cta-section .section-title{color:var(--white);max-width:640px;margin:0 auto 16px}
+.cta-section .section-sub{color:rgba(255,255,255,0.65);margin:0 auto 44px}
+.cta-form{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1}
+.cta-input{width:300px;height:52px;padding:0 18px;background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.25);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--white);outline:none}
+.cta-input::placeholder{color:rgba(255,255,255,0.4)}
+.cta-btn{height:52px;padding:0 28px;background:var(--white);color:var(--teal-dark);border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+.cta-btn:hover{background:var(--off-white)}
+.cta-note{font-size:12px;color:rgba(255,255,255,0.4);margin-top:16px;position:relative;z-index:1}
+
+/* FOOTER */
+footer{background:var(--navy);padding:48px 5%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:20px;border-top:0.5px solid rgba(255,255,255,0.06)}
+.footer-logo{display:flex;align-items:center;gap:10px}
+.footer-logo-text{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--white)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:rgba(255,255,255,0.7)}
+.footer-copy{font-size:12px;color:rgba(255,255,255,0.2)}
+
+/* FADE IN */
+.fade-in{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+
+/* SUCCESS STATE */
+.success-msg{display:none;font-size:13px;color:var(--teal);margin-top:12px;font-weight:500}
+
+/* MOBILE */
+@media(max-width:768px){
+  .nav-links{display:none}
+  .hero-stats{gap:24px}
+  .how-arrow{display:none}
+  footer{flex-direction:column;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <svg viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="3" stroke="#1D9E75" stroke-width="1.5" transform="rotate(45 18 18)" fill="none"/>
+      <path d="M13 10C8 10 5 13 5 18C5 23 8 26 13 26" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <line x1="17" y1="10" x2="29" y2="26" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="29" y1="10" x2="17" y2="26" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-logo-text">Controlynx</span>
+  </a>
+  <div class="nav-links">
+    <a href="#problem">The Problem</a>
+    <a href="#features">Features</a>
+    <a href="#who">Who It's For</a>
+  </div>
+  <a href="#waitlist" class="nav-cta">Get Early Access</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-diamond"></div>
+  <div class="hero-diamond-2"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="hero-badge-dot"></span>
+      <span>Now accepting early access requests</span>
+    </div>
+    <h1 class="hero-headline">
+      Your planning engineer<br>
+      should be <em>planning.</em><br>
+      Not formatting reports.
+    </h1>
+    <p class="hero-sub">
+      Controlynx automates daily, weekly, and monthly project reports — so your project controls team gets back 8+ hours every week. Built by a construction professional with 22 years of experience.
+    </p>
+    <div class="hero-form">
+      <input class="hero-input" type="email" id="heroEmail" placeholder="Enter your work email">
+      <button class="hero-btn" onclick="submitWaitlist('heroEmail','heroSuccess')">Get Early Access →</button>
+    </div>
+    <p class="hero-note" id="heroSuccess"></p>
+    <p class="hero-note">Free during beta. No credit card required.</p>
+    <div class="hero-stats">
+      <div>
+        <div class="hero-stat-num">8+</div>
+        <div class="hero-stat-label">Hours saved<br>per week</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">4</div>
+        <div class="hero-stat-label">Report types<br>automated</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">22</div>
+        <div class="hero-stat-label">Years of construction<br>experience built in</div>
+      </div>
+      <div>
+        <div class="hero-stat-num">0</div>
+        <div class="hero-stat-label">Manual formatting<br>required</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem fade-in" id="problem">
+  <p class="section-label">The problem</p>
+  <h2 class="section-title">Monday morning.<br>Every week. The same chaos.</h2>
+  <p class="section-sub">Every construction project in the world runs on the same broken workflow. And every planning engineer knows exactly what we mean.</p>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-num">01</div>
+      <div class="problem-title">Data collection takes all morning</div>
+      <p class="problem-desc">Your planning engineer spends Monday morning on WhatsApp and phone calls — chasing site teams and subcontractors for progress data that should have arrived automatically.</p>
+      <p class="problem-quote">"I'll submit the report by 3pm — just waiting on data from site."</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-num">02</div>
+      <div class="problem-title">Reports are submitted with missing data</div>
+      <p class="problem-desc">The data collection is never fully complete by the time the report is due. So every report contains estimates, gaps, and figures that are already outdated the moment they are submitted.</p>
+      <p class="problem-quote">"I'll update the numbers when I get confirmation from the subcontractor."</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-num">03</div>
+      <div class="problem-title">40% of the week is spent on formatting</div>
+      <p class="problem-desc">Planning engineers are hired to analyse schedules, identify risks, and protect the project programme. Instead, they spend nearly half their week copy-pasting data into Word and Excel templates.</p>
+      <p class="problem-quote">"I didn't get time to review the programme this week — the monthly report took three days."</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how fade-in" id="how">
+  <p class="section-label">How it works</p>
+  <h2 class="section-title">From site data to<br>client-ready report in minutes</h2>
+  <p class="section-sub">Three steps. No manual formatting. No chasing data. No missed submissions.</p>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-icon">📋</div>
+      <p class="how-step">Step 1</p>
+      <h3 class="how-title">Site teams fill a 5-minute form</h3>
+      <p class="how-desc">A simple mobile-friendly form — activities completed, manpower deployed, issues, photos. Takes less than 5 minutes. Works on any phone, no app required.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">⚡</div>
+      <p class="how-step">Step 2</p>
+      <h3 class="how-title">AI generates the report</h3>
+      <p class="how-desc">Controlynx reads the data, applies your project template, and generates a complete, professional report — daily, weekly, or monthly — with narrative, charts, and summaries.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">📄</div>
+      <p class="how-step">Step 3</p>
+      <h3 class="how-title">Review, approve, and send</h3>
+      <p class="how-desc">Your engineer reviews the draft in minutes, makes any adjustments, and exports as PDF or Word. Client-ready. Every time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features fade-in" id="features">
+  <p class="section-label" style="color:rgba(29,158,117,0.8)">What's included</p>
+  <h2 class="section-title">Every report your project needs.<br>Automated.</h2>
+  <p class="section-sub">Four reporting modules — each one eliminating hours of manual work every week.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-tag">Daily</span>
+      <h3 class="feature-title">Daily Progress Report (DPR)</h3>
+      <p class="feature-desc">Auto-generated from site team inputs. Complete, formatted, and client-ready every morning before your engineer finishes their coffee.</p>
+      <ul class="feature-list">
+        <li>Activities completed and in progress</li>
+        <li>Manpower deployed by trade</li>
+        <li>Issues, delays, and weather log</li>
+        <li>Photo attachments auto-embedded</li>
+        <li>PDF and Word export</li>
+      </ul>
+    </div>
+    <div class="feature-card">
+      <span class="feature-tag">Weekly</span>
+      <h3 class="feature-title">Weekly Progress Report</h3>
+      <p class="feature-desc">Aggregated from 7 days of DPR data. S-curve, planned vs actual, lookahead, issues summary — all formatted and ready.</p>
+      <ul class="feature-list">
+        <li>Planned vs actual S-curve</li>
+        <li>Progress by area and discipline</li>
+        <li>Issues and risks summary</li>
+        <li>2-week lookahead</li>
+        <li>Formatted per your client template</li>
+      </ul>
+    </div>
+    <div class="feature-card">
+      <span class="feature-tag">Monthly</span>
+      <h3 class="feature-title">Monthly Progress Report</h3>
+      <p class="feature-desc">The full executive report — narrative, KPIs, schedule variance, cost update, and forecast — generated in minutes instead of three days.</p>
+      <ul class="feature-list">
+        <li>Executive narrative auto-written</li>
+        <li>Schedule and cost KPIs</li>
+        <li>Variance analysis with reasons</li>
+        <li>Next month forecast</li>
+        <li>Risk and issues register</li>
+      </ul>
+    </div>
+    <div class="feature-card">
+      <span class="feature-tag">Presentation</span>
+      <h3 class="feature-title">Weekly Progress Presentation</h3>
+      <p class="feature-desc">The Monday morning client meeting deck — built automatically. Charts, metrics, photos, and key messages. No more Sunday evening PowerPoint sessions.</p>
+      <ul class="feature-list">
+        <li>Auto-built slide deck</li>
+        <li>S-curve and progress charts</li>
+        <li>Key metrics and highlights</li>
+        <li>Photo grid from site</li>
+        <li>Export as PDF or PowerPoint</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="who fade-in" id="who">
+  <p class="section-label">Who it's for</p>
+  <h2 class="section-title">Built for the people who<br>run construction projects</h2>
+  <p class="section-sub">From the engineer on site to the director in the boardroom — everyone gets exactly what they need.</p>
+  <div class="who-grid">
+    <div class="who-card">
+      <div class="who-icon">PCE</div>
+      <h3 class="who-role">Project Controls Engineer</h3>
+      <p class="who-desc">Stop spending your week on formatting. Controlynx handles the reports — you focus on schedule analysis and delay prevention.</p>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">PE</div>
+      <h3 class="who-role">Planning Engineer</h3>
+      <p class="who-desc">Your expertise is in the schedule. Not in copy-pasting data into Word. Get your time back and use it where it matters.</p>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">PM</div>
+      <h3 class="who-role">Project Manager</h3>
+      <p class="who-desc">Get accurate, complete reports on time — every time. No more waiting for your team to finish formatting before you can review the numbers.</p>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">SE</div>
+      <h3 class="who-role">Site Engineer</h3>
+      <p class="who-desc">A 5-minute daily form on your phone. That is your entire reporting responsibility. Controlynx handles everything else automatically.</p>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">DIR</div>
+      <h3 class="who-role">Director / PMO</h3>
+      <p class="who-desc">A consistent, professional reporting format across all your projects — without chasing your team every Monday morning for updates.</p>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="saving fade-in">
+  <div class="saving-inner">
+    <p class="section-label" style="text-align:center">The numbers</p>
+    <h2 class="section-title" style="text-align:center;max-width:560px;margin:0 auto 20px">What Controlynx gives back to your team</h2>
+    <div class="saving-grid">
+      <div class="saving-stat">
+        <div class="saving-num">8<span>+</span></div>
+        <div class="saving-label">Hours saved per planning engineer per week</div>
+      </div>
+      <div class="saving-stat">
+        <div class="saving-num">4</div>
+        <div class="saving-label">Report types fully automated</div>
+      </div>
+      <div class="saving-stat">
+        <div class="saving-num">5<span>min</span></div>
+        <div class="saving-label">Daily site input — all that's needed from site teams</div>
+      </div>
+      <div class="saving-stat">
+        <div class="saving-num">22<span>yr</span></div>
+        <div class="saving-label">Construction experience built into every AI output</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section fade-in" id="waitlist">
+  <h2 class="section-title">Stop losing Monday mornings<br>to report formatting</h2>
+  <p class="section-sub">Join the waitlist for early access. Free during beta. Built for GCC construction teams launching globally.</p>
+  <div class="cta-form">
+    <input class="cta-input" type="email" id="ctaEmail" placeholder="Enter your work email">
+    <button class="cta-btn" onclick="submitWaitlist('ctaEmail','ctaSuccess')">Get Early Access →</button>
+  </div>
+  <p class="cta-note" id="ctaSuccess"></p>
+  <p class="cta-note" style="margin-top:8px">No credit card. No commitment. Cancel any time.</p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <svg width="28" height="28" viewBox="0 0 36 36" fill="none">
+      <rect x="2" y="2" width="32" height="32" rx="3" stroke="#1D9E75" stroke-width="1.5" transform="rotate(45 18 18)" fill="none"/>
+      <path d="M13 10C8 10 5 13 5 18C5 23 8 26 13 26" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+      <line x1="17" y1="10" x2="29" y2="26" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="29" y1="10" x2="17" y2="26" stroke="#1D9E75" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <span class="footer-logo-text">Controlynx</span>
+  </div>
+  <div class="footer-links">
+    <a href="mailto:founder@controlynx.ai">founder@controlynx.ai</a>
+    <a href="#problem">The Problem</a>
+    <a href="#features">Features</a>
+    <a href="#waitlist">Early Access</a>
+  </div>
+  <p class="footer-copy">© 2026 Controlynx. AI Project Controls Platform.</p>
+</footer>
+
+<script>
+// Fade in on scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Waitlist form
+function submitWaitlist(inputId, successId) {
+  const email = document.getElementById(inputId).value.trim();
+  const successEl = document.getElementById(successId);
+  if (!email || !email.includes('@')) {
+    document.getElementById(inputId).style.borderColor = 'rgba(220,80,80,0.6)';
+    return;
+  }
+  document.getElementById(inputId).value = '';
+  document.getElementById(inputId).style.borderColor = '';
+  successEl.textContent = '✓ You\'re on the list. We\'ll be in touch soon.';
+  successEl.style.display = 'block';
+  successEl.style.color = '#1D9E75';
+  successEl.style.fontWeight = '500';
+  successEl.style.marginTop = '12px';
+}
+
+// Smooth scroll for nav links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if(target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+</body>
+</html>
