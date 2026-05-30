@@ -109,15 +109,15 @@ nav{
   transition:background .3s
 }
 nav.scrolled{background:rgba(8,13,20,0.97)}
-.nav-inner{max-width:1240px;margin:0 auto;padding:0 5%;height:100%;display:flex;align-items:center;justify-content:space-between}
-.nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-inner{max-width:1240px;margin:0 auto;padding:0 5%;height:100%;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px}
+.nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0;justify-self:start}
 .nav-logo-mark{width:30px;height:30px}
 .nav-wordmark{font-family:var(--display);font-size:17px;font-weight:800;color:var(--white);letter-spacing:-0.3px}
 .nav-wordmark span{color:var(--cyan)}
-.nav-links{display:flex;align-items:center;gap:2px}
+.nav-links{display:flex;align-items:center;gap:2px;justify-self:center}
 .nav-links a{font-size:13px;color:var(--white-3);padding:6px 12px;border-radius:var(--r-sm);transition:all .18s;font-weight:400}
 .nav-links a:hover{color:var(--white);background:rgba(255,255,255,0.05)}
-.nav-right{display:flex;align-items:center;gap:10px}
+.nav-right{display:flex;align-items:center;gap:10px;justify-self:end}
 .nav-login{font-size:13px;font-weight:500;color:var(--white-3);transition:color .18s;padding:6px 12px}
 .nav-login:hover{color:var(--white)}
 .nav-cta{height:38px;padding:0 16px;background:var(--cyan);color:var(--bg);border-radius:var(--r-sm);font-size:13px;font-weight:700;border:none;transition:all .18s;cursor:pointer}
@@ -153,7 +153,7 @@ nav.scrolled{background:rgba(8,13,20,0.97)}
 .badge-text{font-size:11px;font-weight:700;color:var(--cyan);letter-spacing:.08em;text-transform:uppercase}
 .hero-headline{font-family:var(--display);font-size:clamp(40px,5vw,68px);font-weight:800;color:var(--white);line-height:1.06;letter-spacing:-2px;margin-bottom:22px}
 .hero-headline .accent{color:var(--cyan)}
-.hero-sub{font-size:18px;font-weight:300;color:var(--white-2);line-height:1.72;max-width:500px;margin-bottom:36px}
+.hero-sub{font-size:18px;font-weight:300;color:var(--white-2);line-height:1.72;max-width:680px;margin-bottom:36px}
 .hero-sub strong{color:var(--white);font-weight:500}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
 .hero-trust{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
@@ -162,7 +162,7 @@ nav.scrolled{background:rgba(8,13,20,0.97)}
 .trust-sep{width:1px;height:12px;background:var(--border-2)}
 
 /* Hero dashboard */
-.hero-right{position:relative;min-width:0}
+.hero-right{position:relative;min-width:0;padding:24px 20px 32px 0}
 .dash-shell{
   background:var(--bg-card);
   border:0.5px solid var(--border-2);
@@ -224,21 +224,21 @@ nav.scrolled{background:rgba(8,13,20,0.97)}
 .gen-badge-text strong{color:var(--cyan)}
 
 /* Floating tags */
-.hero-tag{position:absolute;background:var(--bg-card);border:0.5px solid var(--border-2);border-radius:var(--r-md);padding:9px 14px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:2}
-.tag-1{top:-16px;right:20px;animation:float-t1 8s ease-in-out infinite}
-.tag-2{bottom:20px;left:-10px;animation:float-t2 9s ease-in-out infinite}
-@keyframes float-t1{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(0deg)}}
-@keyframes float-t2{0%,100%{transform:translateY(0) rotate(1deg)}50%{transform:translateY(7px) rotate(0deg)}}
+.hero-tag{position:absolute;background:var(--bg-card);border:0.5px solid var(--border-2);border-radius:var(--r-md);padding:9px 14px;box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:3;pointer-events:none}
+.tag-1{top:16px;right:-12px;animation:float-t1 8s ease-in-out infinite}
+.tag-2{bottom:-16px;left:24px;animation:float-t2 9s ease-in-out infinite}
+@keyframes float-t1{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-6px) rotate(0deg)}}
+@keyframes float-t2{0%,100%{transform:translateY(0) rotate(1deg)}50%{transform:translateY(5px) rotate(0deg)}}
 .tag-val{font-family:var(--display);font-size:18px;font-weight:800;color:var(--white);line-height:1}
 .tag-label{font-size:9px;font-family:var(--mono);color:var(--white-3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
 
 /* ─── LOGOS STRIP ─────────────────────────────────────── */
 .logos-strip{padding:48px 0;border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);background:var(--bg-2)}
-.logos-label{font-size:11px;font-family:var(--mono);color:var(--white-4);text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:28px}
+.logos-label{font-size:11px;font-family:var(--mono);color:var(--white-2);text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:28px}
 .logos-row{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
-.logo-pill{display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,.03);border:0.5px solid var(--border);border-radius:var(--r-md);opacity:.45;transition:opacity .2s}
-.logo-pill:hover{opacity:.7}
-.logo-pill-icon{width:18px;height:18px;background:var(--white-4);border-radius:3px}
+.logo-pill{display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,.04);border:0.5px solid var(--border-2);border-radius:var(--r-md);opacity:.65;transition:opacity .2s}
+.logo-pill:hover{opacity:1}
+.logo-pill-icon{width:18px;height:18px;background:var(--white-3);border-radius:3px}
 .logo-pill-text{font-size:12px;font-weight:600;color:var(--white-2);letter-spacing:.02em}
 
 /* ─── PROBLEM ─────────────────────────────────────────── */
@@ -249,7 +249,7 @@ nav.scrolled{background:rgba(8,13,20,0.97)}
 .prob-card:hover{background:rgba(255,255,255,.02)}
 .prob-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),transparent);transform:scaleX(0);transform-origin:left;transition:transform .3s}
 .prob-card:hover::before{transform:scaleX(1)}
-.prob-num{font-family:var(--display);font-size:48px;font-weight:800;color:rgba(255,255,255,.04);line-height:1;margin-bottom:16px;user-select:none}
+.prob-num{font-family:var(--display);font-size:48px;font-weight:800;color:rgba(0,212,255,0.18);line-height:1;margin-bottom:16px;user-select:none;letter-spacing:-1px}
 .prob-icon{width:40px;height:40px;background:var(--cyan-dim);border:0.5px solid var(--cyan-border);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
 .prob-icon svg{width:20px;height:20px;color:var(--cyan)}
 .prob-title{font-family:var(--display);font-size:16px;font-weight:700;color:var(--white);margin-bottom:10px;line-height:1.35}
