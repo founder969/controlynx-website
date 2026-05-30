@@ -3,1403 +3,1739 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controlynx — AI Project Controls Platform for Construction</title>
-<meta name="description" content="Controlynx automates daily, weekly, and monthly project reports — so your project controls team gets back 8+ hours every week. Built by a construction professional with 22 years of experience.">
-<meta property="og:title" content="Controlynx — AI Project Controls Platform">
-<meta property="og:description" content="Stop spending Sundays on reports. Controlynx automates project controls reporting for construction teams.">
+<title>Controlynx.ai — AI Project Controls Platform for Construction</title>
+<meta name="description" content="Controlynx.ai automates daily reports, delay analysis, planned vs actual tracking, and executive dashboards for construction project controls teams. Built for planners, PCMs, and contractors.">
+<meta property="og:title" content="Controlynx.ai — AI Command Center for Construction Project Controls">
+<meta property="og:description" content="Automate reporting. Detect delays. Control projects earlier. Built for construction teams who run on data.">
 <meta property="og:url" content="https://controlynx.ai">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ─── RESET & ROOT ─────────────────────────────────── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* ─── TOKENS ──────────────────────────────────────────── */
 :root{
-  --navy:#091929;
-  --navy-mid:#0D2137;
-  --navy-surface:#122840;
-  --teal:#1CB87A;
-  --teal-dim:#0F6E4A;
-  --teal-glow:rgba(28,184,122,0.12);
-  --teal-border:rgba(28,184,122,0.22);
+  --bg:#080D14;
+  --bg-2:#0C1220;
+  --bg-3:#101828;
+  --bg-card:#0F1A27;
+  --bg-card-2:#111F30;
+  --border:#1A2D40;
+  --border-2:#1F3347;
+  --cyan:#00D4FF;
+  --cyan-dim:rgba(0,212,255,0.12);
+  --cyan-glow:rgba(0,212,255,0.07);
+  --cyan-border:rgba(0,212,255,0.2);
+  --green:#00C48C;
+  --green-dim:rgba(0,196,140,0.12);
   --amber:#F4A030;
-  --white:#FFFFFF;
-  --off-white:#F5F3EC;
-  --stone:#EAE7DE;
-  --text-ink:#0D1F2D;
-  --text-muted:#5A6473;
-  --text-quiet:#8A94A0;
-  --border-light:#E4E1D8;
-  --border-dark:rgba(255,255,255,0.07);
-  --shadow-card:0 1px 3px rgba(0,0,0,0.06),0 4px 16px rgba(0,0,0,0.05);
-  --shadow-lift:0 8px 32px rgba(0,0,0,0.12),0 2px 8px rgba(0,0,0,0.06);
+  --amber-dim:rgba(244,160,48,0.12);
+  --red:#FF4D4D;
+  --red-dim:rgba(255,77,77,0.1);
+  --white:#F0F4F8;
+  --white-2:#B8C5D0;
+  --white-3:#6B7F8E;
+  --white-4:#3A4F60;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Figtree',sans-serif;
+  --display:'Syne',sans-serif;
   --r-sm:6px;
   --r-md:10px;
   --r-lg:16px;
-  --r-xl:24px;
+  --r-xl:20px;
+  --r-2xl:28px;
+  --shadow-card:0 1px 0 rgba(255,255,255,0.04) inset,0 0 0 0.5px var(--border);
+  --shadow-glow:0 0 40px rgba(0,212,255,0.06);
 }
-html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
-body{font-family:'Figtree',sans-serif;color:var(--text-ink);background:var(--white);overflow-x:hidden;font-size:16px;line-height:1.6}
+
+/* ─── RESET ───────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{font-family:var(--sans);background:var(--bg);color:var(--white);overflow-x:hidden;font-size:16px;line-height:1.6}
 a{text-decoration:none;color:inherit}
-img{max-width:100%;display:block}
+button{font-family:var(--sans);cursor:pointer;border:none;outline:none}
+input{font-family:var(--sans);outline:none}
 ul{list-style:none}
-button{font-family:'Figtree',sans-serif;cursor:pointer}
-input{font-family:'Figtree',sans-serif}
-
-/* ─── SKIP LINK ─────────────────────────────────────── */
-.skip-link{position:absolute;top:-100px;left:0;background:var(--teal);color:#fff;padding:8px 16px;z-index:9999;border-radius:0 0 var(--r-sm) 0;font-size:14px;font-weight:500;transition:top .2s}
-.skip-link:focus{top:0}
-
-/* ─── SCROLLBAR ─────────────────────────────────────── */
-::-webkit-scrollbar{width:6px}
+img{max-width:100%;display:block}
+::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:rgba(28,184,122,0.25);border-radius:3px}
+::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:2px}
+.skip-link{position:absolute;top:-100px;left:16px;background:var(--cyan);color:var(--bg);padding:8px 16px;border-radius:var(--r-sm);font-size:14px;font-weight:600;z-index:9999;transition:top .2s}
+.skip-link:focus{top:16px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 
-/* ─── NAV ───────────────────────────────────────────── */
+/* ─── TYPOGRAPHY ──────────────────────────────────────── */
+.t-display{font-family:var(--display);font-weight:800;line-height:1.06;letter-spacing:-1.5px}
+.t-h2{font-family:var(--display);font-weight:700;line-height:1.1;letter-spacing:-0.5px}
+.t-mono{font-family:var(--mono);font-weight:400}
+.t-cyan{color:var(--cyan)}
+.t-muted{color:var(--white-2)}
+.t-quiet{color:var(--white-3)}
+
+/* ─── LAYOUT ──────────────────────────────────────────── */
+.wrap{max-width:1240px;margin:0 auto;padding:0 5%}
+.section{padding:100px 0}
+.section-sm{padding:72px 0}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';width:20px;height:1px;background:var(--cyan);opacity:.6}
+.section-title{font-family:var(--display);font-size:clamp(30px,3.5vw,46px);font-weight:800;line-height:1.1;letter-spacing:-0.5px;color:var(--white);margin-bottom:16px}
+.section-sub{font-size:17px;font-weight:300;color:var(--white-2);line-height:1.7;max-width:560px}
+
+/* ─── BUTTONS ─────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;gap:8px;height:48px;padding:0 22px;border-radius:var(--r-md);font-size:14px;font-weight:600;transition:all .2s;cursor:pointer;white-space:nowrap}
+.btn-primary{background:var(--cyan);color:var(--bg);border:none}
+.btn-primary:hover{background:#1DE0FF;transform:translateY(-1px);box-shadow:0 8px 28px rgba(0,212,255,0.3)}
+.btn-primary:active{transform:translateY(0)}
+.btn-ghost{background:transparent;color:var(--white-2);border:0.5px solid var(--border-2)}
+.btn-ghost:hover{color:var(--white);border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.04)}
+.btn-lg{height:54px;padding:0 28px;font-size:15px}
+.btn svg{width:16px;height:16px;flex-shrink:0}
+
+/* ─── CARDS ───────────────────────────────────────────── */
+.card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:24px;transition:all .25s}
+.card:hover{border-color:var(--border-2);box-shadow:var(--shadow-glow)}
+.card-cyan{background:var(--cyan-dim);border-color:var(--cyan-border)}
+
+/* ─── NAV ─────────────────────────────────────────────── */
 nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
-  height:64px;padding:0 5%;
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(9,25,41,0.92);
-  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
-  border-bottom:0.5px solid var(--border-dark);
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  height:64px;
+  background:rgba(8,13,20,0.85);
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  border-bottom:0.5px solid var(--border);
   transition:background .3s
 }
-nav.scrolled{background:rgba(9,25,41,0.98)}
-.nav-logo{display:flex;align-items:center;gap:9px}
-.nav-logomark{width:32px;height:32px;flex-shrink:0}
-.nav-wordmark{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;letter-spacing:-0.2px}
-.nav-links{display:flex;align-items:center;gap:6px}
-.nav-links a{font-size:13px;font-weight:400;color:rgba(255,255,255,0.55);padding:6px 12px;border-radius:var(--r-sm);transition:color .18s,background .18s}
-.nav-links a:hover{color:#fff;background:rgba(255,255,255,0.06)}
+nav.scrolled{background:rgba(8,13,20,0.97)}
+.nav-inner{max-width:1240px;margin:0 auto;padding:0 5%;height:100%;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.nav-logo-mark{width:30px;height:30px}
+.nav-wordmark{font-family:var(--display);font-size:17px;font-weight:800;color:var(--white);letter-spacing:-0.3px}
+.nav-wordmark span{color:var(--cyan)}
+.nav-links{display:flex;align-items:center;gap:2px}
+.nav-links a{font-size:13px;color:var(--white-3);padding:6px 12px;border-radius:var(--r-sm);transition:all .18s;font-weight:400}
+.nav-links a:hover{color:var(--white);background:rgba(255,255,255,0.05)}
 .nav-right{display:flex;align-items:center;gap:10px}
-.btn-ghost-nav{font-size:13px;font-weight:500;color:rgba(255,255,255,0.65);padding:8px 16px;border-radius:var(--r-sm);border:0.5px solid rgba(255,255,255,0.12);background:transparent;transition:all .18s}
-.btn-ghost-nav:hover{color:#fff;border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.06)}
-.btn-primary-nav{font-size:13px;font-weight:600;color:#fff;padding:8px 18px;border-radius:var(--r-sm);border:none;background:var(--teal);transition:all .18s}
-.btn-primary-nav:hover{background:#17A06B;transform:translateY(-1px)}
+.nav-login{font-size:13px;font-weight:500;color:var(--white-3);transition:color .18s;padding:6px 12px}
+.nav-login:hover{color:var(--white)}
+.nav-cta{height:38px;padding:0 16px;background:var(--cyan);color:var(--bg);border-radius:var(--r-sm);font-size:13px;font-weight:700;border:none;transition:all .18s;cursor:pointer}
+.nav-cta:hover{background:#1DE0FF;transform:translateY(-1px)}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;cursor:pointer;border-radius:var(--r-sm)}
+.hamburger span{width:20px;height:1.5px;background:var(--white-2);display:block;transition:all .25s;transform-origin:center}
+.hamburger[aria-expanded=true] span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
+.hamburger[aria-expanded=true] span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger[aria-expanded=true] span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;z-index:499;background:rgba(8,13,20,0.98);backdrop-filter:blur(20px);border-bottom:0.5px solid var(--border);padding:16px 5% 24px;flex-direction:column;gap:4px}
+.mobile-menu.open{display:flex}
+.mobile-menu a{font-size:15px;color:var(--white-2);padding:12px 14px;border-radius:var(--r-sm);transition:all .18s}
+.mobile-menu a:hover{color:var(--white);background:rgba(255,255,255,0.05)}
+.mobile-menu .m-cta{margin-top:12px;padding:15px;background:var(--cyan);color:var(--bg);text-align:center;border-radius:var(--r-md);font-weight:700;font-size:15px}
 
-/* Hamburger */
-.nav-hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;padding:8px;cursor:pointer;border-radius:var(--r-sm)}
-.nav-hamburger span{width:22px;height:1.5px;background:rgba(255,255,255,0.7);display:block;transition:all .25s;transform-origin:center}
-.nav-hamburger[aria-expanded="true"] span:nth-child(1){transform:translateY(6.5px) rotate(45deg)}
-.nav-hamburger[aria-expanded="true"] span:nth-child(2){opacity:0;transform:scaleX(0)}
-.nav-hamburger[aria-expanded="true"] span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
-
-/* Mobile menu */
-.nav-mobile{
-  display:none;position:fixed;top:64px;left:0;right:0;z-index:199;
-  background:rgba(9,25,41,0.97);backdrop-filter:blur(18px);
-  padding:16px 5% 24px;border-bottom:0.5px solid var(--border-dark);
-  flex-direction:column;gap:4px
-}
-.nav-mobile.open{display:flex}
-.nav-mobile a{font-size:15px;color:rgba(255,255,255,0.65);padding:12px 14px;border-radius:var(--r-sm);transition:all .18s}
-.nav-mobile a:hover{color:#fff;background:rgba(255,255,255,0.06)}
-.nav-mobile .mobile-cta{margin-top:12px;padding:14px;background:var(--teal);color:#fff;text-align:center;border-radius:var(--r-md);font-weight:600;font-size:15px}
-
-/* ─── HERO ──────────────────────────────────────────── */
+/* ─── HERO ────────────────────────────────────────────── */
 .hero{
   min-height:100dvh;
-  background:var(--navy);
-  padding:120px 5% 80px;
-  display:grid;
-  grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);
-  gap:48px;
-  align-items:center;
+  padding:120px 0 80px;
+  background:var(--bg);
   position:relative;
   overflow:hidden;
-  max-width:1440px;
-  margin-left:auto;
-  margin-right:auto;
+  display:flex;align-items:center;
 }
-/* Hero wrapper to allow full-bleed bg */
-.hero-outer{
-  background:var(--navy);
-  position:relative;
+.hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
+.hero-glow{position:absolute;top:-200px;right:-150px;width:800px;height:800px;background:radial-gradient(circle,rgba(0,212,255,0.05) 0%,transparent 65%);pointer-events:none}
+.hero-glow-2{position:absolute;bottom:-300px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(0,196,140,0.04) 0%,transparent 65%);pointer-events:none}
+.hero-content{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center;max-width:1240px;margin:0 auto;padding:0 5%}
+.hero-left{min-width:0}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;background:rgba(0,212,255,0.08);border:0.5px solid rgba(0,212,255,0.22);border-radius:999px;margin-bottom:28px}
+.badge-pulse{width:6px;height:6px;background:var(--cyan);border-radius:50%;animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.badge-text{font-size:11px;font-weight:700;color:var(--cyan);letter-spacing:.08em;text-transform:uppercase}
+.hero-headline{font-family:var(--display);font-size:clamp(40px,5vw,68px);font-weight:800;color:var(--white);line-height:1.06;letter-spacing:-2px;margin-bottom:22px}
+.hero-headline .accent{color:var(--cyan)}
+.hero-sub{font-size:18px;font-weight:300;color:var(--white-2);line-height:1.72;max-width:500px;margin-bottom:36px}
+.hero-sub strong{color:var(--white);font-weight:500}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px}
+.hero-trust{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--white-3)}
+.trust-item svg{width:13px;height:13px;color:var(--green);flex-shrink:0}
+.trust-sep{width:1px;height:12px;background:var(--border-2)}
+
+/* Hero dashboard */
+.hero-right{position:relative;min-width:0}
+.dash-shell{
+  background:var(--bg-card);
+  border:0.5px solid var(--border-2);
+  border-radius:var(--r-2xl);
   overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 0.5px rgba(255,255,255,.04) inset,var(--shadow-glow);
+  animation:float 7s ease-in-out infinite
 }
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.dash-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,.03);border-bottom:0.5px solid var(--border)}
+.dash-dots{display:flex;gap:6px}
+.dash-dots span{width:9px;height:9px;border-radius:50%}
+.dash-title{font-family:var(--mono);font-size:10px;color:var(--white-3)}
+.dash-live{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;color:var(--green);font-family:var(--mono)}
+.dash-live-dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:pulse 1.5s ease-in-out infinite}
+.dash-body{padding:18px}
 
-/* Background decoration */
-.hero-bg-grid{
-  position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(28,184,122,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(28,184,122,0.04) 1px, transparent 1px);
-  background-size:48px 48px;
-  pointer-events:none
-}
-.hero-bg-glow{
-  position:absolute;top:-80px;right:-100px;
-  width:700px;height:700px;
-  background:radial-gradient(circle,rgba(28,184,122,0.06) 0%,transparent 65%);
-  pointer-events:none
-}
-.hero-bg-glow-2{
-  position:absolute;bottom:-200px;left:-100px;
-  width:500px;height:500px;
-  background:radial-gradient(circle,rgba(28,184,122,0.04) 0%,transparent 65%);
-  pointer-events:none
-}
+/* KPI row */
+.kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-md);padding:12px 14px}
+.kpi-val{font-family:var(--display);font-size:22px;font-weight:800;line-height:1;margin-bottom:4px}
+.kpi-label{font-size:9px;font-family:var(--mono);color:var(--white-3);text-transform:uppercase;letter-spacing:.08em}
+.kpi-delta{font-size:10px;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:3px}
+.kpi-delta.up{color:var(--green)}
+.kpi-delta.down{color:var(--red)}
+.kpi-delta.warn{color:var(--amber)}
 
-.hero-left{position:relative;z-index:1;min-width:0}
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:5px 12px 5px 8px;
-  background:rgba(28,184,122,0.1);
-  border:0.5px solid rgba(28,184,122,0.25);
-  border-radius:999px;
-  margin-bottom:28px
-}
-.eyebrow-dot{width:6px;height:6px;background:var(--teal);border-radius:50%;animation:pulse-dot 2s ease-in-out infinite}
-@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.85)}}
-.eyebrow-text{font-size:11.5px;font-weight:600;color:var(--teal);letter-spacing:0.07em;text-transform:uppercase}
+/* Progress bars */
+.prog-section{margin-bottom:14px}
+.prog-label-row{display:flex;justify-content:space-between;margin-bottom:6px}
+.prog-name{font-size:11px;color:var(--white-2);font-weight:500}
+.prog-val{font-size:11px;font-family:var(--mono);color:var(--white-3)}
+.prog-track{height:5px;background:var(--bg-3);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.prog-fill.cyan{background:linear-gradient(90deg,var(--cyan),rgba(0,212,255,.5))}
+.prog-fill.green{background:linear-gradient(90deg,var(--green),rgba(0,196,140,.5))}
+.prog-fill.amber{background:linear-gradient(90deg,var(--amber),rgba(244,160,48,.5))}
+.prog-fill.red{background:linear-gradient(90deg,var(--red),rgba(255,77,77,.5))}
+.prog-item{margin-bottom:8px}
 
-.hero-headline{
-  font-family:'Syne',sans-serif;
-  font-size:clamp(38px,4.8vw,62px);
-  font-weight:800;
-  color:#fff;
-  line-height:1.07;
-  letter-spacing:-1.5px;
-  margin-bottom:22px
-}
-.hero-headline .hl-teal{color:var(--teal)}
-.hero-headline .hl-underline{
-  position:relative;display:inline-block
-}
-.hero-headline .hl-underline::after{
-  content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;
-  background:var(--teal);border-radius:1px;opacity:0.7
-}
+/* Alert row */
+.alert-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.alert-card{border-radius:var(--r-sm);padding:10px 12px;display:flex;align-items:flex-start;gap:8px}
+.alert-card.red{background:var(--red-dim);border:0.5px solid rgba(255,77,77,.2)}
+.alert-card.amber{background:var(--amber-dim);border:0.5px solid rgba(244,160,48,.2)}
+.alert-icon{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+.alert-title{font-size:10px;font-weight:600;color:var(--white);line-height:1.3}
+.alert-desc{font-size:9px;color:var(--white-3);margin-top:2px}
 
-.hero-sub{
-  font-size:17px;font-weight:300;
-  color:rgba(255,255,255,0.68);
-  line-height:1.75;
-  max-width:520px;
-  margin-bottom:40px
-}
-.hero-sub strong{color:rgba(255,255,255,0.92);font-weight:500}
-
-.hero-form-wrap{margin-bottom:16px}
-.hero-form{display:flex;gap:8px;flex-wrap:wrap}
-.hero-input{
-  flex:1;min-width:220px;height:50px;
-  padding:0 16px;
-  background:rgba(255,255,255,0.06);
-  border:0.5px solid rgba(255,255,255,0.14);
-  border-radius:var(--r-md);
-  font-size:14px;color:#fff;
-  outline:none;transition:border-color .2s,background .2s;
-  -webkit-appearance:none
-}
-.hero-input::placeholder{color:rgba(255,255,255,0.3)}
-.hero-input:focus{border-color:rgba(28,184,122,0.5);background:rgba(255,255,255,0.08)}
-
-.hero-btn{
-  height:50px;padding:0 24px;
-  background:var(--teal);color:#fff;
-  border:none;border-radius:var(--r-md);
-  font-size:14px;font-weight:600;
-  white-space:nowrap;
-  transition:all .2s;
-  display:inline-flex;align-items:center;gap:8px
-}
-.hero-btn:hover{background:#17A06B;transform:translateY(-1px);box-shadow:0 8px 24px rgba(28,184,122,0.25)}
-.hero-btn:active{transform:translateY(0)}
-.hero-btn svg{width:14px;height:14px;flex-shrink:0}
-
-.hero-trust{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.trust-item{font-size:12px;color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:5px}
-.trust-item svg{width:13px;height:13px;color:var(--teal);flex-shrink:0}
-.trust-divider{width:1px;height:12px;background:rgba(255,255,255,0.1)}
-
-/* Hero stats */
-.hero-stats{
-  display:grid;grid-template-columns:repeat(2,1fr);gap:1px;
-  background:rgba(255,255,255,0.06);
-  border-radius:var(--r-lg);
-  overflow:hidden;
-  border:0.5px solid rgba(255,255,255,0.07);
-  margin-top:48px
-}
-.hero-stat{
-  background:rgba(255,255,255,0.03);
-  padding:24px 20px;
-  transition:background .2s
-}
-.hero-stat:hover{background:rgba(28,184,122,0.07)}
-.stat-num{
-  font-family:'Syne',sans-serif;
-  font-size:36px;font-weight:800;
-  color:#fff;line-height:1;
-  margin-bottom:6px
-}
-.stat-num .stat-accent{color:var(--teal)}
-.stat-label{font-size:12px;color:rgba(255,255,255,0.35);line-height:1.4}
-
-/* Hero right — product mockup */
-.hero-right{position:relative;z-index:1;min-width:0;width:100%}
-.mockup-shell{
-  background:var(--navy-surface);
-  border:0.5px solid rgba(255,255,255,0.09);
-  border-radius:var(--r-xl);
-  overflow:hidden;
-  width:100%;
-  max-width:580px;
-  box-shadow:0 24px 80px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.2),inset 0 0.5px 0 rgba(255,255,255,0.06);
-  animation:float-card 6s ease-in-out infinite
-}
-@keyframes float-card{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-
-/* Mockup header bar */
-.mockup-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:12px 16px;
-  background:rgba(255,255,255,0.03);
-  border-bottom:0.5px solid rgba(255,255,255,0.06)
-}
-.mockup-dots{display:flex;gap:6px}
-.mockup-dots span{width:9px;height:9px;border-radius:50%}
-.mockup-dots span:nth-child(1){background:#FF5F57}
-.mockup-dots span:nth-child(2){background:#FFBD2E}
-.mockup-dots span:nth-child(3){background:#27C93F}
-.mockup-title{font-size:11px;color:rgba(255,255,255,0.3);font-weight:500}
-.mockup-status{font-size:10px;color:var(--teal);background:rgba(28,184,122,0.12);padding:3px 8px;border-radius:4px;font-weight:600;letter-spacing:0.05em}
-
-/* Report document inside mockup */
-.mockup-body{padding:20px 20px 24px}
-.report-header{
-  background:linear-gradient(135deg,var(--navy-mid) 0%,rgba(28,184,122,0.08) 100%);
-  border:0.5px solid var(--teal-border);
-  border-radius:var(--r-md);
-  padding:16px 18px;
-  margin-bottom:14px
-}
-.report-title-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
-.report-tag{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);background:rgba(28,184,122,0.15);padding:3px 8px;border-radius:3px}
-.report-date{font-size:10px;color:rgba(255,255,255,0.3)}
-.report-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:#fff;margin-bottom:2px}
-.report-project{font-size:11px;color:rgba(255,255,255,0.4)}
-
-/* Report metrics row */
-.report-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.metric-box{
-  background:rgba(255,255,255,0.04);
-  border:0.5px solid rgba(255,255,255,0.07);
-  border-radius:var(--r-sm);
-  padding:10px 12px
-}
-.metric-val{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;line-height:1}
-.metric-val .up{color:var(--teal)}
-.metric-val .warn{color:var(--amber)}
-.metric-lbl{font-size:9px;color:rgba(255,255,255,0.3);margin-top:3px;text-transform:uppercase;letter-spacing:0.06em}
-
-/* Mini S-curve chart */
-.scurve-wrap{margin-bottom:14px}
-.scurve-label-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.scurve-title{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.06em}
-.scurve-legend{display:flex;gap:10px}
-.legend-item{display:flex;align-items:center;gap:4px;font-size:9px;color:rgba(255,255,255,0.3)}
-.legend-dot{width:6px;height:6px;border-radius:50%}
-
-/* Activities list */
-.activities-label{font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px}
-.activity-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:7px 10px;
-  background:rgba(255,255,255,0.03);
-  border-radius:5px;
-  margin-bottom:4px
-}
-.activity-row:last-child{margin-bottom:0}
-.act-left{display:flex;align-items:center;gap:8px}
+/* Activity list */
+.act-list{display:flex;flex-direction:column;gap:6px}
+.act-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg-3);border-radius:var(--r-sm)}
+.act-left{display:flex;align-items:center;gap:7px}
 .act-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
-.act-dot.green{background:var(--teal)}
-.act-dot.amber{background:var(--amber)}
-.act-dot.gray{background:rgba(255,255,255,0.2)}
-.act-name{font-size:10px;color:rgba(255,255,255,0.6)}
-.act-pct{font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);font-variant-numeric:tabular-nums}
+.act-name{font-size:10px;color:var(--white-2)}
+.act-pct{font-size:10px;font-family:var(--mono);color:var(--white-3);font-weight:500}
+.gen-badge{margin-top:12px;display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(0,212,255,.08);border:0.5px solid rgba(0,212,255,.18);border-radius:999px}
+.gen-badge-text{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.45);font-family:var(--mono);letter-spacing:.04em}
+.gen-badge-text strong{color:var(--cyan)}
 
-/* AI badge on mockup */
-.ai-badge{
-  display:inline-flex;align-items:center;gap:6px;
-  margin-top:14px;
-  padding:7px 12px;
-  background:rgba(28,184,122,0.1);
-  border:0.5px solid rgba(28,184,122,0.2);
-  border-radius:999px
-}
-.ai-badge-icon{width:14px;height:14px;color:var(--teal)}
-.ai-badge-text{font-size:10px;font-weight:600;color:rgba(255,255,255,0.5);letter-spacing:0.05em}
-.ai-badge-text strong{color:var(--teal)}
+/* Floating tags */
+.hero-tag{position:absolute;background:var(--bg-card);border:0.5px solid var(--border-2);border-radius:var(--r-md);padding:9px 14px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:2}
+.tag-1{top:-16px;right:20px;animation:float-t1 8s ease-in-out infinite}
+.tag-2{bottom:20px;left:-10px;animation:float-t2 9s ease-in-out infinite}
+@keyframes float-t1{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-7px) rotate(0deg)}}
+@keyframes float-t2{0%,100%{transform:translateY(0) rotate(1deg)}50%{transform:translateY(7px) rotate(0deg)}}
+.tag-val{font-family:var(--display);font-size:18px;font-weight:800;color:var(--white);line-height:1}
+.tag-label{font-size:9px;font-family:var(--mono);color:var(--white-3);margin-top:2px;text-transform:uppercase;letter-spacing:.06em}
 
-/* Floating accent cards */
-.hero-float-card{
-  position:absolute;
-  background:var(--navy-surface);
-  border:0.5px solid rgba(255,255,255,0.09);
-  border-radius:var(--r-md);
-  padding:10px 14px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.3)
-}
-.float-1{top:-16px;right:8px;animation:float-c1 7s ease-in-out infinite}
-.float-2{bottom:8px;left:8px;animation:float-c2 8s ease-in-out infinite}
-@keyframes float-c1{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(-1deg)}}
-@keyframes float-c2{0%,100%{transform:translateY(0) rotate(2deg)}50%{transform:translateY(6px) rotate(1deg)}}
-.float-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;line-height:1}
-.float-val span{color:var(--teal)}
-.float-lbl{font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px}
+/* ─── LOGOS STRIP ─────────────────────────────────────── */
+.logos-strip{padding:48px 0;border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);background:var(--bg-2)}
+.logos-label{font-size:11px;font-family:var(--mono);color:var(--white-4);text-align:center;letter-spacing:.1em;text-transform:uppercase;margin-bottom:28px}
+.logos-row{display:flex;align-items:center;justify-content:center;gap:40px;flex-wrap:wrap}
+.logo-pill{display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(255,255,255,.03);border:0.5px solid var(--border);border-radius:var(--r-md);opacity:.45;transition:opacity .2s}
+.logo-pill:hover{opacity:.7}
+.logo-pill-icon{width:18px;height:18px;background:var(--white-4);border-radius:3px}
+.logo-pill-text{font-size:12px;font-weight:600;color:var(--white-2);letter-spacing:.02em}
 
-/* ─── SOCIAL PROOF STRIP ────────────────────────────── */
-.proof-strip{
-  background:var(--off-white);
-  padding:28px 5%;
-  border-top:0.5px solid var(--border-light);
-  border-bottom:0.5px solid var(--border-light)
-}
-.proof-inner{
-  display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap;
-  max-width:900px;margin:0 auto
-}
-.proof-item{
-  display:flex;align-items:center;gap:10px;
-  font-size:13px;color:var(--text-muted);
-  font-weight:400
-}
-.proof-icon{
-  width:32px;height:32px;border-radius:50%;
-  background:var(--stone);
-  display:flex;align-items:center;justify-content:center;
-  flex-shrink:0
-}
-.proof-icon svg{width:15px;height:15px;color:var(--teal-dim)}
-.proof-divider{width:1px;height:24px;background:var(--border-light)}
-.proof-star{color:var(--amber);font-size:13px;letter-spacing:1px;display:block}
-.proof-text{font-size:13px;color:var(--text-muted)}
-.proof-text strong{color:var(--text-ink);font-weight:600}
+/* ─── PROBLEM ─────────────────────────────────────────── */
+.problem{background:var(--bg-2)}
+.problem-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0;margin-top:56px;border:0.5px solid var(--border);border-radius:var(--r-xl);overflow:hidden}
+.prob-card{padding:36px 30px;border-right:0.5px solid var(--border);position:relative;transition:background .25s}
+.prob-card:last-child{border-right:none}
+.prob-card:hover{background:rgba(255,255,255,.02)}
+.prob-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),transparent);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.prob-card:hover::before{transform:scaleX(1)}
+.prob-num{font-family:var(--display);font-size:48px;font-weight:800;color:rgba(255,255,255,.04);line-height:1;margin-bottom:16px;user-select:none}
+.prob-icon{width:40px;height:40px;background:var(--cyan-dim);border:0.5px solid var(--cyan-border);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.prob-icon svg{width:20px;height:20px;color:var(--cyan)}
+.prob-title{font-family:var(--display);font-size:16px;font-weight:700;color:var(--white);margin-bottom:10px;line-height:1.35}
+.prob-desc{font-size:13.5px;color:var(--white-3);line-height:1.65}
+.prob-quote{margin-top:14px;font-size:12.5px;color:rgba(0,212,255,.6);font-style:italic;padding:10px 14px;background:rgba(0,212,255,.04);border-left:2px solid rgba(0,212,255,.3);border-radius:0 var(--r-sm) var(--r-sm) 0;line-height:1.5}
 
-/* ─── SECTION SHARED ────────────────────────────────── */
-.section{padding:100px 5%}
-.section-inner{max-width:1180px;margin:0 auto}
-.section-inner-narrow{max-width:840px;margin:0 auto}
-.section-inner-center{max-width:1180px;margin:0 auto;text-align:center}
+/* ─── SOLUTION ────────────────────────────────────────── */
+.solution{background:var(--bg)}
+.solution-grid{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;margin-top:60px}
+.solution-steps{display:flex;flex-direction:column;gap:0}
+.step-item{display:flex;gap:20px;padding:24px 0;border-bottom:0.5px solid var(--border);position:relative}
+.step-item:last-child{border-bottom:none}
+.step-num-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:0}
+.step-num{width:36px;height:36px;background:var(--bg-card);border:0.5px solid var(--border-2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:13px;font-weight:800;color:var(--cyan);flex-shrink:0;position:relative;z-index:1}
+.step-line{flex:1;width:0.5px;background:var(--border);margin-top:6px}
+.step-content{padding-bottom:8px}
+.step-title{font-family:var(--display);font-size:16px;font-weight:700;color:var(--white);margin-bottom:6px}
+.step-desc{font-size:13.5px;color:var(--white-3);line-height:1.6}
+.solution-visual{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-glow)}
+.sol-visual-bar{padding:12px 16px;background:rgba(255,255,255,.03);border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sol-visual-title{font-family:var(--mono);font-size:10px;color:var(--white-3)}
+.sol-body{padding:20px}
+.sol-report-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);margin-bottom:8px;transition:background .2s}
+.sol-report-item:hover{background:rgba(255,255,255,.03)}
+.sol-ri-icon{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sol-ri-icon.cyan{background:var(--cyan-dim)}
+.sol-ri-icon.green{background:var(--green-dim)}
+.sol-ri-icon.amber{background:var(--amber-dim)}
+.sol-ri-icon svg{width:18px;height:18px}
+.sol-ri-name{font-size:13px;font-weight:600;color:var(--white);display:block;margin-bottom:2px}
+.sol-ri-status{font-size:11px;font-family:var(--mono);color:var(--white-3)}
+.sol-ri-badge{margin-left:auto;flex-shrink:0;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;font-family:var(--mono)}
+.badge-ready{background:var(--green-dim);color:var(--green)}
+.badge-gen{background:var(--cyan-dim);color:var(--cyan)}
+.badge-review{background:var(--amber-dim);color:var(--amber)}
 
-.section-eyebrow{
-  font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
-  color:var(--teal);margin-bottom:14px;display:block
-}
-.section-heading{
-  font-family:'Syne',sans-serif;
-  font-size:clamp(28px,3.2vw,42px);
-  font-weight:800;
-  color:var(--text-ink);
-  line-height:1.12;
-  letter-spacing:-0.5px;
-  margin-bottom:18px
-}
-.section-sub{
-  font-size:17px;font-weight:300;color:var(--text-muted);
-  line-height:1.7;max-width:540px
-}
-.section-sub.centered{margin:0 auto}
+/* ─── FEATURES ────────────────────────────────────────── */
+.features{background:var(--bg-2)}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:56px}
+.feat-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:26px;transition:all .25s;position:relative;overflow:hidden}
+.feat-card::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at top left,rgba(0,212,255,.05),transparent 60%);opacity:0;transition:opacity .3s}
+.feat-card:hover{border-color:var(--cyan-border);transform:translateY(-2px);box-shadow:var(--shadow-glow)}
+.feat-card:hover::before{opacity:1}
+.feat-icon{width:44px;height:44px;background:var(--cyan-dim);border:0.5px solid var(--cyan-border);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.feat-icon svg{width:22px;height:22px;color:var(--cyan)}
+.feat-title{font-family:var(--display);font-size:15px;font-weight:700;color:var(--white);margin-bottom:8px;line-height:1.3}
+.feat-desc{font-size:13px;color:var(--white-3);line-height:1.6}
+.feat-tag{display:inline-block;font-size:9px;font-weight:700;font-family:var(--mono);color:var(--cyan);background:var(--cyan-dim);border:0.5px solid var(--cyan-border);padding:2px 7px;border-radius:3px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
 
-/* ─── PROBLEM SECTION ───────────────────────────────── */
-.problem{background:var(--off-white)}
-.problem-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(290px,1fr));
-  gap:0;
-  margin-top:60px;
-  border:0.5px solid var(--border-light);
-  border-radius:var(--r-lg);
-  overflow:hidden
+/* ─── DASHBOARD ───────────────────────────────────────── */
+.dashboard-section{background:var(--bg)}
+.dashboard-shell{
+  margin-top:56px;
+  background:var(--bg-card);
+  border:0.5px solid var(--border-2);
+  border-radius:var(--r-2xl);
+  overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,.5),var(--shadow-glow)
 }
-.problem-card{
-  background:var(--white);
-  padding:36px 32px;
-  position:relative;
-  border-right:0.5px solid var(--border-light);
-  transition:background .25s
-}
-.problem-card:last-child{border-right:none}
-.problem-card:hover{background:#FAFAF8}
-.problem-card::before{
-  content:'';position:absolute;
-  top:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--teal),transparent);
-  opacity:0;transition:opacity .3s
-}
-.problem-card:hover::before{opacity:1}
-.problem-num{
-  font-family:'Syne',sans-serif;
-  font-size:52px;font-weight:800;
-  color:rgba(13,33,55,0.05);
-  line-height:1;margin-bottom:20px;
-  user-select:none
-}
-.problem-title{
-  font-family:'Syne',sans-serif;
-  font-size:16px;font-weight:700;
-  color:var(--text-ink);margin-bottom:12px;line-height:1.35
-}
-.problem-desc{font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:16px}
-.problem-quote{
-  font-size:13px;color:var(--teal-dim);font-style:italic;
-  padding:12px 14px;
-  background:rgba(28,184,122,0.07);
-  border-left:2px solid var(--teal);
-  border-radius:0 var(--r-sm) var(--r-sm) 0;
-  line-height:1.55
-}
+.dash-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;background:rgba(255,255,255,.025);border-bottom:0.5px solid var(--border)}
+.dash-header-left{display:flex;align-items:center;gap:12px}
+.dash-header-dots{display:flex;gap:6px}
+.dash-header-dots span{width:10px;height:10px;border-radius:50%}
+.dash-header-title{font-family:var(--mono);font-size:11px;color:var(--white-3);font-weight:400}
+.dash-header-right{display:flex;align-items:center;gap:10px}
+.dash-status-pill{display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--mono);font-weight:600;padding:4px 10px;border-radius:999px}
+.dash-status-pill.live{background:rgba(0,196,140,.12);color:var(--green);border:0.5px solid rgba(0,196,140,.2)}
+.dash-status-pill.alert{background:var(--amber-dim);color:var(--amber);border:0.5px solid rgba(244,160,48,.2)}
+.dash-inner{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto;gap:0}
+.dash-panel{padding:20px;border-right:0.5px solid var(--border);border-bottom:0.5px solid var(--border)}
+.dash-panel:nth-child(3){border-right:none}
+.dash-panel:nth-child(4){border-right:0.5px solid var(--border)}
+.dash-panel:nth-child(5){border-right:0.5px solid var(--border)}
+.dash-panel:nth-child(6){border-right:none;border-bottom:none}
+.dash-panel:nth-child(4),.dash-panel:nth-child(5),.dash-panel:nth-child(6){border-bottom:none}
+.dp-label{font-size:10px;font-family:var(--mono);color:var(--white-4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px}
+.dp-score{font-family:var(--display);font-size:52px;font-weight:800;line-height:1;margin-bottom:4px}
+.dp-score.good{color:var(--green)}
+.dp-score.warn{color:var(--amber)}
+.dp-score.bad{color:var(--red)}
+.dp-score-sub{font-size:11px;color:var(--white-3);font-family:var(--mono)}
+.dp-chart-bars{display:flex;align-items:flex-end;gap:4px;height:52px;margin-bottom:4px}
+.bar-planned{background:rgba(255,255,255,.12);border-radius:2px 2px 0 0;flex:1;min-width:8px}
+.bar-actual{border-radius:2px 2px 0 0;flex:1;min-width:8px}
+.bar-actual.green{background:var(--green)}
+.bar-actual.cyan{background:var(--cyan)}
+.bar-actual.amber{background:var(--amber)}
+.bar-actual.red{background:var(--red)}
+.dp-chart-labels{display:flex;justify-content:space-between}
+.dp-chart-label{font-size:8px;font-family:var(--mono);color:var(--white-4)}
+.risk-list{display:flex;flex-direction:column;gap:7px}
+.risk-item{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:var(--r-sm)}
+.risk-item.critical{background:var(--red-dim);border:0.5px solid rgba(255,77,77,.15)}
+.risk-item.high{background:var(--amber-dim);border:0.5px solid rgba(244,160,48,.15)}
+.risk-item.medium{background:rgba(0,212,255,.06);border:0.5px solid rgba(0,212,255,.12)}
+.risk-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.risk-dot.critical{background:var(--red)}
+.risk-dot.high{background:var(--amber)}
+.risk-dot.medium{background:var(--cyan)}
+.risk-text{font-size:10.5px;color:var(--white-2);line-height:1.4}
+.risk-meta{font-size:9px;font-family:var(--mono);color:var(--white-4);margin-top:2px}
+.dp-report-btns{display:flex;flex-direction:column;gap:7px}
+.dp-report-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-sm);transition:all .2s;cursor:pointer}
+.dp-report-btn:hover{border-color:var(--cyan-border);background:var(--cyan-dim)}
+.dp-report-btn-icon{width:26px;height:26px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dp-report-btn-icon.daily{background:var(--cyan-dim)}
+.dp-report-btn-icon.weekly{background:var(--green-dim)}
+.dp-report-btn-icon.monthly{background:var(--amber-dim)}
+.dp-report-btn-icon svg{width:14px;height:14px}
+.dp-report-name{font-size:11px;font-weight:600;color:var(--white)}
+.dp-report-status{font-size:9px;font-family:var(--mono);color:var(--white-3)}
+.dp-report-arrow{margin-left:auto;width:14px;height:14px;color:var(--white-4)}
 
-/* ─── HOW IT WORKS ──────────────────────────────────── */
-.how{background:var(--white)}
-.how-grid{
-  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-  gap:24px;margin-top:60px;position:relative
-}
-/* Connector line between steps */
-.how-grid::before{
-  content:'';
-  position:absolute;
-  top:52px;left:calc(16% + 28px);right:calc(16% + 28px);
-  height:1px;
-  background:linear-gradient(90deg,var(--teal),rgba(28,184,122,0.1));
-  pointer-events:none
-}
-.how-card{
-  background:var(--off-white);
-  border-radius:var(--r-lg);
-  padding:32px 28px;
-  position:relative;
-  border:0.5px solid var(--border-light);
-  transition:all .25s
-}
-.how-card:hover{background:var(--white);border-color:var(--teal-border);box-shadow:var(--shadow-lift);transform:translateY(-3px)}
-.how-number{
-  width:48px;height:48px;
-  background:var(--navy-mid);
-  border-radius:var(--r-md);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:20px;
-  position:relative;z-index:1
-}
-.how-number span{
-  font-family:'Syne',sans-serif;
-  font-size:18px;font-weight:800;color:var(--teal)
-}
-.how-step-label{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px}
-.how-title{
-  font-family:'Syne',sans-serif;
-  font-size:16px;font-weight:700;
-  color:var(--text-ink);margin-bottom:10px;line-height:1.35
-}
-.how-desc{font-size:13.5px;color:var(--text-muted);line-height:1.65}
+/* ─── WORKFLOW ────────────────────────────────────────── */
+.workflow{background:var(--bg-2)}
+.workflow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;position:relative}
+.workflow-steps::before{content:'';position:absolute;top:28px;left:calc(12.5% + 28px);right:calc(12.5% + 28px);height:0.5px;background:linear-gradient(90deg,var(--cyan),rgba(0,212,255,.1));z-index:0}
+.wf-step{padding:0 16px;text-align:center;position:relative;z-index:1}
+.wf-num{width:56px;height:56px;background:var(--bg-card);border:0.5px solid var(--cyan-border);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-family:var(--display);font-size:20px;font-weight:800;color:var(--cyan);position:relative}
+.wf-num::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:0.5px solid rgba(0,212,255,.12)}
+.wf-title{font-family:var(--display);font-size:15px;font-weight:700;color:var(--white);margin-bottom:8px}
+.wf-desc{font-size:13px;color:var(--white-3);line-height:1.6}
 
-/* ─── FEATURES ──────────────────────────────────────── */
-.features{background:var(--navy);position:relative;overflow:hidden}
-.features-bg{
-  position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(28,184,122,0.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(28,184,122,0.03) 1px,transparent 1px);
-  background-size:48px 48px;
-  pointer-events:none
-}
-.features .section-heading{color:#fff}
-.features .section-sub{color:rgba(255,255,255,0.45)}
-.features .section-eyebrow{color:rgba(28,184,122,0.8)}
+/* ─── USE CASES ───────────────────────────────────────── */
+.use-cases{background:var(--bg)}
+.use-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px}
+.use-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:28px;transition:all .25s}
+.use-card:hover{border-color:var(--border-2);transform:translateY(-2px);box-shadow:var(--shadow-glow)}
+.use-role{display:inline-flex;align-items:center;gap:7px;margin-bottom:16px}
+.use-role-abbr{font-family:var(--display);font-size:12px;font-weight:800;color:var(--cyan);background:var(--cyan-dim);border:0.5px solid var(--cyan-border);padding:4px 9px;border-radius:var(--r-sm)}
+.use-role-name{font-size:13px;font-weight:600;color:var(--white-2)}
+.use-title{font-family:var(--display);font-size:17px;font-weight:700;color:var(--white);margin-bottom:10px;line-height:1.3}
+.use-desc{font-size:13px;color:var(--white-3);line-height:1.65;margin-bottom:16px}
+.use-bullets{display:flex;flex-direction:column;gap:6px}
+.use-bullet{display:flex;align-items:flex-start;gap:7px;font-size:12.5px;color:var(--white-3)}
+.use-bullet::before{content:'';width:4px;height:4px;background:var(--cyan);border-radius:50%;margin-top:6px;flex-shrink:0;opacity:.7}
 
-.features-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(256px,1fr));
-  gap:16px;margin-top:60px;
-  position:relative;z-index:1
-}
-.feature-card{
-  background:rgba(255,255,255,0.035);
-  border:0.5px solid rgba(255,255,255,0.07);
-  border-radius:var(--r-lg);
-  padding:28px 26px;
-  transition:all .25s
-}
-.feature-card:hover{
-  background:rgba(255,255,255,0.06);
-  border-color:rgba(28,184,122,0.28);
-  transform:translateY(-3px);
-  box-shadow:0 16px 48px rgba(0,0,0,0.25)
-}
-.feature-tag{
-  display:inline-block;
-  font-size:9.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
-  color:var(--teal);
-  background:rgba(28,184,122,0.12);
-  border:0.5px solid rgba(28,184,122,0.2);
-  padding:3px 9px;border-radius:4px;
-  margin-bottom:16px
-}
-.feature-title{
-  font-family:'Syne',sans-serif;
-  font-size:16px;font-weight:700;
-  color:#fff;margin-bottom:10px;line-height:1.35
-}
-.feature-desc{font-size:13px;color:rgba(255,255,255,0.42);line-height:1.65;margin-bottom:18px}
-.feature-list{display:flex;flex-direction:column;gap:6px}
-.feature-list li{
-  font-size:12px;color:rgba(255,255,255,0.38);
-  display:flex;align-items:center;gap:8px;
-  padding:4px 0
-}
-.feature-list li::before{
-  content:'';width:5px;height:5px;
-  background:var(--teal);border-radius:50%;
-  opacity:0.7;flex-shrink:0
-}
-.feature-divider{
-  height:0.5px;
-  background:rgba(255,255,255,0.07);
-  margin-bottom:18px
-}
+/* ─── REPORTS ─────────────────────────────────────────── */
+.reports{background:var(--bg-2)}
+.reports-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:56px}
+.rep-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:22px;display:flex;flex-direction:column;gap:12px;transition:all .25s;position:relative;overflow:hidden}
+.rep-card:hover{border-color:var(--border-2);transform:translateY(-2px)}
+.rep-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0;transition:opacity .3s}
+.rep-card:hover::after{opacity:1}
+.rep-card.type-daily::after{background:var(--cyan)}
+.rep-card.type-weekly::after{background:var(--green)}
+.rep-card.type-monthly::after{background:var(--amber)}
+.rep-card.type-exec::after{background:rgba(168,85,247,1)}
+.rep-card.type-delay::after{background:var(--red)}
+.rep-icon{width:40px;height:40px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center}
+.rep-icon.cyan{background:var(--cyan-dim)}
+.rep-icon.green{background:var(--green-dim)}
+.rep-icon.amber{background:var(--amber-dim)}
+.rep-icon.purple{background:rgba(168,85,247,.12)}
+.rep-icon.red{background:var(--red-dim)}
+.rep-icon svg{width:20px;height:20px}
+.rep-name{font-family:var(--display);font-size:14px;font-weight:700;color:var(--white);line-height:1.3}
+.rep-desc{font-size:12px;color:var(--white-3);line-height:1.55}
+.rep-freq{font-size:10px;font-family:var(--mono);font-weight:600;padding:2px 7px;border-radius:3px;align-self:flex-start}
+.rep-freq.daily{background:var(--cyan-dim);color:var(--cyan)}
+.rep-freq.weekly{background:var(--green-dim);color:var(--green)}
+.rep-freq.monthly{background:var(--amber-dim);color:var(--amber)}
+.rep-freq.ondemand{background:rgba(168,85,247,.12);color:rgba(168,85,247,1)}
 
-/* ─── WHO IT'S FOR ──────────────────────────────────── */
-.who{background:var(--off-white)}
-.who-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:14px;margin-top:60px
-}
-.who-card{
-  background:var(--white);
-  border-radius:var(--r-lg);
-  padding:26px 22px;
-  border:0.5px solid var(--border-light);
-  transition:all .25s
-}
-.who-card:hover{border-color:var(--teal-border);box-shadow:var(--shadow-card);transform:translateY(-2px)}
-.who-abbr{
-  width:44px;height:44px;
-  border-radius:var(--r-md);
-  background:var(--navy-mid);
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:16px;
-  font-family:'Syne',sans-serif;
-  font-size:13px;font-weight:800;color:var(--teal)
-}
-.who-role{
-  font-family:'Syne',sans-serif;
-  font-size:14px;font-weight:700;
-  color:var(--text-ink);margin-bottom:8px;line-height:1.3
-}
-.who-desc{font-size:12.5px;color:var(--text-muted);line-height:1.65}
+/* ─── BENEFITS ────────────────────────────────────────── */
+.benefits{background:var(--bg)}
+.benefits-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:56px}
+.ben-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:28px;text-align:center;transition:all .25s}
+.ben-card:hover{border-color:var(--border-2);transform:translateY(-2px);box-shadow:var(--shadow-glow)}
+.ben-num{font-family:var(--display);font-size:48px;font-weight:800;color:var(--cyan);line-height:1;margin-bottom:8px;font-variant-numeric:tabular-nums}
+.ben-label{font-size:14px;font-weight:600;color:var(--white);margin-bottom:8px}
+.ben-desc{font-size:12.5px;color:var(--white-3);line-height:1.55}
 
-/* ─── TESTIMONIAL ───────────────────────────────────── */
-.testimonial{background:var(--white);padding:100px 5%}
-.testimonial-inner{max-width:860px;margin:0 auto;text-align:center}
-.quote-mark{
-  font-family:'Syne',sans-serif;
-  font-size:80px;font-weight:800;
-  color:var(--teal);opacity:0.2;
-  line-height:1;margin-bottom:-20px;
-  user-select:none
-}
-.quote-text{
-  font-size:clamp(17px,2vw,22px);
-  font-weight:300;
-  color:var(--text-ink);
-  line-height:1.7;
-  font-style:italic;
-  margin-bottom:28px
-}
-.quote-author{display:flex;align-items:center;justify-content:center;gap:12px}
-.quote-avatar{
-  width:44px;height:44px;border-radius:50%;
-  background:linear-gradient(135deg,var(--navy-mid),var(--teal-dim));
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--teal)
-}
-.quote-meta strong{font-size:14px;font-weight:600;color:var(--text-ink);display:block}
-.quote-meta span{font-size:12px;color:var(--text-muted)}
+/* ─── TRUST ───────────────────────────────────────────── */
+.trust{background:var(--bg-2);padding:80px 0}
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px}
+.trust-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:26px;display:flex;gap:16px;align-items:flex-start;transition:all .25s}
+.trust-card:hover{border-color:var(--border-2)}
+.trust-icon{width:40px;height:40px;background:var(--green-dim);border:0.5px solid rgba(0,196,140,.2);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.trust-icon svg{width:20px;height:20px;color:var(--green)}
+.trust-title{font-family:var(--display);font-size:14px;font-weight:700;color:var(--white);margin-bottom:6px}
+.trust-desc{font-size:12.5px;color:var(--white-3);line-height:1.6}
 
-/* ─── STATS ─────────────────────────────────────────── */
-.stats{background:var(--navy);padding:80px 5%}
-.stats-inner{max-width:1000px;margin:0 auto}
-.stats-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:0;
-  border:0.5px solid rgba(255,255,255,0.07);
-  border-radius:var(--r-xl);
-  overflow:hidden
-}
-.stat-cell{
-  padding:44px 32px;
-  border-right:0.5px solid rgba(255,255,255,0.07);
-  text-align:center;
-  transition:background .25s
-}
-.stat-cell:last-child{border-right:none}
-.stat-cell:hover{background:rgba(28,184,122,0.05)}
-.stat-big{
-  font-family:'Syne',sans-serif;
-  font-size:52px;font-weight:800;
-  color:#fff;line-height:1;
-  margin-bottom:10px;
-  font-variant-numeric:tabular-nums
-}
-.stat-big .accent{color:var(--teal)}
-.stat-desc{font-size:13px;color:rgba(255,255,255,0.32);line-height:1.5;max-width:120px;margin:0 auto}
+/* ─── PRICING ─────────────────────────────────────────── */
+.pricing{background:var(--bg)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;max-width:1000px;margin-left:auto;margin-right:auto}
+.price-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-xl);padding:32px;transition:all .25s;position:relative;overflow:hidden}
+.price-card.featured{border-color:var(--cyan-border);background:linear-gradient(135deg,var(--bg-card) 0%,rgba(0,212,255,.04) 100%)}
+.price-card.featured::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),rgba(0,212,255,.3))}
+.price-popular{position:absolute;top:20px;right:20px;font-size:9px;font-weight:700;font-family:var(--mono);color:var(--cyan);background:var(--cyan-dim);border:0.5px solid var(--cyan-border);padding:3px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:.06em}
+.price-tier{font-size:11px;font-family:var(--mono);color:var(--white-3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.price-name{font-family:var(--display);font-size:22px;font-weight:800;color:var(--white);margin-bottom:8px}
+.price-desc{font-size:13px;color:var(--white-3);line-height:1.6;margin-bottom:24px;padding-bottom:24px;border-bottom:0.5px solid var(--border)}
+.price-main{font-family:var(--display);font-size:32px;font-weight:800;color:var(--white);margin-bottom:4px}
+.price-main span{font-size:14px;font-weight:400;color:var(--white-3)}
+.price-note{font-size:11px;font-family:var(--mono);color:var(--white-4);margin-bottom:24px}
+.price-cta{width:100%;height:46px;border-radius:var(--r-md);font-size:14px;font-weight:700;margin-bottom:24px;transition:all .2s;cursor:pointer}
+.price-cta.primary{background:var(--cyan);color:var(--bg);border:none}
+.price-cta.primary:hover{background:#1DE0FF}
+.price-cta.secondary{background:transparent;color:var(--white-2);border:0.5px solid var(--border-2)}
+.price-cta.secondary:hover{border-color:rgba(255,255,255,.25);color:var(--white);background:rgba(255,255,255,.04)}
+.price-features{display:flex;flex-direction:column;gap:10px}
+.price-feature{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--white-2)}
+.price-feature svg{width:14px;height:14px;color:var(--green);flex-shrink:0;margin-top:2px}
 
-/* ─── CTA SECTION ───────────────────────────────────── */
-.cta-section{
-  background:var(--teal-dim);
-  padding:100px 5%;
-  position:relative;overflow:hidden
-}
-.cta-section::before{
-  content:'';position:absolute;inset:0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,0.03) 1px,transparent 1px);
-  background-size:40px 40px;
-  pointer-events:none
-}
-.cta-section::after{
-  content:'';position:absolute;
-  top:-150px;right:-150px;
-  width:500px;height:500px;
-  background:radial-gradient(circle,rgba(255,255,255,0.04) 0%,transparent 65%);
-  pointer-events:none
-}
-.cta-inner{max-width:700px;margin:0 auto;text-align:center;position:relative;z-index:1}
-.cta-section .section-heading{color:#fff;font-size:clamp(28px,3.5vw,44px)}
-.cta-section .section-sub{color:rgba(255,255,255,0.6);margin:0 auto 40px}
-.cta-form{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.cta-input{
-  width:280px;height:50px;
-  padding:0 16px;
-  background:rgba(255,255,255,0.1);
-  border:0.5px solid rgba(255,255,255,0.2);
-  border-radius:var(--r-md);
-  font-size:14px;color:#fff;
-  outline:none;transition:all .2s;
-  -webkit-appearance:none
-}
-.cta-input::placeholder{color:rgba(255,255,255,0.4)}
-.cta-input:focus{border-color:rgba(255,255,255,0.45);background:rgba(255,255,255,0.14)}
-.cta-btn{
-  height:50px;padding:0 26px;
-  background:#fff;color:var(--teal-dim);
-  border:none;border-radius:var(--r-md);
-  font-size:14px;font-weight:700;
-  transition:all .2s;
-  display:inline-flex;align-items:center;gap:7px
-}
-.cta-btn:hover{background:var(--off-white);transform:translateY(-1px);box-shadow:0 8px 28px rgba(0,0,0,0.2)}
-.cta-note{font-size:12px;color:rgba(255,255,255,0.38);margin-top:14px}
-.cta-trust-row{
-  display:flex;align-items:center;justify-content:center;
-  gap:20px;flex-wrap:wrap;margin-top:32px
-}
-.cta-trust-item{
-  display:flex;align-items:center;gap:6px;
-  font-size:12px;color:rgba(255,255,255,0.45)
-}
-.cta-trust-item svg{width:14px;height:14px;color:rgba(255,255,255,0.5);flex-shrink:0}
-.cta-divider{width:1px;height:14px;background:rgba(255,255,255,0.15)}
+/* ─── FAQ ─────────────────────────────────────────────── */
+.faq{background:var(--bg-2)}
+.faq-list{max-width:760px;margin:48px auto 0;display:flex;flex-direction:column;gap:8px}
+.faq-item{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:border-color .2s}
+.faq-item.open{border-color:var(--cyan-border)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;cursor:pointer;gap:16px;user-select:none}
+.faq-q-text{font-size:15px;font-weight:600;color:var(--white);line-height:1.4}
+.faq-chevron{width:18px;height:18px;color:var(--white-3);flex-shrink:0;transition:transform .25s}
+.faq-item.open .faq-chevron{transform:rotate(180deg)}
+.faq-a{display:none;padding:0 22px 18px;font-size:14px;color:var(--white-3);line-height:1.7}
+.faq-item.open .faq-a{display:block}
 
-/* ─── FOOTER ────────────────────────────────────────── */
-footer{
-  background:var(--navy);
-  padding:48px 5% 32px;
-  border-top:0.5px solid rgba(255,255,255,0.05)
-}
-.footer-top{
-  display:flex;align-items:flex-start;justify-content:space-between;
-  gap:32px;flex-wrap:wrap;
-  margin-bottom:40px;
-  padding-bottom:40px;
-  border-bottom:0.5px solid rgba(255,255,255,0.06)
-}
-.footer-brand-col{max-width:260px}
-.footer-logo{display:flex;align-items:center;gap:9px;margin-bottom:14px}
-.footer-logo-text{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#fff}
-.footer-tagline{font-size:13px;color:rgba(255,255,255,0.3);line-height:1.6}
-.footer-nav-col h4{font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.25);margin-bottom:14px}
-.footer-nav-col ul{display:flex;flex-direction:column;gap:8px}
-.footer-nav-col ul a{font-size:13px;color:rgba(255,255,255,0.4);transition:color .18s}
-.footer-nav-col ul a:hover{color:rgba(255,255,255,0.75)}
-.footer-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
-.footer-copy{font-size:12px;color:rgba(255,255,255,0.18)}
-.footer-legal{display:flex;gap:18px}
-.footer-legal a{font-size:12px;color:rgba(255,255,255,0.25);transition:color .18s}
-.footer-legal a:hover{color:rgba(255,255,255,0.55)}
-.footer-social{display:flex;gap:10px}
-.footer-social a{
-  width:32px;height:32px;
-  border:0.5px solid rgba(255,255,255,0.1);
-  border-radius:var(--r-sm);
-  display:flex;align-items:center;justify-content:center;
-  transition:all .18s
-}
-.footer-social a:hover{border-color:rgba(28,184,122,0.4);background:rgba(28,184,122,0.08)}
-.footer-social a svg{width:14px;height:14px;color:rgba(255,255,255,0.35)}
-.footer-social a:hover svg{color:var(--teal)}
+/* ─── FINAL CTA ───────────────────────────────────────── */
+.final-cta{background:var(--bg);padding:120px 0;position:relative;overflow:hidden}
+.final-cta-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
+.final-cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(0,212,255,.06) 0%,transparent 65%);pointer-events:none}
+.final-cta-inner{position:relative;z-index:1;text-align:center;max-width:680px;margin:0 auto}
+.final-cta-headline{font-family:var(--display);font-size:clamp(32px,4.5vw,56px);font-weight:800;line-height:1.08;letter-spacing:-1.5px;color:var(--white);margin-bottom:18px}
+.final-cta-headline .accent{color:var(--cyan)}
+.final-cta-sub{font-size:17px;color:var(--white-2);line-height:1.7;margin-bottom:40px;font-weight:300}
+.final-cta-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.final-cta-note{font-size:12px;font-family:var(--mono);color:var(--white-4)}
 
-/* ─── FORM SUCCESS ──────────────────────────────────── */
-.form-success{
-  display:none;
-  align-items:center;gap:8px;
-  font-size:13px;font-weight:500;
-  color:var(--teal);margin-top:12px
-}
-.form-success svg{width:16px;height:16px;flex-shrink:0}
-.form-success.visible{display:flex}
+/* ─── FOOTER ──────────────────────────────────────────── */
+footer{background:var(--bg-2);border-top:0.5px solid var(--border);padding:64px 0 40px}
+.footer-top{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:40px;padding-bottom:48px;border-bottom:0.5px solid var(--border)}
+.footer-brand .footer-logo{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.footer-brand .footer-wordmark{font-family:var(--display);font-size:16px;font-weight:800;color:var(--white)}
+.footer-brand .footer-wordmark span{color:var(--cyan)}
+.footer-tagline{font-size:13px;color:var(--white-3);line-height:1.65;max-width:220px;margin-bottom:20px}
+.footer-contact-link{font-size:13px;color:var(--white-3);transition:color .18s;display:flex;align-items:center;gap:6px}
+.footer-contact-link:hover{color:var(--cyan)}
+.footer-contact-link svg{width:14px;height:14px}
+.footer-col h4{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--white-4);margin-bottom:16px;font-family:var(--mono)}
+.footer-col ul{display:flex;flex-direction:column;gap:10px}
+.footer-col ul a{font-size:13px;color:var(--white-3);transition:color .18s}
+.footer-col ul a:hover{color:var(--white)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:32px;flex-wrap:wrap;gap:16px}
+.footer-copy{font-size:12px;font-family:var(--mono);color:var(--white-4)}
+.footer-legal{display:flex;gap:20px}
+.footer-legal a{font-size:12px;color:var(--white-4);transition:color .18s}
+.footer-legal a:hover{color:var(--white-2)}
+.footer-social{display:flex;gap:8px}
+.footer-social a{width:34px;height:34px;border:0.5px solid var(--border);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;transition:all .18s}
+.footer-social a:hover{border-color:var(--cyan-border);background:var(--cyan-dim)}
+.footer-social a svg{width:15px;height:15px;color:var(--white-4)}
+.footer-social a:hover svg{color:var(--cyan)}
 
-/* ─── REVEAL ANIMATIONS ─────────────────────────────── */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
+/* ─── REVEAL ──────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
-.reveal-delay-1{transition-delay:.1s}
-.reveal-delay-2{transition-delay:.2s}
-.reveal-delay-3{transition-delay:.3s}
-.reveal-delay-4{transition-delay:.4s}
+.reveal-d1{transition-delay:.1s}
+.reveal-d2{transition-delay:.18s}
+.reveal-d3{transition-delay:.26s}
+.reveal-d4{transition-delay:.34s}
+.reveal-d5{transition-delay:.42s}
 
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
-}
-
-/* ─── RESPONSIVE ────────────────────────────────────── */
+/* ─── RESPONSIVE ──────────────────────────────────────── */
 @media(max-width:1100px){
-  .hero{grid-template-columns:1fr;gap:48px;padding-top:110px}
-  .hero-right{order:-1}
-  .mockup-shell{max-width:100%}
-  .hero-stats{grid-template-columns:repeat(4,1fr)}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .stat-cell:nth-child(2){border-right:none}
-  .stat-cell:nth-child(3){border-top:0.5px solid rgba(255,255,255,0.07)}
-  .how-grid::before{display:none}
+  .hero-content{grid-template-columns:1fr;gap:48px;padding-top:20px}
+  .hero-right{display:none}
+  .dash-inner{grid-template-columns:1fr 1fr;grid-template-rows:auto auto auto}
+  .dash-panel:nth-child(2){border-right:none}
+  .dash-panel:nth-child(3){border-right:0.5px solid var(--border);border-top:0.5px solid var(--border)}
+  .dash-panel:nth-child(4){border-right:none;border-top:0.5px solid var(--border)}
+  .dash-panel:nth-child(5){border-right:0.5px solid var(--border);border-top:0.5px solid var(--border)}
+  .dash-panel:nth-child(6){border-top:0.5px solid var(--border)}
+  .footer-top{grid-template-columns:1fr 1fr 1fr;gap:32px}
+  .footer-brand{grid-column:1/-1}
+  .benefits-grid{grid-template-columns:repeat(2,1fr)}
+  .workflow-steps{grid-template-columns:repeat(2,1fr);gap:32px}
+  .workflow-steps::before{display:none}
+  .use-grid{grid-template-columns:repeat(2,1fr)}
+  .pricing-grid{grid-template-columns:1fr}
+  .solution-grid{grid-template-columns:1fr}
 }
 @media(max-width:768px){
   .nav-links,.nav-right{display:none}
-  .nav-hamburger{display:flex}
-  .hero{padding:100px 5% 64px}
-  .hero-right{display:none}
-  .hero-stats{grid-template-columns:repeat(2,1fr)}
-  .section{padding:72px 5%}
-  .problem-grid{border-radius:var(--r-md)}
-  .problem-card{border-right:none;border-bottom:0.5px solid var(--border-light)}
-  .problem-card:last-child{border-bottom:none}
-  .stats-grid{grid-template-columns:repeat(2,1fr)}
-  .cta-input{width:100%;min-width:0}
-  .cta-form{flex-direction:column;align-items:center}
-  .footer-top{flex-direction:column;gap:32px}
+  .hamburger{display:flex}
+  .section{padding:72px 0}
+  .section-sm{padding:56px 0}
+  .grid-3{grid-template-columns:1fr}
+  .grid-4{grid-template-columns:repeat(2,1fr)}
+  .features-grid{grid-template-columns:1fr}
+  .trust-grid{grid-template-columns:1fr}
+  .use-grid{grid-template-columns:1fr}
+  .problem-grid{border-radius:var(--r-lg)}
+  .prob-card{border-right:none;border-bottom:0.5px solid var(--border)}
+  .prob-card:last-child{border-bottom:none}
+  .benefits-grid{grid-template-columns:repeat(2,1fr)}
+  .workflow-steps{grid-template-columns:1fr}
+  .reports-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-top{grid-template-columns:1fr 1fr;gap:28px}
+  .footer-brand{grid-column:1/-1}
   .footer-bottom{flex-direction:column;align-items:flex-start;gap:12px}
-  .mockup-shell{display:none}
+  .dash-inner{grid-template-columns:1fr;grid-template-rows:auto}
+  .dash-panel{border-right:none!important;border-bottom:0.5px solid var(--border)!important}
+  .dash-panel:last-child{border-bottom:none!important}
+  .final-cta-actions{flex-direction:column;align-items:center}
+  .hero-actions{flex-direction:column;align-items:flex-start}
+  .hero-actions .btn{width:100%;justify-content:center}
+  .pricing-grid{grid-template-columns:1fr}
 }
 @media(max-width:480px){
   .hero-headline{letter-spacing:-1px}
-  .hero-stats{grid-template-columns:repeat(2,1fr);gap:0}
-  .hero-stat{padding:20px 16px}
-  .hero-btn{width:100%}
-  .hero-form{flex-direction:column}
-  .hero-input{min-width:0;width:100%}
-  .stats-grid{grid-template-columns:1fr}
-  .stat-cell{border-right:none;border-bottom:0.5px solid rgba(255,255,255,0.07)}
-  .stat-cell:last-child{border-bottom:none}
+  .benefits-grid{grid-template-columns:1fr}
+  .grid-4{grid-template-columns:1fr}
+  .reports-grid{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .logos-row{gap:16px}
+  .footer-top{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
-<!-- Skip link for accessibility -->
 <a href="#main" class="skip-link">Skip to main content</a>
 
-<!-- ─── NAV ──────────────────────────────────────────── -->
+<!-- ═══════════ NAV ═══════════ -->
 <nav id="nav" role="banner">
-  <a href="#" class="nav-logo" aria-label="Controlynx home">
-    <svg class="nav-logomark" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-      <rect x="2.5" y="2.5" width="31" height="31" rx="3" stroke="#1CB87A" stroke-width="1.5" transform="rotate(45 18 18)" fill="none"/>
-      <path d="M13.5 10C8.5 10 5.5 13.5 5.5 18C5.5 22.5 8.5 26 13.5 26" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-      <line x1="17" y1="10" x2="29" y2="26" stroke="#1CB87A" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="29" y1="10" x2="17" y2="26" stroke="#1CB87A" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>
-    <span class="nav-wordmark">Controlynx</span>
-  </a>
-  <div class="nav-links" role="navigation" aria-label="Main navigation">
-    <a href="#problem">The Problem</a>
-    <a href="#how">How It Works</a>
-    <a href="#features">Features</a>
-    <a href="#who">Who It's For</a>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" aria-label="Controlynx.ai home">
+      <svg class="nav-logo-mark" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="26" height="26" rx="2.5" stroke="#00D4FF" stroke-width="1.2" transform="rotate(45 15 15)" fill="none"/>
+        <path d="M11 8C7 8 4.5 11 4.5 15C4.5 19 7 22 11 22" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+        <line x1="14" y1="8" x2="24" y2="22" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+        <line x1="24" y1="8" x2="14" y2="22" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="nav-wordmark">Controlynx<span>.ai</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#features">Product</a>
+      <a href="#use-cases">Solutions</a>
+      <a href="#reports">Reports</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">About</a>
+    </nav>
+    <div class="nav-right">
+      <a href="#" class="nav-login">Log in</a>
+      <button class="nav-cta" onclick="scrollToSection('#final-cta')" aria-label="Book a demo">Book a Demo</button>
+    </div>
+    <button class="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-nav" onclick="toggleMobile(this)">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-  <div class="nav-right">
-    <a href="mailto:founder@controlynx.ai" class="btn-ghost-nav">Contact</a>
-    <a href="#waitlist" class="btn-primary-nav">Get Early Access</a>
-  </div>
-  <button class="nav-hamburger" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobile-menu" onclick="toggleMobileMenu(this)">
-    <span></span><span></span><span></span>
-  </button>
 </nav>
 
-<!-- Mobile menu -->
-<div class="nav-mobile" id="mobile-menu" role="navigation" aria-label="Mobile navigation">
-  <a href="#problem" onclick="closeMobileMenu()">The Problem</a>
-  <a href="#how" onclick="closeMobileMenu()">How It Works</a>
-  <a href="#features" onclick="closeMobileMenu()">Features</a>
-  <a href="#who" onclick="closeMobileMenu()">Who It's For</a>
-  <a href="mailto:founder@controlynx.ai" onclick="closeMobileMenu()">Contact</a>
-  <a href="#waitlist" class="mobile-cta" onclick="closeMobileMenu()">Get Early Access — Free Beta</a>
+<div class="mobile-menu" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
+  <a href="#features" onclick="closeMobile()">Product</a>
+  <a href="#use-cases" onclick="closeMobile()">Solutions</a>
+  <a href="#reports" onclick="closeMobile()">Reports</a>
+  <a href="#pricing" onclick="closeMobile()">Pricing</a>
+  <a href="#faq" onclick="closeMobile()">FAQ</a>
+  <a href="#" onclick="closeMobile()">Log in</a>
+  <a href="#final-cta" class="m-cta" onclick="closeMobile()">Book a Demo</a>
 </div>
 
-<!-- ─── HERO ──────────────────────────────────────────── -->
+<!-- ═══════════ HERO ═══════════ -->
 <main id="main">
 <section class="hero" aria-label="Hero">
-  <div class="hero-bg-grid" aria-hidden="true"></div>
-  <div class="hero-bg-glow" aria-hidden="true"></div>
-  <div class="hero-bg-glow-2" aria-hidden="true"></div>
+  <div class="hero-grid-bg" aria-hidden="true"></div>
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-glow-2" aria-hidden="true"></div>
 
-  <!-- Left column -->
-  <div class="hero-left">
-    <div class="hero-eyebrow">
-      <span class="eyebrow-dot" aria-hidden="true"></span>
-      <span class="eyebrow-text">Now accepting early access requests</span>
-    </div>
-
-    <h1 class="hero-headline">
-      Your planning engineer<br>
-      should be <span class="hl-teal hl-underline">planning.</span><br>
-      Not formatting reports.
-    </h1>
-
-    <p class="hero-sub">
-      Controlynx automates daily, weekly, and monthly project reports —
-      so your project controls team gets back <strong>8+ hours every week.</strong>
-      Built by a construction professional with <strong>22 years of experience.</strong>
-    </p>
-
-    <div class="hero-form-wrap">
-      <div class="hero-form" role="group" aria-label="Early access sign up">
-        <label for="heroEmail" class="sr-only">Work email address</label>
-        <input
-          class="hero-input"
-          type="email"
-          id="heroEmail"
-          name="email"
-          placeholder="Enter your work email"
-          autocomplete="email"
-          required
-          aria-describedby="heroTrust"
-        >
-        <button class="hero-btn" onclick="submitWaitlist('heroEmail','heroSuccess')" aria-label="Get early access to Controlynx">
-          Get Early Access
-          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="hero-content">
+    <!-- Left -->
+    <div class="hero-left">
+      <div class="hero-badge">
+        <span class="badge-pulse" aria-hidden="true"></span>
+        <span class="badge-text">AI Project Controls Platform</span>
+      </div>
+      <h1 class="hero-headline">
+        Control the project<br>
+        before the <span class="accent">delay</span><br>
+        controls you.
+      </h1>
+      <p class="hero-sub">
+        Controlynx.ai automates daily reports, delay analysis, planned vs actual tracking, and executive dashboards — so your project controls team spends less time formatting and <strong>more time controlling outcomes.</strong>
+      </p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-lg" onclick="scrollToSection('#final-cta')" aria-label="Book a product demo">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M6 5.5l4 2.5-4 2.5V5.5z" fill="currentColor"/></svg>
+          Book a Demo
         </button>
+        <a href="#workflow" class="btn btn-ghost btn-lg">
+          See How It Works
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
       </div>
-      <div class="form-success" id="heroSuccess" role="alert" aria-live="polite">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        You're on the list — we'll be in touch soon.
+      <div class="hero-trust">
+        <span class="trust-item">
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7l2.5 2.5L11 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Built for construction workflows
+        </span>
+        <span class="trust-sep" aria-hidden="true"></span>
+        <span class="trust-item">
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7l2.5 2.5L11 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Works with Excel & Primavera data
+        </span>
+        <span class="trust-sep" aria-hidden="true"></span>
+        <span class="trust-item">
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M3 7l2.5 2.5L11 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Human review before submission
+        </span>
       </div>
     </div>
 
-    <div class="hero-trust" id="heroTrust">
-      <span class="trust-item">
-        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1l1.5 3.5H12L9 7l1 3.5L7 9 4 10.5 5 7 2 4.5h3.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-        Free during beta
-      </span>
-      <span class="trust-divider" aria-hidden="true"></span>
-      <span class="trust-item">
-        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="2" y="6" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 6V4a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        No credit card required
-      </span>
-      <span class="trust-divider" aria-hidden="true"></span>
-      <span class="trust-item">
-        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1l1.2 3.7H12L9 7.5l1.2 3.7L7 9 3.8 11.2 5 7.5 2 4.7h3.8L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-        Cancel any time
-      </span>
-    </div>
-
-    <!-- Stats grid -->
-    <div class="hero-stats" role="list" aria-label="Key metrics">
-      <div class="hero-stat" role="listitem">
-        <div class="stat-num"><span class="stat-accent">8</span>+</div>
-        <div class="stat-label">Hours saved per engineer per week</div>
+    <!-- Right: Dashboard mockup -->
+    <div class="hero-right" aria-hidden="true">
+      <div class="hero-tag tag-1">
+        <div class="tag-val" style="color:var(--green)">−40%</div>
+        <div class="tag-label">Reporting time</div>
       </div>
-      <div class="hero-stat" role="listitem">
-        <div class="stat-num"><span class="stat-accent">4</span></div>
-        <div class="stat-label">Report types fully automated</div>
+      <div class="hero-tag tag-2">
+        <div class="tag-val"><span style="color:var(--cyan)">✓</span> Sent</div>
+        <div class="tag-label">DPR — 08:42 AM</div>
       </div>
-      <div class="hero-stat" role="listitem">
-        <div class="stat-num"><span class="stat-accent">5</span><span style="font-size:20px;color:rgba(255,255,255,0.4)">min</span></div>
-        <div class="stat-label">Daily site input required</div>
-      </div>
-      <div class="hero-stat" role="listitem">
-        <div class="stat-num"><span class="stat-accent">22</span></div>
-        <div class="stat-label">Years of construction experience</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Right column — product mockup -->
-  <div class="hero-right" aria-hidden="true">
-    <!-- Floating accent cards -->
-    <div class="hero-float-card float-1">
-      <div class="float-val"><span>94</span>%</div>
-      <div class="float-lbl">Programme adherence</div>
-    </div>
-    <div class="hero-float-card float-2">
-      <div class="float-val"><span>✓</span> Sent</div>
-      <div class="float-lbl">DPR submitted 08:47 AM</div>
-    </div>
-
-    <div class="mockup-shell">
-      <div class="mockup-bar">
-        <div class="mockup-dots">
-          <span></span><span></span><span></span>
+      <div class="dash-shell">
+        <div class="dash-bar">
+          <div class="dash-dots">
+            <span style="background:#FF5F57"></span>
+            <span style="background:#FFBD2E"></span>
+            <span style="background:#27C93F"></span>
+          </div>
+          <span class="dash-title">Controlynx.ai — Project Dashboard</span>
+          <div class="dash-live"><span class="dash-live-dot"></span>LIVE</div>
         </div>
-        <span class="mockup-title">Daily Progress Report — Al Noor Tower</span>
-        <span class="mockup-status">AI Generated</span>
-      </div>
-      <div class="mockup-body">
-        <!-- Report header -->
-        <div class="report-header">
-          <div class="report-title-row">
-            <span class="report-tag">DPR</span>
-            <span class="report-date">30 May 2026</span>
-          </div>
-          <div class="report-name">Al Noor Tower — Package 3B</div>
-          <div class="report-project">Structural Works · Zone C, Levels 12–15</div>
-        </div>
-
-        <!-- Metrics -->
-        <div class="report-metrics">
-          <div class="metric-box">
-            <div class="metric-val"><span class="up">67%</span></div>
-            <div class="metric-lbl">Overall progress</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-val"><span class="warn">+2d</span></div>
-            <div class="metric-lbl">Schedule variance</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-val">143</div>
-            <div class="metric-lbl">Manpower today</div>
-          </div>
-        </div>
-
-        <!-- Mini S-curve -->
-        <div class="scurve-wrap">
-          <div class="scurve-label-row">
-            <span class="scurve-title">S-Curve — Week 22</span>
-            <div class="scurve-legend">
-              <span class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>Actual</span>
-              <span class="legend-item"><span class="legend-dot" style="background:rgba(255,255,255,0.25)"></span>Planned</span>
+        <div class="dash-body">
+          <div class="kpi-row">
+            <div class="kpi">
+              <div class="kpi-val" style="color:var(--amber)">72%</div>
+              <div class="kpi-label">Overall Progress</div>
+              <div class="kpi-delta warn">▲ −3% vs Plan</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-val" style="color:var(--red)">+5d</div>
+              <div class="kpi-label">Schedule Variance</div>
+              <div class="kpi-delta down">⚠ Critical delay</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-val" style="color:var(--green)">94%</div>
+              <div class="kpi-label">Scope Complete</div>
+              <div class="kpi-delta up">▲ On track</div>
             </div>
           </div>
-          <svg viewBox="0 0 280 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="S-curve progress chart showing actual vs planned progress">
-            <!-- Grid lines -->
-            <line x1="0" y1="18" x2="280" y2="18" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-            <line x1="0" y1="36" x2="280" y2="36" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-            <line x1="0" y1="54" x2="280" y2="54" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-            <!-- Planned line -->
-            <path d="M0 68 C20 68, 30 60, 56 52 C80 44, 110 28, 140 16 C170 6, 200 4, 280 3" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" stroke-dasharray="4 3" fill="none"/>
-            <!-- Actual line + fill -->
-            <path d="M0 68 C20 68, 30 62, 56 56 C80 50, 110 36, 140 22 C160 12, 170 8, 190 6" stroke="#1CB87A" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <path d="M0 68 C20 68, 30 62, 56 56 C80 50, 110 36, 140 22 C160 12, 170 8, 190 6 L190 68 Z" fill="url(#scurve-fill)" opacity="0.35"/>
-            <!-- Current position dot -->
-            <circle cx="190" cy="6" r="4" fill="#1CB87A"/>
-            <circle cx="190" cy="6" r="7" fill="#1CB87A" opacity="0.25"/>
-            <defs>
-              <linearGradient id="scurve-fill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#1CB87A" stop-opacity="0.5"/>
-                <stop offset="100%" stop-color="#1CB87A" stop-opacity="0"/>
-              </linearGradient>
-            </defs>
-          </svg>
-        </div>
-
-        <!-- Activities -->
-        <div class="activities-label">Today's activities</div>
-        <div class="activity-row">
-          <div class="act-left">
-            <span class="act-dot green"></span>
-            <span class="act-name">Concrete pour — L14 slab</span>
+          <div class="prog-section">
+            <div class="prog-item">
+              <div class="prog-label-row"><span class="prog-name">Structural Works</span><span class="prog-val">78%</span></div>
+              <div class="prog-track"><div class="prog-fill cyan" style="width:78%"></div></div>
+            </div>
+            <div class="prog-item">
+              <div class="prog-label-row"><span class="prog-name">MEP Installations</span><span class="prog-val">54%</span></div>
+              <div class="prog-track"><div class="prog-fill amber" style="width:54%"></div></div>
+            </div>
+            <div class="prog-item">
+              <div class="prog-label-row"><span class="prog-name">Finishes & Fit-out</span><span class="prog-val">31%</span></div>
+              <div class="prog-track"><div class="prog-fill green" style="width:31%"></div></div>
+            </div>
           </div>
-          <span class="act-pct">100%</span>
-        </div>
-        <div class="activity-row">
-          <div class="act-left">
-            <span class="act-dot amber"></span>
-            <span class="act-name">Rebar fixing — L15 columns</span>
+          <div class="alert-row">
+            <div class="alert-card red">
+              <svg class="alert-icon" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2L13 12H1L7 2z" stroke="#FF4D4D" stroke-width="1.2"/><line x1="7" y1="5.5" x2="7" y2="8.5" stroke="#FF4D4D" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="10" r=".5" fill="#FF4D4D"/></svg>
+              <div><div class="alert-title">Concrete pour delay</div><div class="alert-desc">Level 14 — 3 days behind</div></div>
+            </div>
+            <div class="alert-card amber">
+              <svg class="alert-icon" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.5" stroke="#F4A030" stroke-width="1.2"/><line x1="7" y1="4.5" x2="7" y2="7.5" stroke="#F4A030" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="9.5" r=".5" fill="#F4A030"/></svg>
+              <div><div class="alert-title">Rebar delivery risk</div><div class="alert-desc">Expected: 4 Jun</div></div>
+            </div>
           </div>
-          <span class="act-pct">72%</span>
-        </div>
-        <div class="activity-row">
-          <div class="act-left">
-            <span class="act-dot gray"></span>
-            <span class="act-name">Formwork stripping — L12</span>
+          <div class="act-list">
+            <div class="act-row">
+              <div class="act-left"><span class="act-dot" style="background:var(--green)"></span><span class="act-name">Slab formwork — L15</span></div>
+              <span class="act-pct">100%</span>
+            </div>
+            <div class="act-row">
+              <div class="act-left"><span class="act-dot" style="background:var(--cyan)"></span><span class="act-name">Column casting — Zone C</span></div>
+              <span class="act-pct">68%</span>
+            </div>
+            <div class="act-row">
+              <div class="act-left"><span class="act-dot" style="background:var(--amber)"></span><span class="act-name">MEP rough-in — Level 12</span></div>
+              <span class="act-pct">42%</span>
+            </div>
           </div>
-          <span class="act-pct">45%</span>
-        </div>
-
-        <!-- AI badge -->
-        <div class="ai-badge">
-          <svg class="ai-badge-icon" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1v2M7 11v2M1 7h2M11 7h2M3.22 3.22l1.41 1.41M9.37 9.37l1.41 1.41M3.22 10.78l1.41-1.41M9.37 4.63l1.41-1.41" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-          <span class="ai-badge-text"><strong>Generated by Controlynx AI</strong> — 5 min input → full report</span>
+          <div class="gen-badge">
+            <svg style="width:12px;height:12px;color:var(--cyan)" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 1v2M6 9v2M1 6h2M9 6h2M2.64 2.64l1.41 1.41M7.95 7.95l1.41 1.41M2.64 9.36l1.41-1.41M7.95 4.05l1.41-1.41" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+            <span class="gen-badge-text"><strong>AI-generated DPR ready</strong> — 5 min input → full report</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ─── SOCIAL PROOF STRIP ────────────────────────────── -->
-<div class="proof-strip" aria-label="Trust indicators">
-  <div class="proof-inner">
-    <div class="proof-item">
-      <div class="proof-icon" aria-hidden="true">
-        <svg viewBox="0 0 20 20" fill="none"><path d="M10 2l2.4 5.6 6 .4-4.5 4 1.5 5.8L10 15l-5.4 2.8 1.5-5.8L1.6 8l6-.4L10 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-      </div>
-      <div>
-        <span class="proof-star" aria-label="5 stars">★★★★★</span>
-        <span class="proof-text">Built by a <strong>22-year construction veteran</strong></span>
-      </div>
-    </div>
-    <span class="proof-divider" aria-hidden="true"></span>
-    <div class="proof-item">
-      <div class="proof-icon" aria-hidden="true">
-        <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div>
-        <span class="proof-text"><strong>GCC-first</strong>, launching globally</span>
-      </div>
-    </div>
-    <span class="proof-divider" aria-hidden="true"></span>
-    <div class="proof-item">
-      <div class="proof-icon" aria-hidden="true">
-        <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="8" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M7 8V6a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      </div>
-      <div>
-        <span class="proof-text"><strong>Your project data</strong> is never shared or sold</span>
-      </div>
-    </div>
-    <span class="proof-divider" aria-hidden="true"></span>
-    <div class="proof-item">
-      <div class="proof-icon" aria-hidden="true">
-        <svg viewBox="0 0 20 20" fill="none"><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-      </div>
-      <div>
-        <span class="proof-text"><strong>Free during beta</strong> — no card needed</span>
-      </div>
+<!-- ═══════════ LOGOS ═══════════ -->
+<div class="logos-strip" aria-label="Built for construction workflows">
+  <div class="wrap">
+    <p class="logos-label">Designed around construction industry workflows</p>
+    <div class="logos-row">
+      <div class="logo-pill"><div class="logo-pill-icon"></div><span class="logo-pill-text">Primavera P6</span></div>
+      <div class="logo-pill"><div class="logo-pill-icon"></div><span class="logo-pill-text">Excel Reporting</span></div>
+      <div class="logo-pill"><div class="logo-pill-icon"></div><span class="logo-pill-text">PowerPoint Export</span></div>
+      <div class="logo-pill"><div class="logo-pill-icon"></div><span class="logo-pill-text">PDF Generation</span></div>
+      <div class="logo-pill"><div class="logo-pill-icon"></div><span class="logo-pill-text">Word Documents</span></div>
+      <div class="logo-pill"><div class="logo-pill-icon"></div><span class="logo-pill-text">MS Project</span></div>
     </div>
   </div>
 </div>
 
-<!-- ─── PROBLEM ──────────────────────────────────────── -->
+<!-- ═══════════ PROBLEM ═══════════ -->
 <section class="section problem reveal" id="problem" aria-labelledby="problem-heading">
-  <div class="section-inner">
-    <span class="section-eyebrow">The problem</span>
-    <h2 class="section-heading" id="problem-heading">Monday morning.<br>Every week. The same chaos.</h2>
-    <p class="section-sub">Every construction project in the world runs on the same broken workflow. Every planning engineer knows exactly what we mean.</p>
+  <div class="wrap">
+    <div class="eyebrow" aria-hidden="true">The Problem</div>
+    <h2 class="section-title" id="problem-heading">Manual project controls<br>is costing you control.</h2>
+    <p class="section-sub">Every construction project runs on the same broken reporting loop. Your best engineers spend their time on admin instead of analysis.</p>
     <div class="problem-grid">
-      <div class="problem-card">
-        <div class="problem-num" aria-hidden="true">01</div>
-        <h3 class="problem-title">Data collection takes all morning</h3>
-        <p class="problem-desc">Your planning engineer spends Monday morning on WhatsApp and phone calls — chasing site teams and subcontractors for progress data that should have arrived automatically.</p>
-        <p class="problem-quote">"I'll submit the report by 3pm — just waiting on data from site."</p>
+      <div class="prob-card reveal reveal-d1">
+        <div class="prob-num" aria-hidden="true">01</div>
+        <div class="prob-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M4 10h12M4 6h12M4 14h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="prob-title">Reports take hours to produce</h3>
+        <p class="prob-desc">Planning engineers spend Monday mornings chasing data from site teams instead of reviewing the schedule. A report that should take 30 minutes takes half a day.</p>
+        <p class="prob-quote">"I'll send the DPR by 3pm — still waiting on data from site."</p>
       </div>
-      <div class="problem-card">
-        <div class="problem-num" aria-hidden="true">02</div>
-        <h3 class="problem-title">Reports go out with missing data</h3>
-        <p class="problem-desc">The data collection is never fully complete by the time the report is due. Every report contains estimates, gaps, and figures that are already outdated the moment they are submitted.</p>
-        <p class="problem-quote">"I'll update the numbers when I get confirmation from the subcontractor."</p>
+      <div class="prob-card reveal reveal-d2">
+        <div class="prob-num" aria-hidden="true">02</div>
+        <div class="prob-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M10 4v6l4 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <h3 class="prob-title">Delays surface too late</h3>
+        <p class="prob-desc">By the time a delay is visible in a monthly report, the project has already lost two weeks. Early warning signals are buried in spreadsheets nobody has time to read.</p>
+        <p class="prob-quote">"We only found out about the concrete delay when the client asked."</p>
       </div>
-      <div class="problem-card">
-        <div class="problem-num" aria-hidden="true">03</div>
-        <h3 class="problem-title">40% of the week spent on formatting</h3>
-        <p class="problem-desc">Planning engineers are hired to analyse schedules, identify risks, and protect the programme. Instead, they spend nearly half their week copy-pasting data into Word and Excel templates.</p>
-        <p class="problem-quote">"I didn't get time to review the programme this week — the monthly report took three days."</p>
+      <div class="prob-card reveal reveal-d3">
+        <div class="prob-num" aria-hidden="true">03</div>
+        <div class="prob-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 10h6M7 7h6M7 13h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="prob-title">Data lives in silos</h3>
+        <p class="prob-desc">Progress data, manpower logs, procurement status, and engineering approvals all sit in separate Excel files, WhatsApp threads, and email chains. Nobody has the full picture.</p>
+        <p class="prob-quote">"The MEP progress figures in the weekly report don't match what the subcontractor submitted."</p>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ─── HOW IT WORKS ─────────────────────────────────── -->
-<section class="section how reveal" id="how" aria-labelledby="how-heading">
-  <div class="section-inner">
-    <span class="section-eyebrow">How it works</span>
-    <h2 class="section-heading" id="how-heading">From site data to<br>client-ready report in minutes</h2>
-    <p class="section-sub">Three steps. No manual formatting. No chasing data. No missed submissions.</p>
-    <div class="how-grid">
-      <div class="how-card reveal reveal-delay-1">
-        <div class="how-number" aria-hidden="true"><span>1</span></div>
-        <p class="how-step-label">Step 1</p>
-        <h3 class="how-title">Site teams fill a 5-minute form</h3>
-        <p class="how-desc">A simple mobile-friendly form — activities completed, manpower deployed, issues, photos. Takes less than 5 minutes. Works on any phone, no app required.</p>
-      </div>
-      <div class="how-card reveal reveal-delay-2">
-        <div class="how-number" aria-hidden="true"><span>2</span></div>
-        <p class="how-step-label">Step 2</p>
-        <h3 class="how-title">AI generates the complete report</h3>
-        <p class="how-desc">Controlynx reads the data, applies your project template, and generates a complete, professional report — daily, weekly, or monthly — with narrative, charts, and summaries.</p>
-      </div>
-      <div class="how-card reveal reveal-delay-3">
-        <div class="how-number" aria-hidden="true"><span>3</span></div>
-        <p class="how-step-label">Step 3</p>
-        <h3 class="how-title">Review, approve, and send</h3>
-        <p class="how-desc">Your engineer reviews the draft in minutes, makes any adjustments, and exports as PDF or Word. Client-ready. Every time. Without a Sunday evening spent on PowerPoint.</p>
+      <div class="prob-card reveal reveal-d4">
+        <div class="prob-num" aria-hidden="true">04</div>
+        <div class="prob-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.64 5.64l1.41 1.41M12.95 12.95l1.41 1.41M5.64 14.36l1.41-1.41M12.95 7.05l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h3 class="prob-title">Management lacks real-time visibility</h3>
+        <p class="prob-desc">Directors and PMOs receive weekly snapshots at best. They make decisions on data that is already five days old, and can't act on project health issues until it's too late to recover.</p>
+        <p class="prob-quote">"By the time the monthly report reaches me, the problem is already a contract issue."</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ─── FEATURES ─────────────────────────────────────── -->
+<!-- ═══════════ SOLUTION ═══════════ -->
+<section class="section solution reveal" id="solution" aria-labelledby="solution-heading">
+  <div class="wrap">
+    <div class="eyebrow">The Solution</div>
+    <h2 class="section-title" id="solution-heading">From site data to executive report.<br>In minutes, not days.</h2>
+    <p class="section-sub">Controlynx.ai collects, structures, and transforms your project data into professional reports and dashboards — automatically.</p>
+    <div class="solution-grid">
+      <div class="solution-steps">
+        <div class="step-item">
+          <div class="step-num-wrap">
+            <div class="step-num">1</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <h3 class="step-title">Site teams submit progress in 5 minutes</h3>
+            <p class="step-desc">A structured mobile form replaces WhatsApp updates, phone calls, and informal logs. Activities, manpower, photos, issues — collected once, used everywhere.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num-wrap">
+            <div class="step-num">2</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <h3 class="step-title">AI compares planned vs actual</h3>
+            <p class="step-desc">Controlynx reads your baseline schedule, compares it against reported actuals, calculates variances, and identifies activities at risk — automatically.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num-wrap">
+            <div class="step-num">3</div>
+            <div class="step-line"></div>
+          </div>
+          <div class="step-content">
+            <h3 class="step-title">Reports and dashboards are generated</h3>
+            <p class="step-desc">Daily progress reports, weekly summaries, monthly executive reports, and PowerPoint presentations — all generated with your project data, formatted to professional standards.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-num-wrap">
+            <div class="step-num">4</div>
+          </div>
+          <div class="step-content">
+            <h3 class="step-title">Your engineer reviews, approves, and sends</h3>
+            <p class="step-desc">The human review step is built in. Your planning engineer reviews the AI-generated output, makes any adjustments, and submits — with confidence, not frustration.</p>
+          </div>
+        </div>
+      </div>
+      <div class="solution-visual reveal reveal-d2">
+        <div class="sol-visual-bar">
+          <span class="sol-visual-title">Report generation queue</span>
+          <span style="font-size:10px;font-family:var(--mono);color:var(--white-4)">Today — Week 22</span>
+        </div>
+        <div class="sol-body">
+          <div class="sol-report-item">
+            <div class="sol-ri-icon cyan">
+              <svg viewBox="0 0 18 18" fill="none" style="width:18px;height:18px;color:var(--cyan)"><rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 6h8M5 9h8M5 12h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <span class="sol-ri-name">Daily Progress Report</span>
+              <span class="sol-ri-status">Tue 30 May — Auto-generated</span>
+            </div>
+            <span class="sol-ri-badge badge-ready">READY</span>
+          </div>
+          <div class="sol-report-item">
+            <div class="sol-ri-icon green">
+              <svg viewBox="0 0 18 18" fill="none" style="width:18px;height:18px;color:var(--green)"><path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <span class="sol-ri-name">Weekly Progress Report</span>
+              <span class="sol-ri-status">Week 22 — Generating…</span>
+            </div>
+            <span class="sol-ri-badge badge-gen">GENERATING</span>
+          </div>
+          <div class="sol-report-item">
+            <div class="sol-ri-icon amber">
+              <svg viewBox="0 0 18 18" fill="none" style="width:18px;height:18px;color:var(--amber)"><rect x="2" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M6 7h6M6 10h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <span class="sol-ri-name">Monthly Executive Report</span>
+              <span class="sol-ri-status">May 2026 — Awaiting review</span>
+            </div>
+            <span class="sol-ri-badge badge-review">REVIEW</span>
+          </div>
+          <div class="sol-report-item">
+            <div class="sol-ri-icon cyan">
+              <svg viewBox="0 0 18 18" fill="none" style="width:18px;height:18px;color:var(--cyan)"><rect x="2" y="2" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M7 6l5 3-5 3V6z" fill="currentColor" stroke="none"/></svg>
+            </div>
+            <div>
+              <span class="sol-ri-name">Delay Analysis Report</span>
+              <span class="sol-ri-status">AI variance analysis complete</span>
+            </div>
+            <span class="sol-ri-badge badge-ready">READY</span>
+          </div>
+          <div style="margin-top:16px;padding:14px;background:rgba(0,212,255,.05);border:0.5px solid rgba(0,212,255,.15);border-radius:var(--r-md)">
+            <div style="font-size:11px;font-family:var(--mono);color:var(--white-4);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em">AI Summary — Week 22</div>
+            <p style="font-size:12.5px;color:var(--white-2);line-height:1.6">"Structural works are progressing at 78% against a planned 81%. A 3-day delay on concrete pours at Level 14 is the primary critical path risk. Recommend immediate review of pour schedule for Levels 15–17."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FEATURES ═══════════ -->
 <section class="section features reveal" id="features" aria-labelledby="features-heading">
-  <div class="features-bg" aria-hidden="true"></div>
-  <div class="section-inner" style="position:relative;z-index:1">
-    <span class="section-eyebrow">What's included</span>
-    <h2 class="section-heading" id="features-heading">Every report your project needs.<br>Automated.</h2>
-    <p class="section-sub">Four reporting modules — each one eliminating hours of manual work every week.</p>
+  <div class="wrap">
+    <div class="eyebrow">Platform Features</div>
+    <h2 class="section-title" id="features-heading">Every tool your project controls<br>team actually needs.</h2>
+    <p class="section-sub">Ten focused capabilities that eliminate the most time-consuming manual tasks in construction project controls.</p>
     <div class="features-grid">
-      <div class="feature-card reveal reveal-delay-1">
-        <span class="feature-tag">Daily</span>
-        <div class="feature-divider"></div>
-        <h3 class="feature-title">Daily Progress Report</h3>
-        <p class="feature-desc">Auto-generated from site team inputs. Complete, formatted, and client-ready every morning before your engineer finishes their coffee.</p>
-        <ul class="feature-list">
-          <li>Activities completed and in progress</li>
-          <li>Manpower deployed by trade</li>
-          <li>Issues, delays, and weather log</li>
-          <li>Photo attachments auto-embedded</li>
-          <li>PDF and Word export</li>
+      <div class="feat-card reveal reveal-d1">
+        <span class="feat-tag">Daily</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><path d="M4 11h14M4 7h14M4 15h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3 class="feat-title">Daily Report Automation</h3>
+        <p class="feat-desc">Generates complete Daily Progress Reports from site team inputs. Formatted, structured, and client-ready before your engineer finishes their morning coffee.</p>
+      </div>
+      <div class="feat-card reveal reveal-d2">
+        <span class="feat-tag">Weekly</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M3 8h16M8 4v4M14 4v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3 class="feat-title">Weekly Report Automation</h3>
+        <p class="feat-desc">Aggregates 7 days of daily data into a structured weekly progress report — including S-curve, planned vs actual, issues log, and 2-week lookahead.</p>
+      </div>
+      <div class="feat-card reveal reveal-d3">
+        <span class="feat-tag">Monthly</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 11h8M7 15h5M7 7h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3 class="feat-title">Monthly Executive Reports</h3>
+        <p class="feat-desc">Produces the full executive monthly report — narrative, KPIs, schedule variance, cost update, and forecast — in minutes instead of three days.</p>
+      </div>
+      <div class="feat-card reveal reveal-d4">
+        <span class="feat-tag">Analysis</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><path d="M4 17l4.5-5 3.5 3 4-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17" cy="6" r="2" stroke="currentColor" stroke-width="1.5"/></svg></div>
+        <h3 class="feat-title">AI Delay Analysis</h3>
+        <p class="feat-desc">Compares planned vs actual progress across all activities, calculates schedule variance, identifies critical path risks, and flags early warning signals before they become claims.</p>
+      </div>
+      <div class="feat-card reveal reveal-d1">
+        <span class="feat-tag">Tracking</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><path d="M4 6h14M4 10h10M4 14h12M4 18h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3 class="feat-title">Engineering &amp; Procurement Logs</h3>
+        <p class="feat-desc">Tracks engineering submittals, approvals, and RFIs alongside procurement delivery schedules. Surfaces blockers before they impact the construction programme.</p>
+      </div>
+      <div class="feat-card reveal reveal-d2">
+        <span class="feat-tag">Resources</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><circle cx="9" cy="8" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 18c0-3.31 2.69-6 6-6h4c3.31 0 6 2.69 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3 class="feat-title">Resource Planned vs Actual</h3>
+        <p class="feat-desc">Compares manpower deployed against plan by trade, discipline, and area. Highlights resource gaps and productivity trends over time.</p>
+      </div>
+      <div class="feat-card reveal reveal-d3">
+        <span class="feat-tag">Dashboard</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="12" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="12" y="12" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg></div>
+        <h3 class="feat-title">Progress Dashboard</h3>
+        <p class="feat-desc">A live project health view showing overall progress, area-by-area breakdown, schedule performance index, and current programme status at a glance.</p>
+      </div>
+      <div class="feat-card reveal reveal-d4">
+        <span class="feat-tag">Finance</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><path d="M11 3v2m0 12v2M3 11h2m12 0h2M5.64 5.64l1.41 1.41m8.3 8.3 1.41 1.41M5.64 16.36l1.41-1.41m8.3-8.3 1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3 class="feat-title">Cost &amp; Productivity Insights</h3>
+        <p class="feat-desc">Tracks cost performance, earned value, and productivity ratios per activity and area. Gives commercial managers the data they need to manage variation orders proactively.</p>
+      </div>
+      <div class="feat-card reveal reveal-d1">
+        <span class="feat-tag">Risk</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><path d="M11 4L19 18H3L11 4z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><line x1="11" y1="9" x2="11" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="11" cy="15.5" r=".75" fill="currentColor"/></svg></div>
+        <h3 class="feat-title">Risk &amp; Early Warning Alerts</h3>
+        <p class="feat-desc">Automated alerts when activities fall behind critical path thresholds, procurement delivery windows are missed, or resource deployment drops below plan.</p>
+      </div>
+      <div class="feat-card reveal reveal-d2">
+        <span class="feat-tag">Presentation</span>
+        <div class="feat-icon" aria-hidden="true"><svg viewBox="0 0 22 22" fill="none"><rect x="3" y="4" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M9 19h4M11 15v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <h3 class="feat-title">PowerPoint Report Generator</h3>
+        <p class="feat-desc">Builds the Monday morning client meeting deck automatically — S-curve, progress charts, key messages, and photo grid. No more Sunday evening formatting sessions.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<section class="section dashboard-section reveal" id="dashboard" aria-labelledby="dash-heading">
+  <div class="wrap">
+    <div class="eyebrow">Product Preview</div>
+    <h2 class="section-title" id="dash-heading">The AI command center for<br>construction project controls.</h2>
+    <p class="section-sub">A single dashboard that gives every stakeholder — from site engineer to PMO director — exactly the visibility they need.</p>
+    <div class="dashboard-shell">
+      <div class="dash-header">
+        <div class="dash-header-left">
+          <div class="dash-header-dots">
+            <span style="background:#FF5F57"></span>
+            <span style="background:#FFBD2E"></span>
+            <span style="background:#27C93F"></span>
+          </div>
+          <span class="dash-header-title">Controlynx.ai Dashboard — Al Noor Tower, Package 3B</span>
+        </div>
+        <div class="dash-header-right">
+          <div class="dash-status-pill live"><span style="width:5px;height:5px;background:var(--green);border-radius:50%"></span>Live</div>
+          <div class="dash-status-pill alert">⚠ 2 Risk Alerts</div>
+        </div>
+      </div>
+      <div class="dash-inner">
+        <!-- Panel 1: Health Score -->
+        <div class="dash-panel">
+          <div class="dp-label">Project Health Score</div>
+          <div class="dp-score warn">74</div>
+          <div class="dp-score-sub">/100 — Attention required</div>
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--white-3)">Schedule Performance</span>
+              <span style="font-size:11px;font-family:var(--mono);color:var(--amber)">0.91 SPI</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--white-3)">Cost Performance</span>
+              <span style="font-size:11px;font-family:var(--mono);color:var(--green)">1.03 CPI</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:11px;color:var(--white-3)">Resource Efficiency</span>
+              <span style="font-size:11px;font-family:var(--mono);color:var(--cyan)">88%</span>
+            </div>
+          </div>
+        </div>
+        <!-- Panel 2: Planned vs Actual -->
+        <div class="dash-panel">
+          <div class="dp-label">Planned vs Actual — Week 22</div>
+          <div class="dp-chart-bars">
+            <div class="bar-planned" style="height:40%"></div><div class="bar-actual cyan" style="height:35%"></div>
+            <div class="bar-planned" style="height:52%"></div><div class="bar-actual cyan" style="height:47%"></div>
+            <div class="bar-planned" style="height:65%"></div><div class="bar-actual amber" style="height:60%"></div>
+            <div class="bar-planned" style="height:78%"></div><div class="bar-actual amber" style="height:71%"></div>
+            <div class="bar-planned" style="height:88%"></div><div class="bar-actual red" style="height:78%"></div>
+            <div class="bar-planned" style="height:75%"></div><div class="bar-actual green" style="height:78%"></div>
+          </div>
+          <div class="dp-chart-labels">
+            <span class="dp-chart-label">W17</span>
+            <span class="dp-chart-label">W18</span>
+            <span class="dp-chart-label">W19</span>
+            <span class="dp-chart-label">W20</span>
+            <span class="dp-chart-label">W21</span>
+            <span class="dp-chart-label">W22</span>
+          </div>
+          <div style="display:flex;gap:14px;margin-top:10px">
+            <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--white-4);font-family:var(--mono)"><span style="width:8px;height:8px;background:rgba(255,255,255,.12);border-radius:1px;display:inline-block"></span>Planned</span>
+            <span style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--white-4);font-family:var(--mono)"><span style="width:8px;height:8px;background:var(--cyan);border-radius:1px;display:inline-block"></span>Actual</span>
+          </div>
+        </div>
+        <!-- Panel 3: Risk Alerts -->
+        <div class="dash-panel">
+          <div class="dp-label">Active Risk Alerts</div>
+          <div class="risk-list">
+            <div class="risk-item critical">
+              <div class="risk-dot critical"></div>
+              <div><div class="risk-text">Concrete pour delay — Level 14</div><div class="risk-meta">Critical path · +3 days · SV: −AED 84K</div></div>
+            </div>
+            <div class="risk-item high">
+              <div class="risk-dot high"></div>
+              <div><div class="risk-text">Rebar delivery at risk</div><div class="risk-meta">High priority · ETA: 4 Jun · Float: 2d</div></div>
+            </div>
+            <div class="risk-item medium">
+              <div class="risk-dot medium"></div>
+              <div><div class="risk-text">MEP rough-in productivity -12%</div><div class="risk-meta">Medium · Trending below plan</div></div>
+            </div>
+          </div>
+        </div>
+        <!-- Panel 4: Progress by Area -->
+        <div class="dash-panel">
+          <div class="dp-label">Progress by Area</div>
+          <div style="display:flex;flex-direction:column;gap:9px;margin-top:4px">
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;color:var(--white-2)">Structural Works</span><span style="font-size:11px;font-family:var(--mono);color:var(--cyan)">78%</span></div><div class="prog-track"><div class="prog-fill cyan" style="width:78%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;color:var(--white-2)">MEP Installation</span><span style="font-size:11px;font-family:var(--mono);color:var(--amber)">54%</span></div><div class="prog-track"><div class="prog-fill amber" style="width:54%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;color:var(--white-2)">Finishes</span><span style="font-size:11px;font-family:var(--mono);color:var(--green)">31%</span></div><div class="prog-track"><div class="prog-fill green" style="width:31%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:11px;color:var(--white-2)">External Works</span><span style="font-size:11px;font-family:var(--mono);color:var(--cyan)">90%</span></div><div class="prog-track"><div class="prog-fill cyan" style="width:90%"></div></div></div>
+          </div>
+        </div>
+        <!-- Panel 5: Engineering/Procurement -->
+        <div class="dash-panel">
+          <div class="dp-label">Engineering &amp; Procurement</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-3);border-radius:var(--r-sm)">
+              <span style="font-size:11px;color:var(--white-2)">RFIs Open</span>
+              <span style="font-size:13px;font-family:var(--display);font-weight:700;color:var(--amber)">14</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-3);border-radius:var(--r-sm)">
+              <span style="font-size:11px;color:var(--white-2)">Submittals Pending</span>
+              <span style="font-size:13px;font-family:var(--display);font-weight:700;color:var(--red)">7</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-3);border-radius:var(--r-sm)">
+              <span style="font-size:11px;color:var(--white-2)">Deliveries On Time</span>
+              <span style="font-size:13px;font-family:var(--display);font-weight:700;color:var(--green)">92%</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg-3);border-radius:var(--r-sm)">
+              <span style="font-size:11px;color:var(--white-2)">Manpower On Site</span>
+              <span style="font-size:13px;font-family:var(--display);font-weight:700;color:var(--cyan)">143</span>
+            </div>
+          </div>
+        </div>
+        <!-- Panel 6: Report Buttons -->
+        <div class="dash-panel">
+          <div class="dp-label">Generate Reports</div>
+          <div class="dp-report-btns">
+            <div class="dp-report-btn">
+              <div class="dp-report-btn-icon daily">
+                <svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px;color:var(--cyan)"><rect x="1.5" y="2" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 5.5h6M4 7.5h6M4 9.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <div><div class="dp-report-name">Daily Progress Report</div><div class="dp-report-status">Ready to generate</div></div>
+              <svg class="dp-report-arrow" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="dp-report-btn">
+              <div class="dp-report-btn-icon weekly">
+                <svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px;color:var(--green)"><rect x="1.5" y="2" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4 5h6M4 7.5h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <div><div class="dp-report-name">Weekly Progress Report</div><div class="dp-report-status">Week 22 — Generating</div></div>
+              <svg class="dp-report-arrow" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="dp-report-btn">
+              <div class="dp-report-btn-icon monthly">
+                <svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px;color:var(--amber)"><rect x="1.5" y="1.5" width="11" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5h11M5 1.5v3.5M9 1.5v3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </div>
+              <div><div class="dp-report-name">Monthly Executive Report</div><div class="dp-report-status">May 2026 — Ready</div></div>
+              <svg class="dp-report-arrow" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ WORKFLOW ═══════════ -->
+<section class="section-sm workflow reveal" id="workflow" aria-labelledby="workflow-heading">
+  <div class="wrap">
+    <div class="eyebrow">How It Works</div>
+    <h2 class="section-title" id="workflow-heading">Four steps from raw data<br>to actionable intelligence.</h2>
+    <div class="workflow-steps">
+      <div class="wf-step reveal reveal-d1">
+        <div class="wf-num" aria-hidden="true">1</div>
+        <h3 class="wf-title">Upload or connect project data</h3>
+        <p class="wf-desc">Import your baseline schedule, activity list, and project structure. Works with Primavera exports, MS Project files, and Excel-based schedules.</p>
+      </div>
+      <div class="wf-step reveal reveal-d2">
+        <div class="wf-num" aria-hidden="true">2</div>
+        <h3 class="wf-title">AI structures and validates</h3>
+        <p class="wf-desc">Controlynx reads incoming site progress, cross-references your baseline, validates data quality, and calculates variances across all activities.</p>
+      </div>
+      <div class="wf-step reveal reveal-d3">
+        <div class="wf-num" aria-hidden="true">3</div>
+        <h3 class="wf-title">Dashboards and reports generated</h3>
+        <p class="wf-desc">Professional reports are produced instantly — DPR, weekly, monthly, delay analysis, resource report, and PowerPoint presentation — formatted to industry standard.</p>
+      </div>
+      <div class="wf-step reveal reveal-d4">
+        <div class="wf-num" aria-hidden="true">4</div>
+        <h3 class="wf-title">Teams act on risks earlier</h3>
+        <p class="wf-desc">Risk alerts, early warning indicators, and variance flags give project controls teams the time to intervene before delays become disputes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ USE CASES ═══════════ -->
+<section class="section use-cases reveal" id="use-cases" aria-labelledby="use-cases-heading">
+  <div class="wrap">
+    <div class="eyebrow">Use Cases</div>
+    <h2 class="section-title" id="use-cases-heading">Built for every role in<br>your project controls team.</h2>
+    <p class="section-sub">From the planning engineer on site to the PMO director reviewing the portfolio — everyone gets what they need.</p>
+    <div class="use-grid">
+      <div class="use-card reveal reveal-d1">
+        <div class="use-role"><span class="use-role-abbr">PCM</span><span class="use-role-name">Project Controls Manager</span></div>
+        <h3 class="use-title">A real-time view across the entire project</h3>
+        <p class="use-desc">Spend less time compiling status updates and more time identifying risks. Controlynx gives you a live project health score, variance analysis, and automated risk alerts.</p>
+        <ul class="use-bullets">
+          <li>Live project health score and SPI/CPI tracking</li>
+          <li>Automated variance detection across all activities</li>
+          <li>One-click report generation for client submission</li>
         </ul>
       </div>
-      <div class="feature-card reveal reveal-delay-2">
-        <span class="feature-tag">Weekly</span>
-        <div class="feature-divider"></div>
-        <h3 class="feature-title">Weekly Progress Report</h3>
-        <p class="feature-desc">Aggregated from 7 days of DPR data. S-curve, planned vs actual, lookahead, issues summary — all formatted and ready.</p>
-        <ul class="feature-list">
-          <li>Planned vs actual S-curve</li>
-          <li>Progress by area and discipline</li>
-          <li>Issues and risks summary</li>
-          <li>2-week lookahead schedule</li>
-          <li>Formatted per your client template</li>
+      <div class="use-card reveal reveal-d2">
+        <div class="use-role"><span class="use-role-abbr">PE</span><span class="use-role-name">Planning Engineer</span></div>
+        <h3 class="use-title">Stop formatting. Start analysing.</h3>
+        <p class="use-desc">Your expertise is in the schedule — not in copy-pasting site data into Word templates. Controlynx handles the formatting so you can focus on programme control and delay prevention.</p>
+        <ul class="use-bullets">
+          <li>Automated daily, weekly, and monthly reports</li>
+          <li>Planned vs actual comparison built in</li>
+          <li>More time for critical path analysis</li>
         </ul>
       </div>
-      <div class="feature-card reveal reveal-delay-3">
-        <span class="feature-tag">Monthly</span>
-        <div class="feature-divider"></div>
-        <h3 class="feature-title">Monthly Progress Report</h3>
-        <p class="feature-desc">The full executive report — narrative, KPIs, schedule variance, cost update, and forecast — generated in minutes instead of three days.</p>
-        <ul class="feature-list">
-          <li>Executive narrative auto-written</li>
-          <li>Schedule and cost KPIs</li>
-          <li>Variance analysis with reasons</li>
-          <li>Next month forecast section</li>
-          <li>Risk and issues register</li>
+      <div class="use-card reveal reveal-d3">
+        <div class="use-role"><span class="use-role-abbr">PM</span><span class="use-role-name">Project Manager</span></div>
+        <h3 class="use-title">Accurate reports, delivered on time, every time.</h3>
+        <p class="use-desc">Get complete, consistent project status reports without chasing your team. Controlynx ensures the client receives professional documentation regardless of how busy the project gets.</p>
+        <ul class="use-bullets">
+          <li>No more chasing the team for Monday reports</li>
+          <li>Client-ready formatting as standard</li>
+          <li>Audit trail of all submitted progress data</li>
         </ul>
       </div>
-      <div class="feature-card reveal reveal-delay-4">
-        <span class="feature-tag">Presentation</span>
-        <div class="feature-divider"></div>
-        <h3 class="feature-title">Weekly Progress Presentation</h3>
-        <p class="feature-desc">The Monday morning client meeting deck — built automatically. Charts, metrics, photos, and key messages. No more Sunday evening PowerPoint sessions.</p>
-        <ul class="feature-list">
-          <li>Auto-built slide deck</li>
-          <li>S-curve and progress charts</li>
-          <li>Key metrics and highlights</li>
-          <li>Photo grid from site</li>
-          <li>Export as PDF or PowerPoint</li>
+      <div class="use-card reveal reveal-d1">
+        <div class="use-role"><span class="use-role-abbr">SM</span><span class="use-role-name">Site Manager</span></div>
+        <h3 class="use-title">Five minutes to submit. Nothing else required.</h3>
+        <p class="use-desc">A simple, structured daily form on any phone. Activities, manpower, photos, and issues — submitted in under 5 minutes. Controlynx handles everything else automatically.</p>
+        <ul class="use-bullets">
+          <li>5-minute structured daily site submission</li>
+          <li>Works on any phone, no app required</li>
+          <li>Photo attachments included automatically</li>
+        </ul>
+      </div>
+      <div class="use-card reveal reveal-d2">
+        <div class="use-role"><span class="use-role-abbr">CM</span><span class="use-role-name">Commercial Manager</span></div>
+        <h3 class="use-title">Data to support every variation and claim.</h3>
+        <p class="use-desc">Cost performance, productivity tracking, and earned value analysis built in. Controlynx produces the documentation trail your commercial team needs to manage variations proactively.</p>
+        <ul class="use-bullets">
+          <li>Cost and productivity dashboards</li>
+          <li>Earned value and CPI tracking</li>
+          <li>Exportable data for commercial submissions</li>
+        </ul>
+      </div>
+      <div class="use-card reveal reveal-d3">
+        <div class="use-role"><span class="use-role-abbr">DIR</span><span class="use-role-name">Director / PMO</span></div>
+        <h3 class="use-title">Portfolio visibility without the Monday morning chase.</h3>
+        <p class="use-desc">Consistent reporting across all projects, without chasing project teams. Controlynx delivers standardised health scores, risk summaries, and executive dashboards for every project you oversee.</p>
+        <ul class="use-bullets">
+          <li>Standardised reporting across all projects</li>
+          <li>Executive health scores and risk summaries</li>
+          <li>No more inconsistent formats from different teams</li>
         </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ─── WHO IT'S FOR ──────────────────────────────────── -->
-<section class="section who reveal" id="who" aria-labelledby="who-heading">
-  <div class="section-inner">
-    <span class="section-eyebrow">Who it's for</span>
-    <h2 class="section-heading" id="who-heading">Built for everyone who<br>runs construction projects</h2>
-    <p class="section-sub">From the engineer on site to the director in the boardroom — everyone gets exactly what they need.</p>
-    <div class="who-grid">
-      <div class="who-card reveal reveal-delay-1">
-        <div class="who-abbr" aria-hidden="true">PCE</div>
-        <h3 class="who-role">Project Controls Engineer</h3>
-        <p class="who-desc">Stop spending your week on formatting. Controlynx handles the reports — you focus on schedule analysis and delay prevention.</p>
+<!-- ═══════════ REPORTS ═══════════ -->
+<section class="section reports reveal" id="reports" aria-labelledby="reports-heading">
+  <div class="wrap">
+    <div class="eyebrow">Report Library</div>
+    <h2 class="section-title" id="reports-heading">Every report your project<br>needs, automated.</h2>
+    <p class="section-sub">Ten report types covering the full project controls lifecycle — from daily site updates to executive board presentations.</p>
+    <div class="reports-grid">
+      <div class="rep-card type-daily reveal reveal-d1">
+        <div class="rep-icon cyan"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:var(--cyan)"><rect x="2" y="2" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h10M5 10h10M5 13h7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div><div class="rep-name">Daily Progress Report</div><div class="rep-desc">Site activities, manpower, issues, weather, and photo attachments — auto-generated every day.</div></div>
+        <span class="rep-freq daily">Daily</span>
       </div>
-      <div class="who-card reveal reveal-delay-2">
-        <div class="who-abbr" aria-hidden="true">PE</div>
-        <h3 class="who-role">Planning Engineer</h3>
-        <p class="who-desc">Your expertise is in the schedule. Not in copy-pasting data into Word. Get your time back and use it where it matters.</p>
+      <div class="rep-card type-weekly reveal reveal-d2">
+        <div class="rep-icon green"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:var(--green)"><rect x="2" y="3" width="16" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M2 7h16M7 3v4M13 3v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div><div class="rep-name">Weekly Progress Report</div><div class="rep-desc">S-curve, planned vs actual, lookahead schedule, issues log, and manpower summary.</div></div>
+        <span class="rep-freq weekly">Weekly</span>
       </div>
-      <div class="who-card reveal reveal-delay-3">
-        <div class="who-abbr" aria-hidden="true">PM</div>
-        <h3 class="who-role">Project Manager</h3>
-        <p class="who-desc">Get accurate, complete reports on time — every time. No more waiting for your team to finish formatting before you can review the numbers.</p>
+      <div class="rep-card type-monthly reveal reveal-d3">
+        <div class="rep-icon amber"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:var(--amber)"><rect x="2" y="2" width="16" height="16" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M5 7h10M5 10h10M5 13h6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div><div class="rep-name">Monthly Progress Report</div><div class="rep-desc">Full executive narrative, KPIs, variance analysis, cost update, and next-month forecast.</div></div>
+        <span class="rep-freq monthly">Monthly</span>
       </div>
-      <div class="who-card reveal reveal-delay-2">
-        <div class="who-abbr" aria-hidden="true">SE</div>
-        <h3 class="who-role">Site Engineer</h3>
-        <p class="who-desc">A 5-minute daily form on your phone. That is your entire reporting responsibility. Controlynx handles everything else automatically.</p>
+      <div class="rep-card type-exec reveal reveal-d4">
+        <div class="rep-icon purple"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:rgba(168,85,247,1)"><rect x="2" y="3" width="16" height="11" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M8 18h4M10 14v4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div><div class="rep-name">Executive Dashboard</div><div class="rep-desc">PowerPoint presentation with charts, metrics, photos, and key messages for client meetings.</div></div>
+        <span class="rep-freq ondemand">On Demand</span>
       </div>
-      <div class="who-card reveal reveal-delay-3">
-        <div class="who-abbr" aria-hidden="true">DIR</div>
-        <h3 class="who-role">Director / PMO</h3>
-        <p class="who-desc">A consistent, professional reporting format across all your projects — without chasing your team every Monday morning for updates.</p>
+      <div class="rep-card type-delay reveal reveal-d1">
+        <div class="rep-icon red"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:var(--red)"><path d="M10 3L18 17H2L10 3z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><line x1="10" y1="8" x2="10" y2="12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="10" cy="14.5" r=".75" fill="currentColor"/></svg></div>
+        <div><div class="rep-name">Delay Analysis Report</div><div class="rep-desc">Critical path analysis, schedule variance, impacted activities, and delay causation summary.</div></div>
+        <span class="rep-freq ondemand">On Demand</span>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ─── TESTIMONIAL ───────────────────────────────────── -->
-<section class="testimonial reveal" aria-labelledby="testimonial-heading">
-  <div class="testimonial-inner">
-    <div class="quote-mark" aria-hidden="true">"</div>
-    <blockquote>
-      <p class="quote-text" id="testimonial-heading">
-        "The amount of time spent every week on formatting reports is criminal. Planning engineers are the most valuable technical resource on a construction project — and we spend half our time on admin. Something has to change."
-      </p>
-    </blockquote>
-    <div class="quote-author">
-      <div class="quote-avatar" aria-hidden="true">YA</div>
-      <div class="quote-meta">
-        <strong>Yusuf A.</strong>
-        <span>Senior Planning Engineer — GCC Infrastructure · 14 years experience</span>
+      <div class="rep-card type-weekly reveal reveal-d2">
+        <div class="rep-icon green"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:var(--green)"><circle cx="9" cy="7" r="3.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 17c0-3.31 2.69-6 6-6h4c3.31 0 6 2.69 6 6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div><div class="rep-name">Resource Report</div><div class="rep-desc">Planned vs actual manpower by trade, area, and discipline with productivity trend analysis.</div></div>
+        <span class="rep-freq weekly">Weekly</span>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- ─── STATS ─────────────────────────────────────────── -->
-<section class="stats reveal" aria-labelledby="stats-heading">
-  <div class="stats-inner">
-    <div style="text-align:center;margin-bottom:48px">
-      <span class="section-eyebrow" style="color:rgba(28,184,122,0.7)">The numbers</span>
-      <h2 class="section-heading" style="color:#fff" id="stats-heading">What Controlynx gives back to your team</h2>
-    </div>
-    <div class="stats-grid" role="list" aria-label="Key metrics">
-      <div class="stat-cell" role="listitem">
-        <div class="stat-big"><span class="accent">8</span>+</div>
-        <div class="stat-desc">Hours saved per planning engineer every week</div>
+      <div class="rep-card type-daily reveal reveal-d3">
+        <div class="rep-icon cyan"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:var(--cyan)"><path d="M4 5h12M4 9h12M4 13h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div><div class="rep-name">Engineering Log</div><div class="rep-desc">Submittals, RFIs, approvals, and drawing revisions tracked and reported in structured format.</div></div>
+        <span class="rep-freq weekly">Weekly</span>
       </div>
-      <div class="stat-cell" role="listitem">
-        <div class="stat-big"><span class="accent">4</span></div>
-        <div class="stat-desc">Report types fully automated — daily to monthly</div>
+      <div class="rep-card type-monthly reveal reveal-d4">
+        <div class="rep-icon amber"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:var(--amber)"><path d="M4 16l4-5 3.5 3 4-6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="5" r="2" stroke="currentColor" stroke-width="1.3"/></svg></div>
+        <div><div class="rep-name">Procurement Log</div><div class="rep-desc">Material delivery status, lead time tracking, and procurement risk flags against programme dates.</div></div>
+        <span class="rep-freq weekly">Weekly</span>
       </div>
-      <div class="stat-cell" role="listitem">
-        <div class="stat-big"><span class="accent">5</span><span style="font-size:28px;color:rgba(255,255,255,0.3)">min</span></div>
-        <div class="stat-desc">Daily site input — all that's needed from your teams</div>
+      <div class="rep-card type-exec reveal reveal-d1">
+        <div class="rep-icon purple"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:rgba(168,85,247,1)"><path d="M10 3v2m0 10v2M3 10h2m10 0h2M5.64 5.64l1.41 1.41m5.9 5.9 1.41 1.41M5.64 14.36l1.41-1.41m5.9-5.9 1.41-1.41" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div><div class="rep-name">Cost Report</div><div class="rep-desc">Earned value analysis, CPI, budget vs actual, and variation order summary for commercial teams.</div></div>
+        <span class="rep-freq monthly">Monthly</span>
       </div>
-      <div class="stat-cell" role="listitem">
-        <div class="stat-big"><span class="accent">22</span></div>
-        <div class="stat-desc">Years of construction experience built into every AI output</div>
+      <div class="rep-card type-delay reveal reveal-d2">
+        <div class="rep-icon red"><svg viewBox="0 0 20 20" fill="none" style="width:20px;height:20px;color:var(--red)"><rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M3 9h14M9 9v8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div><div class="rep-name">PowerPoint Presentation</div><div class="rep-desc">Auto-generated client meeting deck with S-curve, progress charts, metrics, photos, and key messages.</div></div>
+        <span class="rep-freq ondemand">On Demand</span>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ─── CTA ───────────────────────────────────────────── -->
-<section class="cta-section reveal" id="waitlist" aria-labelledby="cta-heading">
-  <div class="cta-inner">
-    <span class="section-eyebrow" style="color:rgba(255,255,255,0.5)">Early access</span>
-    <h2 class="section-heading" id="cta-heading">Stop losing Monday mornings<br>to report formatting</h2>
-    <p class="section-sub centered">Join the waitlist for early access. Free during beta. Built for GCC construction teams — launching globally.</p>
-    <div class="cta-form" role="group" aria-label="Waitlist sign up">
-      <label for="ctaEmail" class="sr-only">Work email address</label>
-      <input
-        class="cta-input"
-        type="email"
-        id="ctaEmail"
-        name="email"
-        placeholder="Enter your work email"
-        autocomplete="email"
-        required
-      >
-      <button class="cta-btn" onclick="submitWaitlist('ctaEmail','ctaSuccess')" aria-label="Join the Controlynx waitlist">
-        Join the Waitlist
-        <svg viewBox="0 0 14 14" fill="none" width="14" height="14" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-    <div class="form-success" id="ctaSuccess" role="alert" aria-live="polite" style="justify-content:center;color:rgba(255,255,255,0.8)">
-      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8l3.5 3.5L13 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      You're on the list — we'll be in touch soon.
-    </div>
-    <p class="cta-note">No credit card. No commitment. Cancel any time.</p>
-    <div class="cta-trust-row">
-      <span class="cta-trust-item">
-        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="2" y="6" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 6V4a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        Data never shared
-      </span>
-      <span class="cta-divider" aria-hidden="true"></span>
-      <span class="cta-trust-item">
-        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 1l1.5 3.5H12L9 7l1 3.5L7 9 4 10.5 5 7 2 4.5h3.5L7 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
-        Free during beta
-      </span>
-      <span class="cta-divider" aria-hidden="true"></span>
-      <span class="cta-trust-item">
-        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7c0-2.76 2.24-5 5-5s5 2.24 5 5-2.24 5-5 5-5-2.24-5-5zm5-2v2l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        Takes 30 seconds to sign up
-      </span>
+<!-- ═══════════ BENEFITS ═══════════ -->
+<section class="section benefits reveal" id="benefits" aria-labelledby="benefits-heading">
+  <div class="wrap">
+    <div class="eyebrow">Measurable Outcomes</div>
+    <h2 class="section-title" id="benefits-heading">What project controls teams<br>get back with Controlynx.</h2>
+    <div class="benefits-grid">
+      <div class="ben-card reveal reveal-d1">
+        <div class="ben-num">8+</div>
+        <div class="ben-label">Hours saved per engineer per week</div>
+        <p class="ben-desc">Time previously spent formatting reports, chasing data, and updating templates — returned to programme analysis and schedule control.</p>
+      </div>
+      <div class="ben-card reveal reveal-d2">
+        <div class="ben-num">−40%</div>
+        <div class="ben-label">Reduction in reporting preparation time</div>
+        <p class="ben-desc">Across daily, weekly, and monthly reports combined. Engineers generate the same output in a fraction of the time.</p>
+      </div>
+      <div class="ben-card reveal reveal-d3">
+        <div class="ben-num">72h</div>
+        <div class="ben-label">Earlier delay detection</div>
+        <p class="ben-desc">Automated variance analysis flags critical path risks up to three days before they would appear in a manually prepared report.</p>
+      </div>
+      <div class="ben-card reveal reveal-d4">
+        <div class="ben-num">100%</div>
+        <div class="ben-label">Consistent reporting format</div>
+        <p class="ben-desc">Every project, every report, every submission — same professional standard. No more inconsistent formats from different teams or sub-consultants.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- ─── FOOTER ────────────────────────────────────────── -->
+<!-- ═══════════ TRUST ═══════════ -->
+<section class="trust reveal" id="trust" aria-labelledby="trust-heading">
+  <div class="wrap">
+    <div class="eyebrow">Why Teams Trust Controlynx</div>
+    <h2 class="section-title" id="trust-heading">Designed for construction.<br>Built for compliance.</h2>
+    <div class="trust-grid">
+      <div class="trust-card reveal reveal-d1">
+        <div class="trust-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2l7 3.5v5c0 4.5-3.5 7-7 8.5C6.5 17.5 3 15 3 10.5v-5L10 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div>
+          <h3 class="trust-title">Built for construction project controls logic</h3>
+          <p class="trust-desc">Every feature is designed around actual project controls workflows — not generic project management. The platform understands S-curves, earned value, critical path, and float.</p>
+        </div>
+      </div>
+      <div class="trust-card reveal reveal-d2">
+        <div class="trust-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="8" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M7 8V6a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div>
+          <h3 class="trust-title">Secure project data handling</h3>
+          <p class="trust-desc">Your project data is never shared or used to train external models. All data handling follows enterprise security standards with full audit trails for every submission.</p>
+        </div>
+      </div>
+      <div class="trust-card reveal reveal-d3">
+        <div class="trust-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.3"/><path d="M10 6v4l3 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div>
+          <h3 class="trust-title">Human review before every submission</h3>
+          <p class="trust-desc">Controlynx does not submit reports without your engineer's review. Every AI-generated output goes through a structured review step. The human stays in control.</p>
+        </div>
+      </div>
+      <div class="trust-card reveal reveal-d4">
+        <div class="trust-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v12H4z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M4 8h12M8 8v8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div>
+          <h3 class="trust-title">Works with your existing Excel workflows</h3>
+          <p class="trust-desc">No need to replace your current tools. Controlynx accepts Excel-based schedule data, P6 exports, and standard reporting templates — and outputs to PDF, Word, and PowerPoint.</p>
+        </div>
+      </div>
+      <div class="trust-card reveal reveal-d1">
+        <div class="trust-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.3"/><path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div>
+          <h3 class="trust-title">Supports Primavera-style planning data</h3>
+          <p class="trust-desc">Import baseline schedules from Primavera P6, MS Project, or Excel. Controlynx understands WBS hierarchies, activity codes, and planning logic — no manual reformatting required.</p>
+        </div>
+      </div>
+      <div class="trust-card reveal reveal-d2">
+        <div class="trust-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M3 5h14M3 10h14M3 15h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+        <div>
+          <h3 class="trust-title">Consistent with industry reporting standards</h3>
+          <p class="trust-desc">Report formats are aligned with FIDIC, NEC, and GCC construction contract requirements. Client-ready output that meets the documentation standards your contracts demand.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ PRICING ═══════════ -->
+<section class="section pricing reveal" id="pricing" aria-labelledby="pricing-heading">
+  <div class="wrap">
+    <div class="eyebrow" style="justify-content:center">Pricing</div>
+    <h2 class="section-title" style="text-align:center" id="pricing-heading">Simple, transparent pricing<br>for every team size.</h2>
+    <p class="section-sub" style="text-align:center;margin:0 auto 56px">All plans include human review, PDF/Word/PowerPoint export, and secure data handling. <em style="color:var(--white-3);font-style:normal">Pricing is indicative — contact us for exact figures.</em></p>
+    <div class="pricing-grid">
+      <div class="price-card reveal reveal-d1">
+        <div class="price-tier">Starter</div>
+        <div class="price-name">Individual</div>
+        <p class="price-desc">For planning engineers and project controls engineers managing a single project who need to eliminate manual reporting overhead.</p>
+        <div class="price-main">Contact us <span>for pricing</span></div>
+        <p class="price-note">Per project · Monthly or annual</p>
+        <button class="price-cta secondary" onclick="scrollToSection('#final-cta')">Book a Demo</button>
+        <ul class="price-features">
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Daily, weekly, monthly reports</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Planned vs actual tracking</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>PDF and Word export</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>1 active project</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Up to 3 users</li>
+        </ul>
+      </div>
+      <div class="price-card featured reveal reveal-d2">
+        <div class="price-popular">Most Popular</div>
+        <div class="price-tier">Professional</div>
+        <div class="price-name">Project Team</div>
+        <p class="price-desc">For project teams, main contractors, and consultants managing active construction projects who need full reporting automation and delay analysis.</p>
+        <div class="price-main">Contact us <span>for pricing</span></div>
+        <p class="price-note">Per project · Monthly or annual</p>
+        <button class="price-cta primary" onclick="scrollToSection('#final-cta')">Book a Demo</button>
+        <ul class="price-features">
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Starter</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>AI delay analysis and risk alerts</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>PowerPoint export</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Engineering and procurement logs</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Up to 5 projects · 15 users</li>
+        </ul>
+      </div>
+      <div class="price-card reveal reveal-d3">
+        <div class="price-tier">Enterprise</div>
+        <div class="price-name">Portfolio</div>
+        <p class="price-desc">For contractors, PMOs, and consultancies managing multiple simultaneous projects who need portfolio-level visibility and standardised reporting.</p>
+        <div class="price-main">Contact Sales</div>
+        <p class="price-note">Custom pricing · Enterprise SLA</p>
+        <button class="price-cta secondary" onclick="scrollToSection('#final-cta')">Contact Sales</button>
+        <ul class="price-features">
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Everything in Professional</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Portfolio-level dashboard</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Custom report templates</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Dedicated onboarding</li>
+          <li class="price-feature"><svg viewBox="0 0 14 14" fill="none"><path d="M2.5 7l3 3L11.5 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>Unlimited projects and users</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FAQ ═══════════ -->
+<section class="section-sm faq reveal" id="faq" aria-labelledby="faq-heading">
+  <div class="wrap">
+    <div class="eyebrow" style="justify-content:center">FAQ</div>
+    <h2 class="section-title" style="text-align:center" id="faq-heading">Common questions from<br>project controls professionals.</h2>
+    <div class="faq-list" role="list">
+      <div class="faq-item" role="listitem">
+        <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
+          <span class="faq-q-text">Does Controlynx.ai replace project controls teams?</span>
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 6.75L9 11.25l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="faq-a">No. Controlynx.ai is a tool for project controls professionals, not a replacement for them. The platform handles the mechanical, time-consuming parts of the job — data collection, formatting, and report generation — so that engineers can focus on analysis, programme control, and risk management. Human review is built into every report before submission.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
+          <span class="faq-q-text">Can it work with our existing Excel-based workflows?</span>
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 6.75L9 11.25l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="faq-a">Yes. Controlynx.ai is designed to work alongside your current processes, not replace them. You can import schedule data from Excel, P6 exports, or MS Project files. Outputs are available as Excel, PDF, Word, and PowerPoint — so your team can work with them in existing tools without friction.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
+          <span class="faq-q-text">Can it generate PowerPoint presentations for client meetings?</span>
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 6.75L9 11.25l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="faq-a">Yes. The PowerPoint Report Generator produces a client-ready slide deck from your project data — including S-curve, progress charts, risk highlights, photo grid, and key metrics. You review and adjust before sharing. No more Sunday evening formatting.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
+          <span class="faq-q-text">Does it support Primavera P6 schedule data?</span>
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 6.75L9 11.25l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="faq-a">Controlynx.ai is designed to accept Primavera P6-style planning data including XER exports, activity lists, baseline schedules, and WBS hierarchies. Direct API integration with P6 is on the product roadmap. For current onboarding, structured imports are supported.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
+          <span class="faq-q-text">Does it generate daily, weekly, and monthly reports?</span>
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 6.75L9 11.25l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="faq-a">Yes. The core reporting modules cover Daily Progress Reports, Weekly Progress Reports, and Monthly Executive Reports. Additional outputs include delay analysis reports, resource reports, engineering logs, procurement logs, cost reports, and PowerPoint presentations — all generated from the same underlying project data.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
+          <span class="faq-q-text">How is project data kept secure?</span>
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 6.75L9 11.25l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="faq-a">Your project data belongs to you. It is never used to train external AI models, shared with third parties, or used outside the scope of your account. All data is handled with enterprise-grade security standards. For enterprise clients, dedicated data residency and enhanced security arrangements are available.</div>
+      </div>
+      <div class="faq-item" role="listitem">
+        <div class="faq-q" onclick="toggleFaq(this)" role="button" tabindex="0" aria-expanded="false" onkeydown="if(event.key==='Enter'||event.key===' ')toggleFaq(this)">
+          <span class="faq-q-text">Is it suitable for GCC-based contractors and consultants?</span>
+          <svg class="faq-chevron" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M4.5 6.75L9 11.25l4.5-4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="faq-a">Yes. Controlynx.ai was built by a construction professional with 22 years of experience in GCC construction markets. Report formats, contract terminology, and workflow assumptions reflect GCC construction industry standards. The platform is designed for global deployment and currently serving clients across the GCC region.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FINAL CTA ═══════════ -->
+<section class="final-cta reveal" id="final-cta" aria-labelledby="cta-heading">
+  <div class="final-cta-bg" aria-hidden="true"></div>
+  <div class="final-cta-glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="final-cta-inner">
+      <div class="eyebrow" style="justify-content:center;margin-bottom:24px">Start Today</div>
+      <h2 class="final-cta-headline" id="cta-heading">
+        Control the project<br>before the <span class="accent">delay</span><br>controls you.
+      </h2>
+      <p class="final-cta-sub">Book a 30-minute demo and see how Controlynx.ai transforms your project controls workflow — from site data to executive reports, in minutes.</p>
+      <div class="final-cta-actions">
+        <button class="btn btn-primary btn-lg" onclick="openDemoForm()" aria-label="Book a demo">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M6 5.5l4 2.5-4 2.5V5.5z" fill="currentColor"/></svg>
+          Book a Demo
+        </button>
+        <a href="mailto:founder@controlynx.ai" class="btn btn-ghost btn-lg">
+          Request Early Access
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+      <p class="final-cta-note">No sales pressure. 30-minute call. We show you the platform on a real project scenario.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
 <footer role="contentinfo">
-  <div class="footer-top">
-    <div class="footer-brand-col">
-      <div class="footer-logo">
-        <svg width="26" height="26" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-          <rect x="2.5" y="2.5" width="31" height="31" rx="3" stroke="#1CB87A" stroke-width="1.5" transform="rotate(45 18 18)" fill="none"/>
-          <path d="M13.5 10C8.5 10 5.5 13.5 5.5 18C5.5 22.5 8.5 26 13.5 26" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-          <line x1="17" y1="10" x2="29" y2="26" stroke="#1CB87A" stroke-width="2.5" stroke-linecap="round"/>
-          <line x1="29" y1="10" x2="17" y2="26" stroke="#1CB87A" stroke-width="2.5" stroke-linecap="round"/>
-        </svg>
-        <span class="footer-logo-text">Controlynx</span>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg width="26" height="26" viewBox="0 0 30 30" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="26" height="26" rx="2.5" stroke="#00D4FF" stroke-width="1.2" transform="rotate(45 15 15)" fill="none"/>
+            <path d="M11 8C7 8 4.5 11 4.5 15C4.5 19 7 22 11 22" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <line x1="14" y1="8" x2="24" y2="22" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+            <line x1="24" y1="8" x2="14" y2="22" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span class="footer-wordmark">Controlynx<span>.ai</span></span>
+        </div>
+        <p class="footer-tagline">AI project controls platform for construction. Automate reporting. Detect delays. Control outcomes.</p>
+        <a href="mailto:founder@controlynx.ai" class="footer-contact-link">
+          <svg viewBox="0 0 14 14" fill="none" aria-hidden="true"><rect x="1.5" y="3" width="11" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 4.5L7 8l5.5-3.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+          founder@controlynx.ai
+        </a>
       </div>
-      <p class="footer-tagline">AI project controls platform for construction. Automate your reporting. Reclaim your week.</p>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Platform Features</a></li>
+          <li><a href="#dashboard">Dashboard Preview</a></li>
+          <li><a href="#reports">Reports</a></li>
+          <li><a href="#workflow">How It Works</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Solutions</h4>
+        <ul>
+          <li><a href="#use-cases">For PCMs</a></li>
+          <li><a href="#use-cases">For Planning Engineers</a></li>
+          <li><a href="#use-cases">For Project Managers</a></li>
+          <li><a href="#use-cases">For Contractors</a></li>
+          <li><a href="#use-cases">For PMO Directors</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#faq">About</a></li>
+          <li><a href="#trust">Why Controlynx</a></li>
+          <li><a href="mailto:founder@controlynx.ai">Contact</a></li>
+          <li><a href="#final-cta">Book a Demo</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Service</a></li>
+          <li><a href="/security">Security</a></li>
+        </ul>
+      </div>
     </div>
-    <div class="footer-nav-col">
-      <h4>Product</h4>
-      <ul>
-        <li><a href="#problem">The Problem</a></li>
-        <li><a href="#how">How It Works</a></li>
-        <li><a href="#features">Features</a></li>
-        <li><a href="#who">Who It's For</a></li>
-        <li><a href="#waitlist">Early Access</a></li>
-      </ul>
-    </div>
-    <div class="footer-nav-col">
-      <h4>Company</h4>
-      <ul>
-        <li><a href="mailto:founder@controlynx.ai">Contact Us</a></li>
-        <li><a href="https://linkedin.com/company/controlynx" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-        <li><a href="#waitlist">Join Beta</a></li>
-      </ul>
-    </div>
-    <div class="footer-nav-col">
-      <h4>Legal</h4>
-      <ul>
-        <li><a href="#privacy">Privacy Policy</a></li>
-        <li><a href="#terms">Terms of Service</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p class="footer-copy">© 2026 Controlynx. AI Project Controls Platform. All rights reserved.</p>
-    <div class="footer-social">
-      <a href="https://linkedin.com/company/controlynx" target="_blank" rel="noopener noreferrer" aria-label="Controlynx on LinkedIn">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 6.5v5M4 4v.5M7 11.5V8.75C7 7.78 7.67 7 8.5 7s1.5.78 1.5 1.75v2.75M7 6.5v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      </a>
-      <a href="mailto:founder@controlynx.ai" aria-label="Email Controlynx">
-        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5.5l6.5 4 6.5-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-      </a>
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2026 Controlynx.ai. AI Project Controls Platform. All rights reserved.</p>
+      <div class="footer-social">
+        <a href="https://linkedin.com/company/controlynx" target="_blank" rel="noopener noreferrer" aria-label="Controlynx on LinkedIn">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.2"/><path d="M4 6.5v5M4 4v.5M7 11.5V8.75C7 7.78 7.67 7 8.5 7s1.5.78 1.5 1.75v2.75M7 6.5v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </a>
+        <a href="mailto:founder@controlynx.ai" aria-label="Email Controlynx">
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1.5" y="3.5" width="13" height="9" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M1.5 5.5l6.5 4 6.5-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </a>
+      </div>
+      <div class="footer-legal">
+        <a href="/privacy">Privacy Policy</a>
+        <a href="/terms">Terms</a>
+      </div>
     </div>
   </div>
 </footer>
-</main>
 
-<!-- Screen-reader utility class -->
-<style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}</style>
+<!-- ═══════════ DEMO MODAL ═══════════ -->
+<div id="demo-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div style="background:var(--bg-card);border:0.5px solid var(--border-2);border-radius:var(--r-2xl);padding:40px;max-width:480px;width:100%;position:relative;box-shadow:0 40px 80px rgba(0,0,0,0.6)">
+    <button onclick="closeDemoForm()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.06);border:0.5px solid var(--border);width:32px;height:32px;border-radius:50%;color:var(--white-3);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .18s" aria-label="Close modal">
+      <svg viewBox="0 0 14 14" fill="none" style="width:14px;height:14px"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+      <div style="width:36px;height:36px;background:var(--cyan-dim);border:0.5px solid var(--cyan-border);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 16 16" fill="none" style="width:16px;height:16px;color:var(--cyan)"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M6 5.5l4 2.5-4 2.5V5.5z" fill="currentColor"/></svg>
+      </div>
+      <h2 style="font-family:var(--display);font-size:18px;font-weight:800;color:var(--white)" id="modal-title">Book a Demo</h2>
+    </div>
+    <p style="font-size:14px;color:var(--white-3);line-height:1.65;margin-bottom:28px">30-minute call. We demo the platform on a real project scenario relevant to your team. No sales pressure.</p>
+    <form id="demo-form" onsubmit="submitDemo(event)" novalidate>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">
+        <div>
+          <label for="demo-name" style="font-size:12px;font-weight:600;color:var(--white-3);display:block;margin-bottom:6px">Full Name</label>
+          <input id="demo-name" type="text" placeholder="Your name" required style="width:100%;height:46px;padding:0 14px;background:rgba(255,255,255,0.05);border:0.5px solid var(--border-2);border-radius:var(--r-md);font-size:14px;color:var(--white);transition:border-color .2s" onfocus="this.style.borderColor='rgba(0,212,255,0.5)'" onblur="this.style.borderColor='var(--border-2)'" autocomplete="name">
+        </div>
+        <div>
+          <label for="demo-email" style="font-size:12px;font-weight:600;color:var(--white-3);display:block;margin-bottom:6px">Work Email</label>
+          <input id="demo-email" type="email" placeholder="you@company.com" required style="width:100%;height:46px;padding:0 14px;background:rgba(255,255,255,0.05);border:0.5px solid var(--border-2);border-radius:var(--r-md);font-size:14px;color:var(--white);transition:border-color .2s" onfocus="this.style.borderColor='rgba(0,212,255,0.5)'" onblur="this.style.borderColor='var(--border-2)'" autocomplete="email">
+        </div>
+        <div>
+          <label for="demo-role" style="font-size:12px;font-weight:600;color:var(--white-3);display:block;margin-bottom:6px">Your Role</label>
+          <select id="demo-role" style="width:100%;height:46px;padding:0 14px;background:rgba(255,255,255,0.05);border:0.5px solid var(--border-2);border-radius:var(--r-md);font-size:14px;color:var(--white);appearance:none;transition:border-color .2s;cursor:pointer" onfocus="this.style.borderColor='rgba(0,212,255,0.5)'" onblur="this.style.borderColor='var(--border-2)'">
+            <option value="" style="background:var(--bg-card);color:var(--white)">Select your role</option>
+            <option value="pcm" style="background:var(--bg-card)">Project Controls Manager</option>
+            <option value="pe" style="background:var(--bg-card)">Planning Engineer</option>
+            <option value="pm" style="background:var(--bg-card)">Project Manager</option>
+            <option value="sm" style="background:var(--bg-card)">Site Manager</option>
+            <option value="cm" style="background:var(--bg-card)">Commercial Manager</option>
+            <option value="dir" style="background:var(--bg-card)">Director / PMO</option>
+            <option value="other" style="background:var(--bg-card)">Other</option>
+          </select>
+        </div>
+        <div>
+          <label for="demo-company" style="font-size:12px;font-weight:600;color:var(--white-3);display:block;margin-bottom:6px">Company</label>
+          <input id="demo-company" type="text" placeholder="Your company" style="width:100%;height:46px;padding:0 14px;background:rgba(255,255,255,0.05);border:0.5px solid var(--border-2);border-radius:var(--r-md);font-size:14px;color:var(--white);transition:border-color .2s" onfocus="this.style.borderColor='rgba(0,212,255,0.5)'" onblur="this.style.borderColor='var(--border-2)'" autocomplete="organization">
+        </div>
+      </div>
+      <button type="submit" style="width:100%;height:50px;background:var(--cyan);color:var(--bg);border:none;border-radius:var(--r-md);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px" onmouseover="this.style.background='#1DE0FF'" onmouseout="this.style.background='var(--cyan)'">
+        <svg viewBox="0 0 16 16" fill="none" style="width:16px;height:16px"><rect x="2" y="2" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M6 5.5l4 2.5-4 2.5V5.5z" fill="currentColor"/></svg>
+        Book My Demo
+      </button>
+      <p style="font-size:11px;font-family:var(--mono);color:var(--white-4);text-align:center;margin-top:12px">We'll confirm within one business day. Your data is never shared.</p>
+    </form>
+    <div id="demo-success" style="display:none;text-align:center;padding:20px 0">
+      <div style="width:52px;height:52px;background:var(--green-dim);border:0.5px solid rgba(0,196,140,.25);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+        <svg viewBox="0 0 20 20" fill="none" style="width:24px;height:24px;color:var(--green)"><path d="M4 10l4 4 8-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3 style="font-family:var(--display);font-size:18px;font-weight:800;color:var(--white);margin-bottom:8px">Demo request received.</h3>
+      <p style="font-size:14px;color:var(--white-3);line-height:1.6">We'll confirm your 30-minute demo slot within one business day. Check your email for confirmation.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Scroll reveal ── */
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}});
+},{threshold:.1,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+
+/* ── Nav scroll ── */
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',scrollY>20);
+},{passive:true});
+
+/* ── Mobile menu ── */
+function toggleMobile(btn){
+  const open=btn.getAttribute('aria-expanded')==='true';
+  btn.setAttribute('aria-expanded',String(!open));
+  document.getElementById('mobile-nav').classList.toggle('open',!open);
+  document.body.style.overflow=open?'':'hidden';
+}
+function closeMobile(){
+  const btn=document.querySelector('.hamburger');
+  if(btn){btn.setAttribute('aria-expanded','false');}
+  document.getElementById('mobile-nav').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMobile();closeDemoForm();}});
+
+/* ── Smooth scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const id=a.getAttribute('href');
+    if(id==='#'||id.length<2)return;
+    const t=document.querySelector(id);
+    if(t){e.preventDefault();closeMobile();t.scrollIntoView({behavior:'smooth',block:'start'});}
+  });
+});
+function scrollToSection(sel){
+  const t=document.querySelector(sel);
+  if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ── FAQ ── */
+function toggleFaq(btn){
+  const item=btn.closest('.faq-item');
+  const isOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i=>{
+    i.classList.remove('open');
+    i.querySelector('.faq-q').setAttribute('aria-expanded','false');
+  });
+  if(!isOpen){
+    item.classList.add('open');
+    btn.setAttribute('aria-expanded','true');
+  }
+}
+
+/* ── Demo modal ── */
+function openDemoForm(){
+  const m=document.getElementById('demo-modal');
+  m.style.display='flex';
+  document.body.style.overflow='hidden';
+  setTimeout(()=>{document.getElementById('demo-name').focus();},100);
+}
+function closeDemoForm(){
+  document.getElementById('demo-modal').style.display='none';
+  document.body.style.overflow='';
+}
+document.getElementById('demo-modal').addEventListener('click',e=>{
+  if(e.target===e.currentTarget)closeDemoForm();
+});
+function submitDemo(e){
+  e.preventDefault();
+  const email=document.getElementById('demo-email').value;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    document.getElementById('demo-email').style.borderColor='rgba(255,77,77,0.6)';
+    return;
+  }
+  document.getElementById('demo-form').style.display='none';
+  document.getElementById('demo-success').style.display='block';
+  // GA4 event
+  if(typeof gtag!=='undefined'){
+    gtag('event','demo_request',{event_category:'conversion',email});
+  }
+}
+</script>
 
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-146PN1071V"></script>
@@ -1407,75 +1743,9 @@ footer{
 window.dataLayer=window.dataLayer||[];
 function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());
-gtag('config','G-146PN1071V');
+gtag('config','G-146PN1071V',{send_page_view:true});
 </script>
 
-<script>
-/* ── Scroll reveal ── */
-const revealObs = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');revealObs.unobserve(e.target);}});
-},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});
-document.querySelectorAll('.reveal').forEach(el=>revealObs.observe(el));
-
-/* ── Nav scroll state ── */
-window.addEventListener('scroll',()=>{
-  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>20);
-},{passive:true});
-
-/* ── Mobile menu ── */
-function toggleMobileMenu(btn){
-  const open=btn.getAttribute('aria-expanded')==='true';
-  btn.setAttribute('aria-expanded',String(!open));
-  document.getElementById('mobile-menu').classList.toggle('open',!open);
-  document.body.style.overflow=open?'':'hidden';
-}
-function closeMobileMenu(){
-  const btn=document.querySelector('.nav-hamburger');
-  btn.setAttribute('aria-expanded','false');
-  document.getElementById('mobile-menu').classList.remove('open');
-  document.body.style.overflow='';
-}
-// Close on Escape
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')closeMobileMenu();
-});
-
-/* ── Smooth scroll for anchor links ── */
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    const id=a.getAttribute('href');
-    if(id==='#'||id==='#privacy'||id==='#terms')return;
-    const target=document.querySelector(id);
-    if(target){e.preventDefault();closeMobileMenu();target.scrollIntoView({behavior:'smooth',block:'start'});}
-  });
-});
-
-/* ── Waitlist form ── */
-function submitWaitlist(inputId,successId){
-  const inputEl=document.getElementById(inputId);
-  const successEl=document.getElementById(successId);
-  const email=inputEl.value.trim();
-  const emailRx=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-  if(!emailRx.test(email)){
-    inputEl.style.borderColor='rgba(220,80,80,0.6)';
-    inputEl.focus();
-    return;
-  }
-  inputEl.style.borderColor='';
-  inputEl.value='';
-  successEl.classList.add('visible');
-
-  /* GA4 event */
-  if(typeof gtag!=='undefined'){
-    gtag('event','waitlist_signup',{event_category:'engagement',event_label:inputId});
-  }
-}
-
-/* Clear red border on input */
-document.querySelectorAll('.hero-input,.cta-input').forEach(inp=>{
-  inp.addEventListener('input',()=>{inp.style.borderColor='';});
-});
-</script>
+</main>
 </body>
 </html>
