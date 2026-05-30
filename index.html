@@ -103,9 +103,18 @@ nav.scrolled{background:rgba(9,25,41,0.98)}
   background:var(--navy);
   padding:120px 5% 80px;
   display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:60px;
+  grid-template-columns:minmax(0,1.05fr) minmax(0,0.95fr);
+  gap:48px;
   align-items:center;
+  position:relative;
+  overflow:hidden;
+  max-width:1440px;
+  margin-left:auto;
+  margin-right:auto;
+}
+/* Hero wrapper to allow full-bleed bg */
+.hero-outer{
+  background:var(--navy);
   position:relative;
   overflow:hidden;
 }
@@ -132,7 +141,7 @@ nav.scrolled{background:rgba(9,25,41,0.98)}
   pointer-events:none
 }
 
-.hero-left{position:relative;z-index:1}
+.hero-left{position:relative;z-index:1;min-width:0}
 .hero-eyebrow{
   display:inline-flex;align-items:center;gap:8px;
   padding:5px 12px 5px 8px;
@@ -165,12 +174,12 @@ nav.scrolled{background:rgba(9,25,41,0.98)}
 
 .hero-sub{
   font-size:17px;font-weight:300;
-  color:rgba(255,255,255,0.55);
+  color:rgba(255,255,255,0.68);
   line-height:1.75;
   max-width:520px;
   margin-bottom:40px
 }
-.hero-sub strong{color:rgba(255,255,255,0.85);font-weight:500}
+.hero-sub strong{color:rgba(255,255,255,0.92);font-weight:500}
 
 .hero-form-wrap{margin-bottom:16px}
 .hero-form{display:flex;gap:8px;flex-wrap:wrap}
@@ -230,12 +239,14 @@ nav.scrolled{background:rgba(9,25,41,0.98)}
 .stat-label{font-size:12px;color:rgba(255,255,255,0.35);line-height:1.4}
 
 /* Hero right — product mockup */
-.hero-right{position:relative;z-index:1}
+.hero-right{position:relative;z-index:1;min-width:0;width:100%}
 .mockup-shell{
   background:var(--navy-surface);
   border:0.5px solid rgba(255,255,255,0.09);
   border-radius:var(--r-xl);
   overflow:hidden;
+  width:100%;
+  max-width:580px;
   box-shadow:0 24px 80px rgba(0,0,0,0.4),0 4px 16px rgba(0,0,0,0.2),inset 0 0.5px 0 rgba(255,255,255,0.06);
   animation:float-card 6s ease-in-out infinite
 }
@@ -332,8 +343,8 @@ nav.scrolled{background:rgba(9,25,41,0.98)}
   padding:10px 14px;
   box-shadow:0 8px 32px rgba(0,0,0,0.3)
 }
-.float-1{top:-20px;right:-20px;animation:float-c1 7s ease-in-out infinite}
-.float-2{bottom:-10px;left:-24px;animation:float-c2 8s ease-in-out infinite}
+.float-1{top:-16px;right:8px;animation:float-c1 7s ease-in-out infinite}
+.float-2{bottom:8px;left:8px;animation:float-c2 8s ease-in-out infinite}
 @keyframes float-c1{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-6px) rotate(-1deg)}}
 @keyframes float-c2{0%,100%{transform:translateY(0) rotate(2deg)}50%{transform:translateY(6px) rotate(1deg)}}
 .float-val{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:#fff;line-height:1}
@@ -758,9 +769,10 @@ footer{
 }
 
 /* ─── RESPONSIVE ────────────────────────────────────── */
-@media(max-width:1024px){
+@media(max-width:1100px){
   .hero{grid-template-columns:1fr;gap:48px;padding-top:110px}
-  .hero-right{order:-1;display:none} /* hide mockup on tablet - show only on large desktop */
+  .hero-right{order:-1}
+  .mockup-shell{max-width:100%}
   .hero-stats{grid-template-columns:repeat(4,1fr)}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .stat-cell:nth-child(2){border-right:none}
@@ -771,6 +783,7 @@ footer{
   .nav-links,.nav-right{display:none}
   .nav-hamburger{display:flex}
   .hero{padding:100px 5% 64px}
+  .hero-right{display:none}
   .hero-stats{grid-template-columns:repeat(2,1fr)}
   .section{padding:72px 5%}
   .problem-grid{border-radius:var(--r-md)}
