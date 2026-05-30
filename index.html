@@ -145,7 +145,7 @@ nav.scrolled{background:rgba(8,13,20,0.97)}
 .hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:56px 56px;pointer-events:none}
 .hero-glow{position:absolute;top:-200px;right:-150px;width:800px;height:800px;background:radial-gradient(circle,rgba(0,212,255,0.05) 0%,transparent 65%);pointer-events:none}
 .hero-glow-2{position:absolute;bottom:-300px;left:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(0,196,140,0.04) 0%,transparent 65%);pointer-events:none}
-.hero-content{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center;max-width:1240px;margin:0 auto;padding:0 5%}
+.hero-content{position:relative;z-index:1;display:grid;grid-template-columns:minmax(0,0.9fr) minmax(0,1.1fr);gap:48px;align-items:start;max-width:1240px;margin:0 auto;padding:0 5%}
 .hero-left{min-width:0}
 .hero-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;background:rgba(0,212,255,0.08);border:0.5px solid rgba(0,212,255,0.22);border-radius:999px;margin-bottom:28px}
 .badge-pulse{width:6px;height:6px;background:var(--cyan);border-radius:50%;animation:pulse 2s ease-in-out infinite}
@@ -171,7 +171,7 @@ nav.scrolled{background:rgba(8,13,20,0.97)}
   box-shadow:0 32px 80px rgba(0,0,0,.5),0 0 0 0.5px rgba(255,255,255,.04) inset,var(--shadow-glow);
   animation:float 7s ease-in-out infinite
 }
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .dash-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:rgba(255,255,255,.03);border-bottom:0.5px solid var(--border)}
 .dash-dots{display:flex;gap:6px}
 .dash-dots span{width:9px;height:9px;border-radius:50%}
@@ -664,86 +664,382 @@ footer{background:var(--bg-2);border-top:0.5px solid var(--border);padding:64px 
 
     <!-- Right: Dashboard mockup -->
     <div class="hero-right" aria-hidden="true">
+      <!-- Floating accent cards -->
       <div class="hero-tag tag-1">
-        <div class="tag-val" style="color:var(--green)">−40%</div>
-        <div class="tag-label">Reporting time</div>
+        <div class="tag-val" style="color:var(--green)">0.94 <span style="font-size:11px;color:var(--white-3);font-family:var(--mono)">SPI</span></div>
+        <div class="tag-label">Schedule Performance Index</div>
       </div>
       <div class="hero-tag tag-2">
-        <div class="tag-val"><span style="color:var(--cyan)">✓</span> Sent</div>
-        <div class="tag-label">DPR — 08:42 AM</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="width:7px;height:7px;background:var(--red);border-radius:50%;display:inline-block"></span>
+          <div class="tag-val" style="font-size:14px;color:var(--white)">+14d delay</div>
+        </div>
+        <div class="tag-label">Critical path variance</div>
       </div>
-      <div class="dash-shell">
+
+      <!-- ── EXECUTIVE DASHBOARD SHELL ── -->
+      <div class="dash-shell" style="animation:float 7s ease-in-out infinite">
+
+        <!-- Titlebar -->
         <div class="dash-bar">
           <div class="dash-dots">
             <span style="background:#FF5F57"></span>
             <span style="background:#FFBD2E"></span>
             <span style="background:#27C93F"></span>
           </div>
-          <span class="dash-title">Controlynx.ai — Project Dashboard</span>
+          <span class="dash-title">Controlynx.ai — Executive Progress Dashboard · Week 22 · May 2026</span>
           <div class="dash-live"><span class="dash-live-dot"></span>LIVE</div>
         </div>
-        <div class="dash-body">
-          <div class="kpi-row">
-            <div class="kpi">
-              <div class="kpi-val" style="color:var(--amber)">72%</div>
-              <div class="kpi-label">Overall Progress</div>
-              <div class="kpi-delta warn">▲ −3% vs Plan</div>
+
+        <div class="dash-body" style="padding:12px 14px;display:flex;flex-direction:column;gap:10px">
+
+          <!-- ① PROJECT INFO BAND -->
+          <div style="background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-md);padding:9px 12px">
+            <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">① Project Information</div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-bottom:8px">
+              <div style="text-align:center">
+                <div style="font-size:9px;font-family:var(--mono);color:var(--white-4);margin-bottom:2px">Start</div>
+                <div style="font-size:9px;font-weight:700;color:var(--white-2);font-family:var(--mono)">01 Mar 24</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:9px;font-family:var(--mono);color:var(--white-4);margin-bottom:2px">Contractual</div>
+                <div style="font-size:9px;font-weight:700;color:var(--white-2);font-family:var(--mono)">28 Feb 26</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:9px;font-family:var(--mono);color:var(--white-4);margin-bottom:2px">Duration</div>
+                <div style="font-size:9px;font-weight:700;color:var(--white-2);font-family:var(--mono)">730d</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:9px;font-family:var(--mono);color:var(--white-4);margin-bottom:2px">Elapsed</div>
+                <div style="font-size:9px;font-weight:700;color:var(--cyan);font-family:var(--mono)">456d</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:9px;font-family:var(--mono);color:var(--white-4);margin-bottom:2px">Remaining</div>
+                <div style="font-size:9px;font-weight:700;color:var(--amber);font-family:var(--mono)">274d</div>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:9px;font-family:var(--mono);color:var(--white-4);margin-bottom:2px">Delay</div>
+                <div style="font-size:9px;font-weight:700;color:var(--red);font-family:var(--mono)">+14d</div>
+              </div>
             </div>
-            <div class="kpi">
-              <div class="kpi-val" style="color:var(--red)">+5d</div>
-              <div class="kpi-label">Schedule Variance</div>
-              <div class="kpi-delta down">⚠ Critical delay</div>
-            </div>
-            <div class="kpi">
-              <div class="kpi-val" style="color:var(--green)">94%</div>
-              <div class="kpi-label">Scope Complete</div>
-              <div class="kpi-delta up">▲ On track</div>
+            <!-- Contractual Milestones mini-table -->
+            <div style="border-top:0.5px solid var(--border);padding-top:7px">
+              <div style="font-size:8px;font-family:var(--mono);color:var(--white-4);margin-bottom:5px;letter-spacing:.06em">CONTRACTUAL MILESTONES</div>
+              <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3px">
+                <div style="font-size:8px;font-family:var(--mono);color:var(--white-4)">Milestone</div>
+                <div style="font-size:8px;font-family:var(--mono);color:var(--white-4);text-align:center">Planned</div>
+                <div style="font-size:8px;font-family:var(--mono);color:var(--white-4);text-align:center">Actual</div>
+                <div style="font-size:8px;font-family:var(--mono);color:var(--white-4);text-align:center">Forecast</div>
+                <!-- Row 1 -->
+                <div style="font-size:8.5px;color:var(--white-2);padding:2px 0">Substructure Complete</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-3);text-align:center">Aug 24</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--green);text-align:center">Aug 24 ✓</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-align:center">—</div>
+                <!-- Row 2 -->
+                <div style="font-size:8.5px;color:var(--white-2);padding:2px 0">Superstructure Complete</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-3);text-align:center">Mar 25</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--amber);text-align:center">Apr 25 +30d</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-align:center">—</div>
+                <!-- Row 3 -->
+                <div style="font-size:8.5px;color:var(--white-2);padding:2px 0">Practical Completion</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-3);text-align:center">Feb 26</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-align:center">—</div>
+                <div style="font-size:8.5px;font-family:var(--mono);color:var(--red);text-align:center">Mar 26 +14d</div>
+              </div>
             </div>
           </div>
-          <div class="prog-section">
-            <div class="prog-item">
-              <div class="prog-label-row"><span class="prog-name">Structural Works</span><span class="prog-val">78%</span></div>
-              <div class="prog-track"><div class="prog-fill cyan" style="width:78%"></div></div>
+
+          <!-- ② PLANNED vs ACTUAL + SPI  &  ③ COST EV/PV/CPI — side by side -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+
+            <!-- ② Schedule -->
+            <div style="background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-md);padding:9px 12px">
+              <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">② Progress P vs A</div>
+              <div style="display:flex;gap:8px;align-items:flex-end;margin-bottom:7px">
+                <div>
+                  <div style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--amber);line-height:1">72%</div>
+                  <div style="font-size:8px;font-family:var(--mono);color:var(--white-4)">Actual</div>
+                </div>
+                <div>
+                  <div style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--white-3);line-height:1">75%</div>
+                  <div style="font-size:8px;font-family:var(--mono);color:var(--white-4)">Planned</div>
+                </div>
+                <div style="margin-left:auto;text-align:right">
+                  <div style="font-family:var(--display);font-size:18px;font-weight:800;color:var(--amber);line-height:1">0.96</div>
+                  <div style="font-size:8px;font-family:var(--mono);color:var(--white-4)">SPI</div>
+                </div>
+              </div>
+              <!-- Dual progress bars P vs A -->
+              <div style="margin-bottom:4px">
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:8px;font-family:var(--mono);color:var(--white-4)">Planned</span><span style="font-size:8px;font-family:var(--mono);color:var(--white-3)">75%</span></div>
+                <div style="height:4px;background:var(--bg-card);border-radius:2px;overflow:hidden"><div style="height:100%;width:75%;background:rgba(255,255,255,0.2);border-radius:2px"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:8px;font-family:var(--mono);color:var(--white-4)">Actual</span><span style="font-size:8px;font-family:var(--mono);color:var(--amber)">72%</span></div>
+                <div style="height:4px;background:var(--bg-card);border-radius:2px;overflow:hidden"><div style="height:100%;width:72%;background:linear-gradient(90deg,var(--amber),rgba(244,160,48,.4));border-radius:2px"></div></div>
+              </div>
             </div>
-            <div class="prog-item">
-              <div class="prog-label-row"><span class="prog-name">MEP Installations</span><span class="prog-val">54%</span></div>
-              <div class="prog-track"><div class="prog-fill amber" style="width:54%"></div></div>
-            </div>
-            <div class="prog-item">
-              <div class="prog-label-row"><span class="prog-name">Finishes & Fit-out</span><span class="prog-val">31%</span></div>
-              <div class="prog-track"><div class="prog-fill green" style="width:31%"></div></div>
+
+            <!-- ③ Cost EV/PV/CPI -->
+            <div style="background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-md);padding:9px 12px">
+              <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">③ Cost Performance (EVM)</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:var(--bg-card);border-radius:4px">
+                  <span style="font-size:9px;font-family:var(--mono);color:var(--white-3)">EV (Earned Value)</span>
+                  <span style="font-size:10px;font-weight:700;font-family:var(--mono);color:var(--cyan)">$18.7M</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:var(--bg-card);border-radius:4px">
+                  <span style="font-size:9px;font-family:var(--mono);color:var(--white-3)">PV (Planned Value)</span>
+                  <span style="font-size:10px;font-weight:700;font-family:var(--mono);color:var(--white-2)">$19.5M</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:var(--bg-card);border-radius:4px">
+                  <span style="font-size:9px;font-family:var(--mono);color:var(--white-3)">AC (Actual Cost)</span>
+                  <span style="font-size:10px;font-weight:700;font-family:var(--mono);color:var(--white-2)">$18.1M</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 6px;background:rgba(0,196,140,.08);border:0.5px solid rgba(0,196,140,.2);border-radius:4px">
+                  <span style="font-size:9px;font-family:var(--mono);color:var(--white-3)">CPI</span>
+                  <span style="font-size:11px;font-weight:800;font-family:var(--display);color:var(--green)">1.03</span>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="alert-row">
-            <div class="alert-card red">
-              <svg class="alert-icon" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M7 2L13 12H1L7 2z" stroke="#FF4D4D" stroke-width="1.2"/><line x1="7" y1="5.5" x2="7" y2="8.5" stroke="#FF4D4D" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="10" r=".5" fill="#FF4D4D"/></svg>
-              <div><div class="alert-title">Concrete pour delay</div><div class="alert-desc">Level 14 — 3 days behind</div></div>
+
+          <!-- ④ S-CURVE — full width -->
+          <div style="background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-md);padding:9px 12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-transform:uppercase;letter-spacing:.08em">④ Cumulative S-Curve — Planned vs Actual</div>
+              <div style="display:flex;gap:10px">
+                <span style="display:flex;align-items:center;gap:4px;font-size:8px;font-family:var(--mono);color:var(--white-4)"><span style="width:12px;height:1.5px;background:rgba(255,255,255,.25);display:inline-block;border-radius:1px"></span>Planned</span>
+                <span style="display:flex;align-items:center;gap:4px;font-size:8px;font-family:var(--mono);color:var(--white-4)"><span style="width:12px;height:1.5px;background:var(--cyan);display:inline-block;border-radius:1px"></span>Actual</span>
+              </div>
             </div>
-            <div class="alert-card amber">
-              <svg class="alert-icon" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5.5" stroke="#F4A030" stroke-width="1.2"/><line x1="7" y1="4.5" x2="7" y2="7.5" stroke="#F4A030" stroke-width="1.2" stroke-linecap="round"/><circle cx="7" cy="9.5" r=".5" fill="#F4A030"/></svg>
-              <div><div class="alert-title">Rebar delivery risk</div><div class="alert-desc">Expected: 4 Jun</div></div>
+            <svg viewBox="0 0 380 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto" role="img" aria-label="S-Curve planned vs actual cumulative progress chart">
+              <!-- Y-axis labels -->
+              <text x="2" y="8" font-size="6" fill="rgba(255,255,255,0.25)" font-family="monospace">100%</text>
+              <text x="2" y="24" font-size="6" fill="rgba(255,255,255,0.25)" font-family="monospace">75%</text>
+              <text x="2" y="40" font-size="6" fill="rgba(255,255,255,0.25)" font-family="monospace">50%</text>
+              <text x="2" y="56" font-size="6" fill="rgba(255,255,255,0.25)" font-family="monospace">25%</text>
+              <!-- Grid lines -->
+              <line x1="22" y1="6" x2="378" y2="6" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+              <line x1="22" y1="22" x2="378" y2="22" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+              <line x1="22" y1="38" x2="378" y2="38" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+              <line x1="22" y1="54" x2="378" y2="54" stroke="rgba(255,255,255,0.04)" stroke-width="0.5"/>
+              <!-- Planned S-curve (dashed white) - full project duration -->
+              <path d="M22 58 C40 57,55 55,75 50 C95 44,115 34,140 22 C160 12,185 7,220 5 C255 4,300 4,378 3"
+                    stroke="rgba(255,255,255,0.22)" stroke-width="1.2" fill="none" stroke-dasharray="3 2"/>
+              <!-- Actual S-curve (cyan solid) - up to current point ~62% -->
+              <path d="M22 58 C38 57,52 55,70 51 C90 46,110 38,132 28 C152 18,172 12,200 9"
+                    stroke="#00D4FF" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+              <!-- Area fill under actual -->
+              <path d="M22 58 C38 57,52 55,70 51 C90 46,110 38,132 28 C152 18,172 12,200 9 L200 58 Z"
+                    fill="url(#scurve-hero-fill)" opacity="0.25"/>
+              <!-- Current data point -->
+              <circle cx="200" cy="9" r="3.5" fill="#00D4FF"/>
+              <circle cx="200" cy="9" r="6" fill="#00D4FF" opacity="0.2"/>
+              <!-- Today line -->
+              <line x1="200" y1="4" x2="200" y2="58" stroke="rgba(0,212,255,0.3)" stroke-width="0.5" stroke-dasharray="2 2"/>
+              <text x="202" y="12" font-size="5.5" fill="rgba(0,212,255,0.6)" font-family="monospace">TODAY</text>
+              <!-- X-axis labels -->
+              <text x="22" y="63" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">M1</text>
+              <text x="70" y="63" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">M4</text>
+              <text x="118" y="63" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">M8</text>
+              <text x="166" y="63" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">M12</text>
+              <text x="214" y="63" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">M16</text>
+              <text x="262" y="63" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">M20</text>
+              <text x="340" y="63" font-size="6" fill="rgba(255,255,255,0.2)" font-family="monospace">M24</text>
+              <defs>
+                <linearGradient id="scurve-hero-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.6"/>
+                  <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
+
+          <!-- ⑤ MANPOWER HISTOGRAM + ⑥ RISKS — side by side -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+
+            <!-- ⑤ Manpower Histogram -->
+            <div style="background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-md);padding:9px 12px">
+              <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">⑤ Manpower Histogram P vs A</div>
+              <div style="display:flex;align-items:flex-end;gap:3px;height:44px;margin-bottom:4px">
+                <!-- Week pairs: planned (ghost) + actual (colored) -->
+                <div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex:1">
+                  <div style="background:rgba(255,255,255,.12);border-radius:1px 1px 0 0;width:100%;height:60%"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:1px;flex:1">
+                  <div style="background:var(--green);border-radius:1px 1px 0 0;width:100%;height:62%;opacity:.8"></div>
+                </div>
+                <div style="flex:0.3"></div>
+                <div style="background:rgba(255,255,255,.12);border-radius:1px 1px 0 0;flex:1;height:72%"></div>
+                <div style="background:var(--green);border-radius:1px 1px 0 0;flex:1;height:75%;opacity:.8"></div>
+                <div style="flex:0.3"></div>
+                <div style="background:rgba(255,255,255,.12);border-radius:1px 1px 0 0;flex:1;height:85%"></div>
+                <div style="background:var(--cyan);border-radius:1px 1px 0 0;flex:1;height:80%;opacity:.8"></div>
+                <div style="flex:0.3"></div>
+                <div style="background:rgba(255,255,255,.12);border-radius:1px 1px 0 0;flex:1;height:100%"></div>
+                <div style="background:var(--amber);border-radius:1px 1px 0 0;flex:1;height:86%;opacity:.8"></div>
+                <div style="flex:0.3"></div>
+                <div style="background:rgba(255,255,255,.12);border-radius:1px 1px 0 0;flex:1;height:88%"></div>
+                <div style="background:var(--amber);border-radius:1px 1px 0 0;flex:1;height:78%;opacity:.8"></div>
+                <div style="flex:0.3"></div>
+                <div style="background:rgba(255,255,255,.12);border-radius:1px 1px 0 0;flex:1;height:80%"></div>
+                <div style="background:var(--cyan);border-radius:1px 1px 0 0;flex:1;height:72%;opacity:.8"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+                <span style="font-size:7px;font-family:var(--mono);color:var(--white-4)">W17</span>
+                <span style="font-size:7px;font-family:var(--mono);color:var(--white-4)">W18</span>
+                <span style="font-size:7px;font-family:var(--mono);color:var(--white-4)">W19</span>
+                <span style="font-size:7px;font-family:var(--mono);color:var(--white-4)">W20</span>
+                <span style="font-size:7px;font-family:var(--mono);color:var(--white-4)">W21</span>
+                <span style="font-size:7px;font-family:var(--mono);color:var(--white-4)">W22</span>
+              </div>
+              <div style="display:flex;gap:10px;border-top:0.5px solid var(--border);padding-top:5px">
+                <div style="text-align:center;flex:1">
+                  <div style="font-family:var(--display);font-size:13px;font-weight:800;color:var(--white-2)">156</div>
+                  <div style="font-size:7.5px;font-family:var(--mono);color:var(--white-4)">Planned</div>
+                </div>
+                <div style="text-align:center;flex:1">
+                  <div style="font-family:var(--display);font-size:13px;font-weight:800;color:var(--amber)">143</div>
+                  <div style="font-size:7.5px;font-family:var(--mono);color:var(--white-4)">Actual</div>
+                </div>
+                <div style="text-align:center;flex:1">
+                  <div style="font-family:var(--display);font-size:13px;font-weight:800;color:var(--red)">−13</div>
+                  <div style="font-size:7.5px;font-family:var(--mono);color:var(--white-4)">Variance</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ⑥ Major Concerns & Risks -->
+            <div style="background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-md);padding:9px 12px">
+              <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">⑥ Major Concerns &amp; Risks</div>
+              <div style="display:flex;flex-direction:column;gap:4px">
+                <div style="display:flex;gap:6px;padding:4px 7px;background:rgba(255,77,77,.07);border:0.5px solid rgba(255,77,77,.18);border-radius:4px">
+                  <span style="width:5px;height:5px;background:var(--red);border-radius:50%;flex-shrink:0;margin-top:3px"></span>
+                  <div>
+                    <div style="font-size:9px;font-weight:600;color:var(--white-2);line-height:1.3">Concrete pour delay — CP activity</div>
+                    <div style="font-size:8px;font-family:var(--mono);color:var(--white-4)">+3d · SV: −$84K · EOT claim risk</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;padding:4px 7px;background:rgba(244,160,48,.07);border:0.5px solid rgba(244,160,48,.18);border-radius:4px">
+                  <span style="width:5px;height:5px;background:var(--amber);border-radius:50%;flex-shrink:0;margin-top:3px"></span>
+                  <div>
+                    <div style="font-size:9px;font-weight:600;color:var(--white-2);line-height:1.3">Rebar delivery at risk</div>
+                    <div style="font-size:8px;font-family:var(--mono);color:var(--white-4)">ETA 4 Jun · 2d float remaining</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;padding:4px 7px;background:rgba(244,160,48,.07);border:0.5px solid rgba(244,160,48,.18);border-radius:4px">
+                  <span style="width:5px;height:5px;background:var(--amber);border-radius:50%;flex-shrink:0;margin-top:3px"></span>
+                  <div>
+                    <div style="font-size:9px;font-weight:600;color:var(--white-2);line-height:1.3">MEP subcon productivity −12%</div>
+                    <div style="font-size:8px;font-family:var(--mono);color:var(--white-4)">Trending · 3-week pattern</div>
+                  </div>
+                </div>
+                <div style="display:flex;gap:6px;padding:4px 7px;background:rgba(0,212,255,.05);border:0.5px solid rgba(0,212,255,.15);border-radius:4px">
+                  <span style="width:5px;height:5px;background:var(--cyan);border-radius:50%;flex-shrink:0;margin-top:3px"></span>
+                  <div>
+                    <div style="font-size:9px;font-weight:600;color:var(--white-2);line-height:1.3">14 open RFIs pending approval</div>
+                    <div style="font-size:8px;font-family:var(--mono);color:var(--white-4)">Avg response time 8d · monitor</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="act-list">
-            <div class="act-row">
-              <div class="act-left"><span class="act-dot" style="background:var(--green)"></span><span class="act-name">Slab formwork — L15</span></div>
-              <span class="act-pct">100%</span>
-            </div>
-            <div class="act-row">
-              <div class="act-left"><span class="act-dot" style="background:var(--cyan)"></span><span class="act-name">Column casting — Zone C</span></div>
-              <span class="act-pct">68%</span>
-            </div>
-            <div class="act-row">
-              <div class="act-left"><span class="act-dot" style="background:var(--amber)"></span><span class="act-name">MEP rough-in — Level 12</span></div>
-              <span class="act-pct">42%</span>
+
+          <!-- ⑦ PHASE PROGRESS — full width -->
+          <div style="background:var(--bg-3);border:0.5px solid var(--border);border-radius:var(--r-md);padding:9px 12px">
+            <div style="font-size:8.5px;font-family:var(--mono);color:var(--white-4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:7px">⑦ Major Phase Progress — Planned vs Actual</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <!-- Engineering -->
+              <div style="display:grid;grid-template-columns:110px 1fr 32px 32px;gap:6px;align-items:center">
+                <span style="font-size:8.5px;color:var(--white-2);truncate:ellipsis">Engineering</span>
+                <div style="position:relative;height:7px;background:var(--bg-card);border-radius:3px;overflow:visible">
+                  <div style="position:absolute;height:100%;width:100%;background:rgba(255,255,255,.1);border-radius:3px"></div>
+                  <div style="position:absolute;height:100%;width:100%;background:linear-gradient(90deg,var(--green),rgba(0,196,140,.5));border-radius:3px"></div>
+                </div>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-3);text-align:right">P:100</span>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--green);text-align:right">A:100</span>
+              </div>
+              <!-- Procurement -->
+              <div style="display:grid;grid-template-columns:110px 1fr 32px 32px;gap:6px;align-items:center">
+                <span style="font-size:8.5px;color:var(--white-2)">Procurement</span>
+                <div style="position:relative;height:7px;background:var(--bg-card);border-radius:3px;overflow:hidden">
+                  <div style="position:absolute;height:100%;width:92%;background:rgba(255,255,255,.1);border-radius:3px"></div>
+                  <div style="position:absolute;height:100%;width:88%;background:linear-gradient(90deg,var(--cyan),rgba(0,212,255,.4));border-radius:3px"></div>
+                </div>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-3);text-align:right">P:92</span>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--cyan);text-align:right">A:88</span>
+              </div>
+              <!-- Substructure -->
+              <div style="display:grid;grid-template-columns:110px 1fr 32px 32px;gap:6px;align-items:center">
+                <span style="font-size:8.5px;color:var(--white-2)">Substructure</span>
+                <div style="position:relative;height:7px;background:var(--bg-card);border-radius:3px;overflow:hidden">
+                  <div style="position:absolute;height:100%;width:100%;background:rgba(255,255,255,.1);border-radius:3px"></div>
+                  <div style="position:absolute;height:100%;width:100%;background:linear-gradient(90deg,var(--green),rgba(0,196,140,.5));border-radius:3px"></div>
+                </div>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-3);text-align:right">P:100</span>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--green);text-align:right">A:100</span>
+              </div>
+              <!-- Superstructure -->
+              <div style="display:grid;grid-template-columns:110px 1fr 32px 32px;gap:6px;align-items:center">
+                <span style="font-size:8.5px;color:var(--white-2)">Superstructure</span>
+                <div style="position:relative;height:7px;background:var(--bg-card);border-radius:3px;overflow:hidden">
+                  <div style="position:absolute;height:100%;width:85%;background:rgba(255,255,255,.1);border-radius:3px"></div>
+                  <div style="position:absolute;height:100%;width:78%;background:linear-gradient(90deg,var(--cyan),rgba(0,212,255,.4));border-radius:3px"></div>
+                </div>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-3);text-align:right">P:85</span>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--cyan);text-align:right">A:78</span>
+              </div>
+              <!-- Finishing -->
+              <div style="display:grid;grid-template-columns:110px 1fr 32px 32px;gap:6px;align-items:center">
+                <span style="font-size:8.5px;color:var(--white-2)">Finishing Works</span>
+                <div style="position:relative;height:7px;background:var(--bg-card);border-radius:3px;overflow:hidden">
+                  <div style="position:absolute;height:100%;width:40%;background:rgba(255,255,255,.1);border-radius:3px"></div>
+                  <div style="position:absolute;height:100%;width:31%;background:linear-gradient(90deg,var(--amber),rgba(244,160,48,.4));border-radius:3px"></div>
+                </div>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-3);text-align:right">P:40</span>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--amber);text-align:right">A:31</span>
+              </div>
+              <!-- MEP -->
+              <div style="display:grid;grid-template-columns:110px 1fr 32px 32px;gap:6px;align-items:center">
+                <span style="font-size:8.5px;color:var(--white-2)">MEP Installation</span>
+                <div style="position:relative;height:7px;background:var(--bg-card);border-radius:3px;overflow:hidden">
+                  <div style="position:absolute;height:100%;width:60%;background:rgba(255,255,255,.1);border-radius:3px"></div>
+                  <div style="position:absolute;height:100%;width:54%;background:linear-gradient(90deg,var(--amber),rgba(244,160,48,.4));border-radius:3px"></div>
+                </div>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-3);text-align:right">P:60</span>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--amber);text-align:right">A:54</span>
+              </div>
+              <!-- T&C -->
+              <div style="display:grid;grid-template-columns:110px 1fr 32px 32px;gap:6px;align-items:center">
+                <span style="font-size:8.5px;color:var(--white-2)">Testing &amp; Commissioning</span>
+                <div style="position:relative;height:7px;background:var(--bg-card);border-radius:3px;overflow:hidden">
+                  <div style="position:absolute;height:100%;width:5%;background:rgba(255,255,255,.1);border-radius:3px"></div>
+                  <div style="position:absolute;height:100%;width:0%;background:var(--cyan);border-radius:3px"></div>
+                </div>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-3);text-align:right">P:5</span>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-4);text-align:right">A:0</span>
+              </div>
+              <!-- Handover -->
+              <div style="display:grid;grid-template-columns:110px 1fr 32px 32px;gap:6px;align-items:center">
+                <span style="font-size:8.5px;color:var(--white-2)">Handover</span>
+                <div style="position:relative;height:7px;background:var(--bg-card);border-radius:3px;overflow:hidden">
+                  <div style="position:absolute;height:100%;width:0%;background:rgba(255,255,255,.1);border-radius:3px"></div>
+                </div>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-3);text-align:right">P:0</span>
+                <span style="font-size:8px;font-family:var(--mono);color:var(--white-4);text-align:right">A:0</span>
+              </div>
             </div>
           </div>
-          <div class="gen-badge">
-            <svg style="width:12px;height:12px;color:var(--cyan)" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 1v2M6 9v2M1 6h2M9 6h2M2.64 2.64l1.41 1.41M7.95 7.95l1.41 1.41M2.64 9.36l1.41-1.41M7.95 4.05l1.41-1.41" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-            <span class="gen-badge-text"><strong>AI-generated DPR ready</strong> — 5 min input → full report</span>
+
+          <!-- AI generation badge -->
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:5px 10px;background:rgba(0,212,255,.06);border:0.5px solid rgba(0,212,255,.15);border-radius:999px">
+            <svg style="width:11px;height:11px;color:var(--cyan);flex-shrink:0" viewBox="0 0 12 12" fill="none"><path d="M6 1v2M6 9v2M1 6h2M9 6h2M2.64 2.64l1.41 1.41M7.95 7.95l1.41 1.41M2.64 9.36l1.41-1.41M7.95 4.05l1.41-1.41" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+            <span style="font-size:9px;font-weight:600;color:rgba(255,255,255,.4);font-family:var(--mono);letter-spacing:.04em"><strong style="color:var(--cyan)">AI-generated executive dashboard</strong> — updated automatically each reporting cycle</span>
           </div>
-        </div>
-      </div>
+
+        </div><!-- /dash-body -->
+      </div><!-- /dash-shell -->
     </div>
   </div>
 </section>
