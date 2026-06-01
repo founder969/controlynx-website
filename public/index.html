@@ -2862,6 +2862,7 @@ async function loadTodayReport() {
   if (!project.id) {
     // No project set — fall back to localStorage
     loadDraftLocal();
+    init();
     return;
   }
   STATE.projectId = project.id;
@@ -2885,6 +2886,8 @@ async function loadTodayReport() {
     }
   } catch(e) {
     loadDraftLocal();
+    init();
+    return;
   }
   init();
 }
