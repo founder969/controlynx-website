@@ -279,6 +279,10 @@ Keep it professional, factual, and concise. Internal use only.`;
 
 // ── Serve frontend ───────────────────────────────────────
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+app.get('/privacy.html', (req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
+app.get('/security.html', (req, res) => res.sendFile(path.join(__dirname, 'security.html')));
+app.get('/terms.html', (req, res) => res.sendFile(path.join(__dirname, 'terms.html')));
 app.get('*', (req, res) => {
   if (!req.path.startsWith('/api/')) res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
