@@ -979,10 +979,14 @@ input, select, textarea { outline: none; }
 <script>
 // ─── APP STATE ─────────────────────────────────────────────────────────────
 const STATE = {
-  role: 'planner',  // planner | safety | timekeeper | storekeeper | engineer | qaqc
+  role: (() => {
+    try { return JSON.parse(localStorage.getItem('cx_user')||'{}').role || 'planner'; } catch(e){ return 'planner'; }
+  })(),
+  user: (() => {
+    try { return JSON.parse(localStorage.getItem('cx_user')||'{}'); } catch(e){ return {}; }
+  })(),
   currentTab: 0,
-  tabStatus: new Array(11).fill('empty'),  // empty | complete | ntr
-  role: localStorage.getItem('cx_user') ? (JSON.parse(localStorage.getItem('cx_user')||'{}').role || 'planner') : 'planner',
+  tabStatus: new Array(11).fill('empty'),
   p6Library: [],
   data: {
     identity: {
@@ -1100,21 +1104,51 @@ function renderWeatherFetching() {
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 function init() {
+  // Set role badge
+  const roleLabels = {
+    planner:'Planner / PCE', safety:'Safety Manager',
+    timekeeper:'Timekeeper', storekeeper:'Storekeeper',
+    engineer:'Site Engineer', qaqc:'QA/QC Engineer', admin:'Admin'
+  };
+  const badge = document.getElementById('roleBadge');
+  if (badge) badge.textContent = roleLabels[STATE.role] || STATE.role;
+
+  // Set user name in header
+  const sub = document.getElementById('headerSub');
+  if (sub && STATE.user.full_name) sub.textContent = STATE.user.full_name;
+
+  // For non-planner roles, jump to their first accessible tab
+  if (STATE.role !== 'planner' && STATE.role !== 'admin') {
+    const visible = getVisibleTabs();
+    if (visible.length > 0) STATE.currentTab = visible[0].originalIndex;
+  }
+
   buildTabNav();
   renderPanel(STATE.currentTab);
   updateHeaderSub();
+  updateProgress();
+}
+
+function getVisibleTabs() {
+  // Returns only tabs this role can access
+  return TABS.map((t, i) => ({ ...t, originalIndex: i }))
+    .filter(t => t.roles.includes(STATE.role) || STATE.role === 'planner' || STATE.role === 'admin');
 }
 
 function buildTabNav() {
   const nav = document.getElementById('tabNav');
-  nav.innerHTML = TABS.map((t, i) => `
-    <button class="tab-btn${i===STATE.currentTab?' active':''}${STATE.tabStatus[i]==='complete'?' complete':''}${STATE.tabStatus[i]==='ntr'?' ntr-confirmed':''}"
+  const visible = getVisibleTabs();
+  nav.innerHTML = visible.map((t, visIdx) => {
+    const i = t.originalIndex;
+    const status = getTabStatus(i);
+    return `
+    <button class="tab-btn${i===STATE.currentTab?' active':''}${status==='complete'?' complete':''}${status==='ntr'?' ntr-confirmed':''}"
       id="tabBtn${i}" onclick="jumpToTab(${i})">
-      <span class="tab-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="tab-num">${String(visIdx+1).padStart(2,'0')}</span>
       <span class="tab-icon">${t.icon}</span>
       ${t.label}
-    </button>
-  `).join('');
+    </button>`;
+  }).join('');
 }
 
 function jumpToTab(i) {
@@ -1131,8 +1165,11 @@ function scrollTabIntoView(i) {
 }
 
 function navigate(dir) {
-  const next = STATE.currentTab + dir;
-  if (next < 0 || next >= TABS.length) return;
+  const visible = getVisibleTabs().map(t => t.originalIndex);
+  const currentPos = visible.indexOf(STATE.currentTab);
+  const nextPos = currentPos + dir;
+  if (nextPos < 0 || nextPos >= visible.length) return;
+  const next = visible[nextPos];
   STATE.currentTab = next;
   buildTabNav();
   renderPanel(next);
@@ -1142,9 +1179,13 @@ function navigate(dir) {
 }
 
 function updateProgress() {
-  const pct = ((STATE.currentTab + 1) / TABS.length * 100).toFixed(0);
+  const visible = getVisibleTabs();
+  const currentPos = visible.findIndex(t => t.originalIndex === STATE.currentTab);
+  const pos = currentPos >= 0 ? currentPos : 0;
+  const pct = ((pos + 1) / visible.length * 100).toFixed(0);
   document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('stepCurrent').textContent = STATE.currentTab + 1;
+  document.getElementById('stepCurrent').textContent = pos + 1;
+  document.getElementById('stepTotal').textContent = visible.length;
   document.getElementById('btnBack').disabled = STATE.currentTab === 0;
   document.getElementById('btnNext').textContent = STATE.currentTab === TABS.length - 1 ? 'Submit ✓' : 'Continue →';
   if (STATE.currentTab === TABS.length - 1) {

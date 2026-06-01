@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controlynx — Project Setup</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080D14;--card:#0F1A27;--bg2:#0C1220;--bg3:#101828;
+  --border:#1A2D40;--border2:#1F3347;
+  --cyan:#00D4FF;--cyan-dim:rgba(0,212,255,0.12);--cyan-border:rgba(0,212,255,0.20);--cyan-glow:rgba(0,212,255,0.06);
+  --green:#00C48C;--green-dim:rgba(0,196,140,0.12);
+  --amber:#F4A030;--red:#FF4D4D;--purple:#8B5CF6;
+  --white:#F0F4F8;--w2:#B8C5D0;--w3:#6B7F8E;--w4:#3A4F60;
+  --sans:'Figtree',sans-serif;--display:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
+  --r-md:10px;--r-lg:16px;
+}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--sans);background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column}
+.header{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
+.logo-name{font-family:var(--display);font-size:16px;font-weight:700}.logo-name span{color:var(--cyan)}
+.header-title{font-size:13px;font-weight:600;color:var(--w3);margin-left:4px}
+.main{flex:1;overflow-y:auto;padding:32px 24px;max-width:700px;width:100%;margin:0 auto}
+
+/* Steps */
+.steps{display:flex;align-items:center;margin-bottom:32px}
+.step-item{display:flex;align-items:center;gap:8px;flex:1}
+.step-circle{width:32px;height:32px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--w3);flex-shrink:0;transition:all .3s}
+.step-item.active .step-circle{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-dim)}
+.step-item.done .step-circle{border-color:var(--green);background:var(--green-dim);color:var(--green)}
+.step-label{font-size:12px;color:var(--w3);font-weight:500}
+.step-item.active .step-label{color:var(--white)}
+.step-item.done .step-label{color:var(--green)}
+.step-connector{flex:1;height:1px;background:var(--border2);margin:0 8px}
+.step-item.done+.step-connector{background:var(--green)}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:24px;margin-bottom:16px}
+.card-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--w3);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:12px;background:var(--cyan);border-radius:2px;display:inline-block}
+.section-title{font-family:var(--display);font-size:20px;font-weight:700;color:var(--white);margin-bottom:4px}
+.section-sub{font-size:13px;color:var(--w3);margin-bottom:20px;line-height:1.5}
+
+/* Form */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.span2{grid-column:span 2}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--w3)}
+.field label .req{color:var(--cyan)}
+.field input,.field select,.field textarea{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:var(--white);font-family:var(--sans);width:100%;transition:border-color .2s,box-shadow .2s}
+.field input::placeholder,.field textarea::placeholder{color:var(--w4)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--cyan-border);box-shadow:0 0 0 3px var(--cyan-glow)}
+.field select option{background:var(--bg3)}
+.field textarea{resize:vertical;min-height:70px;line-height:1.5}
+.auto-val{background:rgba(0,212,255,0.04);border:1px solid var(--border);border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:var(--cyan);font-family:var(--mono)}
+
+/* Team member rows */
+.member-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:6px}
+.member-email{flex:1;font-size:13px;color:var(--w2)}
+.member-role{font-size:11px;padding:3px 9px;border-radius:20px;background:var(--cyan-dim);color:var(--cyan);font-weight:600}
+.remove-btn{width:22px;height:22px;border-radius:50%;background:transparent;border:1px solid var(--border2);color:var(--w4);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.remove-btn:hover{background:rgba(255,77,77,0.1);border-color:var(--red);color:var(--red)}
+
+/* Distribution list */
+.dist-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);margin-bottom:6px}
+.dist-info{flex:1}
+.dist-name{font-size:13px;color:var(--white);font-weight:500}
+.dist-email{font-size:11px;color:var(--w3);font-family:var(--mono)}
+
+/* Buttons */
+.add-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r-md);color:var(--w3);font-size:12px;font-family:var(--sans);font-weight:500;cursor:pointer;width:100%;transition:all .2s;margin-top:4px}
+.add-btn:hover{border-color:var(--cyan-border);color:var(--cyan);background:var(--cyan-dim)}
+.btn-primary{width:100%;padding:13px;background:var(--cyan);color:#080D14;font-size:14px;font-weight:700;font-family:var(--display);border:none;border-radius:var(--r-md);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}
+.btn-primary:hover{background:#00b8e0;box-shadow:0 0 24px rgba(0,212,255,0.28)}
+.btn-primary:disabled{background:var(--border2);color:var(--w3);cursor:not-allowed;box-shadow:none}
+.btn-secondary{background:transparent;border:1px solid var(--border2);color:var(--w2);margin-top:8px;padding:11px;border-radius:var(--r-md);font-size:13px;font-weight:600;font-family:var(--sans);cursor:pointer;width:100%;transition:all .2s}
+.btn-secondary:hover{border-color:var(--w3)}
+
+.error{background:rgba(255,77,77,0.09);border:1px solid rgba(255,77,77,0.28);border-radius:9px;padding:11px 13px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
+.error.show{display:block}
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;font-size:12px;color:var(--w3);line-height:1.6;margin-bottom:12px}
+.spin{width:15px;height:15px;border:2px solid rgba(8,13,20,.3);border-top-color:#080D14;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}.span2{grid-column:span 1}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo-name">Controlynx<span>.ai</span></span>
+  <span class="header-title">— New Project Setup</span>
+</div>
+
+<main class="main">
+
+  <!-- Step indicator -->
+  <div class="steps" id="stepsBar">
+    <div class="step-item active" id="si1"><div class="step-circle">1</div><span class="step-label">Project Info</span></div>
+    <div class="step-connector" id="sc1"></div>
+    <div class="step-item" id="si2"><div class="step-circle">2</div><span class="step-label">Team</span></div>
+    <div class="step-connector" id="sc2"></div>
+    <div class="step-item" id="si3"><div class="step-circle">3</div><span class="step-label">Distribution</span></div>
+    <div class="step-connector" id="sc3"></div>
+    <div class="step-item" id="si4"><div class="step-circle">4</div><span class="step-label">Location</span></div>
+    <div class="step-connector" id="sc4"></div>
+    <div class="step-item" id="si5"><div class="step-circle">5</div><span class="step-label">Review</span></div>
+  </div>
+
+  <div id="stepContent"></div>
+
+</main>
+
+<script>
+const token = localStorage.getItem('cx_token');
+const user  = (() => { try { return JSON.parse(localStorage.getItem('cx_user')||'{}'); } catch(e){ return {}; } })();
+if (!token) window.location.href = '/login.html';
+if (user.role && !['planner','admin'].includes(user.role)) window.location.href = '/dpr';
+
+let currentStep = 1;
+const project = {
+  name:'', client:'', pmc:'', consultant:'', contractor:'',
+  contractNo:'', startDate:'', plannedFinish:'', reportPrefix:'DPR',
+  siteLat:null, siteLng:null, siteCoords:'',
+  teamMembers:[], distributionList:[],
+  subcontractors:[]
+};
+
+let map = null, marker = null;
+
+const ROLE_LABELS = {
+  planner:'Planner / PCE', safety:'Safety Manager', timekeeper:'Timekeeper',
+  storekeeper:'Storekeeper', engineer:'Site Engineer', qaqc:'QA/QC Engineer', admin:'Admin'
+};
+
+function updateSteps() {
+  [1,2,3,4,5].forEach(i => {
+    const el = document.getElementById('si'+i);
+    if (!el) return;
+    el.className = 'step-item' + (i===currentStep?' active':i<currentStep?' done':'');
+    const conn = document.getElementById('sc'+i);
+    if (conn) conn.style.background = i < currentStep ? 'var(--green)' : 'var(--border2)';
+  });
+}
+
+function render() {
+  updateSteps();
+  const c = document.getElementById('stepContent');
+  if (currentStep === 1) c.innerHTML = step1HTML();
+  else if (currentStep === 2) c.innerHTML = step2HTML();
+  else if (currentStep === 3) c.innerHTML = step3HTML();
+  else if (currentStep === 4) { c.innerHTML = step4HTML(); initMap(); }
+  else if (currentStep === 5) c.innerHTML = step5HTML();
+}
+
+// ── STEP 1: Project Information ──────────────────────────────────────────
+function step1HTML() {
+  const dur = project.startDate && project.plannedFinish
+    ? Math.ceil((new Date(project.plannedFinish)-new Date(project.startDate))/86400000) + ' days'
+    : '—';
+  return `
+  <div class="section-title">Project Information</div>
+  <div class="section-sub">Fill in the project details once. These auto-populate every daily report.</div>
+  <div class="error" id="err"></div>
+  <div class="card">
+    <div class="card-title">Project identity</div>
+    <div class="form-grid">
+      <div class="field span2">
+        <label>Project Name <span class="req">*</span></label>
+        <input type="text" id="f_name" value="${project.name}" placeholder="e.g. Aldar Manarat Residential Tower — Phase 02">
+      </div>
+      <div class="field">
+        <label>Client / Employer <span class="req">*</span></label>
+        <input type="text" id="f_client" value="${project.client}" placeholder="e.g. Aldar Properties">
+      </div>
+      <div class="field">
+        <label>Main Contractor <span class="req">*</span></label>
+        <input type="text" id="f_contractor" value="${project.contractor}" placeholder="e.g. Bright Accord General Contracting">
+      </div>
+      <div class="field">
+        <label>PMC</label>
+        <input type="text" id="f_pmc" value="${project.pmc}" placeholder="e.g. Hill International">
+      </div>
+      <div class="field">
+        <label>Consultant</label>
+        <input type="text" id="f_consultant" value="${project.consultant}" placeholder="e.g. Ultra-Architectural Consultancy">
+      </div>
+      <div class="field">
+        <label>Contract Number</label>
+        <input type="text" id="f_contractNo" value="${project.contractNo}" placeholder="e.g. SIMR2-EW-BAG-P2">
+      </div>
+      <div class="field">
+        <label>Report Number Prefix <span class="req">*</span></label>
+        <input type="text" id="f_prefix" value="${project.reportPrefix}" placeholder="e.g. DPR or BAGC-DPR">
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Contract dates</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Contract Start Date <span class="req">*</span></label>
+        <input type="date" id="f_start" value="${project.startDate}" onchange="project.startDate=this.value;document.getElementById('dur').textContent=calcDur()">
+      </div>
+      <div class="field">
+        <label>Planned Finish Date <span class="req">*</span></label>
+        <input type="date" id="f_finish" value="${project.plannedFinish}" onchange="project.plannedFinish=this.value;document.getElementById('dur').textContent=calcDur()">
+      </div>
+      <div class="field">
+        <label>Contract Duration</label>
+        <div class="auto-val" id="dur">${dur}</div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="step1Save()">Continue → Team Setup</button>`;
+}
+
+function calcDur() {
+  if (!project.startDate || !project.plannedFinish) return '—';
+  return Math.ceil((new Date(project.plannedFinish)-new Date(project.startDate))/86400000) + ' days';
+}
+
+function step1Save() {
+  project.name       = document.getElementById('f_name').value.trim();
+  project.client     = document.getElementById('f_client').value.trim();
+  project.contractor = document.getElementById('f_contractor').value.trim();
+  project.pmc        = document.getElementById('f_pmc').value.trim();
+  project.consultant = document.getElementById('f_consultant').value.trim();
+  project.contractNo = document.getElementById('f_contractNo').value.trim();
+  project.reportPrefix = document.getElementById('f_prefix').value.trim() || 'DPR';
+
+  if (!project.name) { showErr('Project name is required.'); return; }
+  if (!project.client) { showErr('Client name is required.'); return; }
+  if (!project.contractor) { showErr('Main contractor is required.'); return; }
+  if (!project.startDate) { showErr('Contract start date is required.'); return; }
+  if (!project.plannedFinish) { showErr('Planned finish date is required.'); return; }
+  currentStep = 2; render();
+}
+
+// ── STEP 2: Team Members ─────────────────────────────────────────────────
+function step2HTML() {
+  return `
+  <div class="section-title">Team Members</div>
+  <div class="section-sub">Add your site team. Each member will receive an invitation email with login instructions.</div>
+  <div class="info-box">You are automatically added as <strong>Planner / PCE</strong>. Add the rest of your team below. They will only see the tabs relevant to their role.</div>
+  <div class="card">
+    <div class="card-title">Add team member</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Full Name <span class="req">*</span></label>
+        <input type="text" id="t_name" placeholder="e.g. Ahmed Hassan">
+      </div>
+      <div class="field">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="t_email" placeholder="ahmed@company.com">
+      </div>
+      <div class="field span2">
+        <label>Role <span class="req">*</span></label>
+        <select id="t_role">
+          <option value="planner">Planner / PCE</option>
+          <option value="safety">Safety Manager / Engineer / Officer</option>
+          <option value="timekeeper">Timekeeper</option>
+          <option value="storekeeper">Storekeeper</option>
+          <option value="engineer">CM / PE / Site Engineer</option>
+          <option value="qaqc">QA/QC Engineer</option>
+        </select>
+      </div>
+    </div>
+    <button class="add-btn" onclick="addMember()"><span>+</span> Add team member</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Team (${project.teamMembers.length} added)</div>
+    ${project.teamMembers.length === 0 ? `<div style="text-align:center;padding:20px;color:var(--w4);font-size:13px">No team members added yet. You can add them later from project settings.</div>` :
+      project.teamMembers.map((m,i) => `
+      <div class="member-row">
+        <div style="flex:1">
+          <div class="member-email" style="font-weight:500">${m.name}</div>
+          <div style="font-size:11px;color:var(--w3);font-family:var(--mono)">${m.email}</div>
+        </div>
+        <span class="member-role">${ROLE_LABELS[m.role]||m.role}</span>
+        <button class="remove-btn" onclick="removeMember(${i})">✕</button>
+      </div>`).join('')}
+  </div>
+  <button class="btn-primary" onclick="currentStep=3;render()">Continue → Distribution List</button>
+  <button class="btn-secondary" onclick="currentStep=1;render()">← Back</button>`;
+}
+
+function addMember() {
+  const name  = document.getElementById('t_name').value.trim();
+  const email = document.getElementById('t_email').value.trim();
+  const role  = document.getElementById('t_role').value;
+  if (!name || !email) { alert('Please enter both name and email.'); return; }
+  project.teamMembers.push({ name, email, role });
+  render();
+}
+
+function removeMember(i) { project.teamMembers.splice(i,1); render(); }
+
+// ── STEP 3: Distribution List ────────────────────────────────────────────
+function step3HTML() {
+  return `
+  <div class="section-title">Distribution List</div>
+  <div class="section-sub">Who receives the daily report PDF by email on submission. Typically: PM, Site Manager, Construction Manager, Document Controller.</div>
+  <div class="card">
+    <div class="card-title">Add recipient</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Name <span class="req">*</span></label>
+        <input type="text" id="d_name" placeholder="e.g. Mohammed Al Rashidi">
+      </div>
+      <div class="field">
+        <label>Email <span class="req">*</span></label>
+        <input type="email" id="d_email" placeholder="pm@company.com">
+      </div>
+      <div class="field span2">
+        <label>Role / Title</label>
+        <input type="text" id="d_role" placeholder="e.g. Project Manager, Resident Engineer">
+      </div>
+    </div>
+    <button class="add-btn" onclick="addDist()"><span>+</span> Add recipient</button>
+  </div>
+  <div class="card">
+    <div class="card-title">Distribution list (${project.distributionList.length} recipients)</div>
+    ${project.distributionList.length === 0 ? `<div style="text-align:center;padding:20px;color:var(--w4);font-size:13px">No recipients added. Add at least the Project Manager and Document Controller.</div>` :
+      project.distributionList.map((d,i) => `
+      <div class="dist-row">
+        <div class="dist-info">
+          <div class="dist-name">${d.name} <span style="font-size:11px;color:var(--w3);font-weight:400">— ${d.role||''}</span></div>
+          <div class="dist-email">${d.email}</div>
+        </div>
+        <button class="remove-btn" onclick="removeDist(${i})">✕</button>
+      </div>`).join('')}
+  </div>
+  <button class="btn-primary" onclick="currentStep=4;render()">Continue → Site Location</button>
+  <button class="btn-secondary" onclick="currentStep=2;render()">← Back</button>`;
+}
+
+function addDist() {
+  const name  = document.getElementById('d_name').value.trim();
+  const email = document.getElementById('d_email').value.trim();
+  const role  = document.getElementById('d_role').value.trim();
+  if (!name || !email) { alert('Please enter name and email.'); return; }
+  project.distributionList.push({ name, email, role });
+  render();
+}
+
+function removeDist(i) { project.distributionList.splice(i,1); render(); }
+
+// ── STEP 4: Site Location (Map) ──────────────────────────────────────────
+function step4HTML() {
+  return `
+  <div class="section-title">Site Location</div>
+  <div class="section-sub">Pin your site on the map. This is used to automatically fetch live weather data for every report.</div>
+  <div class="card">
+    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <input type="text" id="mapSearch" placeholder="Search for your project address…"
+        style="flex:1;min-width:200px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:var(--white);font-family:var(--sans)">
+      <button onclick="searchMap()" style="padding:10px 16px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:var(--r-md);color:var(--cyan);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)">Search</button>
+      <button onclick="useGPS()" style="padding:10px 16px;background:var(--green-dim);border:1px solid rgba(0,196,140,0.3);border-radius:var(--r-md);color:var(--green);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--sans)">📍 My location</button>
+    </div>
+    <div id="setupMap" style="height:300px;border-radius:var(--r-md);border:1px solid var(--border);overflow:hidden"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--bg2);border-radius:var(--r-md);border:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--w3)">Coordinates:</span>
+      <span id="coordShow" style="font-family:var(--mono);font-size:12px;color:${project.siteCoords?'var(--green)':'var(--w4)'};flex:1">${project.siteCoords || 'Click the map to pin your site'}</span>
+    </div>
+  </div>
+  <button class="btn-primary" onclick="currentStep=5;render()">Continue → Review</button>
+  <button class="btn-secondary" onclick="currentStep=3;render()">← Back</button>`;
+}
+
+function initMap() {
+  setTimeout(() => {
+    if (!document.getElementById('setupMap')) return;
+    if (map) { try { map.remove(); } catch(e){} map = null; }
+    const coords = project.siteCoords
+      ? project.siteCoords.split(',').map(s=>parseFloat(s.trim()))
+      : [24.4539, 54.3773];
+    map = L.map('setupMap').setView(coords, project.siteCoords ? 14 : 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(map);
+    const icon = L.divIcon({html:'<div style="width:18px;height:18px;background:#00D4FF;border:3px solid #fff;border-radius:50%;box-shadow:0 0 12px rgba(0,212,255,0.8)"></div>',iconSize:[18,18],iconAnchor:[9,9],className:''});
+    if (project.siteCoords) {
+      marker = L.marker(coords,{icon,draggable:true}).addTo(map);
+      marker.on('dragend', e => setCoords(e.target.getLatLng()));
+    }
+    map.on('click', e => {
+      if (marker) map.removeLayer(marker);
+      marker = L.marker(e.latlng,{icon,draggable:true}).addTo(map);
+      marker.on('dragend', ev => setCoords(ev.target.getLatLng()));
+      setCoords(e.latlng);
+    });
+  }, 100);
+}
+
+function setCoords(latlng) {
+  project.siteCoords = latlng.lat.toFixed(6) + ', ' + latlng.lng.toFixed(6);
+  project.siteLat = latlng.lat;
+  project.siteLng = latlng.lng;
+  const el = document.getElementById('coordShow');
+  if (el) { el.textContent = project.siteCoords; el.style.color = 'var(--green)'; }
+}
+
+async function searchMap() {
+  const q = document.getElementById('mapSearch')?.value?.trim();
+  if (!q) return;
+  const r = await fetch('https://nominatim.openstreetmap.org/search?q='+encodeURIComponent(q)+'&format=json&limit=1');
+  const d = await r.json();
+  if (d.length > 0) {
+    const ll = L.latLng(parseFloat(d[0].lat), parseFloat(d[0].lon));
+    map.setView(ll, 14);
+    map.fire('click', { latlng: ll });
+  }
+}
+
+function useGPS() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(p => {
+    const ll = L.latLng(p.coords.latitude, p.coords.longitude);
+    map.setView(ll, 15);
+    map.fire('click', { latlng: ll });
+  });
+}
+
+// ── STEP 5: Review & Create ──────────────────────────────────────────────
+function step5HTML() {
+  const dur = project.startDate && project.plannedFinish
+    ? Math.ceil((new Date(project.plannedFinish)-new Date(project.startDate))/86400000) + ' days'
+    : '—';
+  return `
+  <div class="section-title">Review & Create Project</div>
+  <div class="section-sub">Check everything looks correct before creating the project.</div>
+  <div id="err5" class="error"></div>
+  <div class="card">
+    <div class="card-title">Project details</div>
+    ${row('Project', project.name)}
+    ${row('Client', project.client)}
+    ${row('Main Contractor', project.contractor)}
+    ${project.pmc ? row('PMC', project.pmc) : ''}
+    ${project.consultant ? row('Consultant', project.consultant) : ''}
+    ${row('Contract No.', project.contractNo || '—')}
+    ${row('Start Date', project.startDate)}
+    ${row('Planned Finish', project.plannedFinish)}
+    ${row('Duration', dur)}
+    ${row('Report Prefix', project.reportPrefix)}
+    ${row('Site Location', project.siteCoords || 'Not set')}
+  </div>
+  <div class="card">
+    <div class="card-title">Team (${project.teamMembers.length} members)</div>
+    ${project.teamMembers.length === 0 ? '<div style="color:var(--w4);font-size:13px">No team members — you can add them after creation.</div>' :
+      project.teamMembers.map(m=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:13px"><span style="color:var(--w2)">${m.name}</span><span style="color:var(--w3)">${ROLE_LABELS[m.role]||m.role}</span></div>`).join('')}
+  </div>
+  <div class="card">
+    <div class="card-title">Distribution list (${project.distributionList.length} recipients)</div>
+    ${project.distributionList.length === 0 ? '<div style="color:var(--w4);font-size:13px">No recipients — you can add them after creation.</div>' :
+      project.distributionList.map(d=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--border);font-size:13px"><span style="color:var(--w2)">${d.name}</span><span style="color:var(--w3);font-family:var(--mono);font-size:11px">${d.email}</span></div>`).join('')}
+  </div>
+  <button class="btn-primary" id="createBtn" onclick="createProject()">Create Project & Start Reporting →</button>
+  <button class="btn-secondary" onclick="currentStep=4;render()">← Back</button>`;
+}
+
+function row(label, val) {
+  return `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:13px">
+    <span style="color:var(--w3)">${label}</span>
+    <span style="color:var(--white);font-weight:500;text-align:right;max-width:60%">${val}</span>
+  </div>`;
+}
+
+async function createProject() {
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Creating project…';
+
+  try {
+    const res = await fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+      body: JSON.stringify({
+        name:              project.name,
+        client:            project.client,
+        pmc:               project.pmc,
+        consultant:        project.consultant,
+        contractor:        project.contractor,
+        contract_number:   project.contractNo,
+        start_date:        project.startDate,
+        planned_finish:    project.plannedFinish,
+        report_prefix:     project.reportPrefix,
+        site_lat:          project.siteLat,
+        site_lng:          project.siteLng,
+        distribution_list: project.distributionList,
+        subcontractors:    []
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      document.getElementById('err5').textContent = data.error || 'Failed to create project.';
+      document.getElementById('err5').classList.add('show');
+      btn.disabled=false; btn.innerHTML='Create Project & Start Reporting →';
+      return;
+    }
+
+    // Store project ID for the DPR
+    localStorage.setItem('cx_project', JSON.stringify(data));
+    btn.innerHTML = '✓ Project created! Opening your first report…';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => window.location.href = '/dpr', 1500);
+
+  } catch(e) {
+    document.getElementById('err5').textContent = 'Connection error. Please try again.';
+    document.getElementById('err5').classList.add('show');
+    btn.disabled=false; btn.innerHTML='Create Project & Start Reporting →';
+  }
+}
+
+function showErr(msg) {
+  const el = document.getElementById('err');
+  if (el) { el.textContent = msg; el.classList.add('show'); }
+}
+
+render();
+</script>
+</body>
+</html>

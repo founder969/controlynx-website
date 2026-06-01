@@ -64,6 +64,44 @@ app.post('/api/auth/signin', async (req, res) => {
   });
 });
 
+// Sign up - creates user + organization
+app.post('/api/auth/signup', async (req, res) => {
+  const { email, password, full_name, role, org_name, plan, sector, market } = req.body;
+  if (!email || !password || !full_name || !org_name) {
+    return res.status(400).json({ error: 'Email, password, name and organisation are required.' });
+  }
+
+  // Plan limits
+  const planLimits = { starter:{max_projects:1,max_users:5}, professional:{max_projects:5,max_users:15}, enterprise:{max_projects:999,max_users:9999} };
+  const limits = planLimits[plan] || planLimits.starter;
+
+  // 1. Create Supabase auth user
+  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+    email, password,
+    email_confirm: true,
+    user_metadata: { full_name, role: role || 'planner' }
+  });
+  if (authError) return res.status(400).json({ error: authError.message });
+
+  // 2. Create organisation
+  const { data: org, error: orgError } = await supabase
+    .from('organizations')
+    .insert({ name: org_name, plan: plan || 'starter', max_projects: limits.max_projects, max_users: limits.max_users })
+    .select().single();
+  if (orgError) return res.status(400).json({ error: orgError.message });
+
+  // 3. Update profile with org + role
+  await supabase.from('profiles').upsert({
+    id: authData.user.id,
+    full_name,
+    role: role || 'planner',
+    organization_id: org.id,
+    is_active: true
+  });
+
+  res.json({ success: true, message: 'Account created successfully.' });
+});
+
 app.post('/api/auth/signout', requireAuth, async (req, res) => {
   await supabase.auth.signOut();
   res.json({ success: true });
@@ -236,6 +274,10 @@ Write 4 sections: 1) DAY SUMMARY 2) PRODUCTIVITY ANALYSIS 3) ISSUES & RISKS 4) T
 
 // ── PAGE ROUTES (order matters — specific before generic) ────
 app.get('/login',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
+app.get('/signup',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'signup.html')));
+app.get('/signup.html',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'signup.html')));
+app.get('/setup',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'setup.html')));
+app.get('/setup.html',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'setup.html')));
 app.get('/login.html',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 app.get('/dpr',          (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 app.get('/privacy.html', (req, res) => res.sendFile(path.join(__dirname, 'privacy.html')));
