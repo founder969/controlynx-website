@@ -7,6 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 /* ─── DESIGN TOKENS (extracted from controlynx.ai) ─────────────────────── */
 :root {
@@ -596,6 +598,7 @@ input, select, textarea { outline: none; }
   box-shadow: 0 0 8px rgba(0,212,255,0.4);
 }
 .progress-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.progress-slider { background: linear-gradient(to right, var(--cyan) 0%, var(--cyan) var(--val, 0%), var(--border-2) var(--val, 0%), var(--border-2) 100%); }
 .progress-value {
   font-family: var(--mono);
   font-size: 13px;
@@ -979,6 +982,8 @@ const STATE = {
   role: 'planner',  // planner | safety | timekeeper | storekeeper | engineer | qaqc
   currentTab: 0,
   tabStatus: new Array(11).fill('empty'),  // empty | complete | ntr
+  role: localStorage.getItem('cx_user') ? (JSON.parse(localStorage.getItem('cx_user')||'{}').role || 'planner') : 'planner',
+  p6Library: [],
   data: {
     identity: {
       projectName:'', client:'', pmc:'', consultant:'', contractor:'',
@@ -1218,7 +1223,7 @@ function renderIdentity() {
 
   <div class="card">
     <div class="card-title">Contract dates</div>
-    <div class="form-grid cols-3">
+    <div class="form-grid">
       <div class="field">
         <label>Contract Start Date <span class="req">*</span></label>
         <input type="date" id="f_startDate" value="${d.startDate}">
@@ -1227,10 +1232,21 @@ function renderIdentity() {
         <label>Planned Finish Date <span class="req">*</span></label>
         <input type="date" id="f_plannedFinish" value="${d.plannedFinish}">
       </div>
-      <div class="field">
-        <label>Site Coordinates <span class="req">*</span> <span style="font-size:10px;color:var(--white-4)">(for weather)</span></label>
-        <input type="text" id="f_siteCoords" value="${d.siteCoords}" placeholder="e.g. 24.4539, 54.3773">
-      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Site location <span style="font-size:10px;padding:2px 8px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan);margin-left:4px">Pick on map — auto-fetches weather</span></div>
+    <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
+      <input type="text" id="mapSearch" placeholder="Search for your project location…" style="flex:1;min-width:200px;background:var(--bg-2);border:1px solid var(--border-2);border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:var(--white);font-family:var(--sans)">
+      <button onclick="searchMapLocation()" style="padding:10px 18px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:var(--r-md);color:var(--cyan);font-size:12px;font-family:var(--sans);font-weight:600;cursor:pointer">Search</button>
+      <button onclick="getCurrentLocation()" style="padding:10px 18px;background:var(--green-dim);border:1px solid rgba(0,196,140,0.3);border-radius:var(--r-md);color:var(--green);font-size:12px;font-family:var(--sans);font-weight:600;cursor:pointer">Use my location</button>
+    </div>
+    <div id="siteMap" style="height:280px;border-radius:var(--r-md);border:1px solid var(--border);overflow:hidden;background:var(--bg-2)"></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 12px;background:var(--bg-2);border-radius:var(--r-md);border:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--white-3)">Selected coordinates:</span>
+      <span id="coordDisplay" style="font-family:var(--mono);font-size:12px;color:var(--cyan);flex:1">${d.siteCoords || 'Click on the map to select site location'}</span>
+      ${d.siteCoords ? '<span style="font-size:11px;color:var(--green)">Location set</span>' : ''}
     </div>
   </div>
 
@@ -1284,13 +1300,12 @@ function renderIdentity() {
 }
 
 function bindIdentity() {
-  const fields = ['projectName','client','pmc','consultant','contractor','contractNo','reportPrefix','startDate','plannedFinish','siteCoords','shift','zone','submittedBy'];
+  const fields = ['projectName','client','pmc','consultant','contractor','contractNo','reportPrefix','startDate','plannedFinish','shift','zone','submittedBy'];
   fields.forEach(f => {
     const el = document.getElementById('f_'+f);
     if (!el) return;
     el.addEventListener('input', () => {
       STATE.data.identity[f] = el.value;
-      const calcFields = ['calc_duration','calc_elapsed','calc_remaining','calc_reportNo'];
       document.getElementById('calc_duration').textContent = calcDuration();
       document.getElementById('calc_elapsed').textContent = calcElapsed();
       document.getElementById('calc_remaining').innerHTML = calcRemaining();
@@ -1299,6 +1314,83 @@ function bindIdentity() {
       autoSave();
     });
   });
+  initSiteMap();
+}
+
+let _siteMap = null;
+let _siteMarker = null;
+
+function initSiteMap() {
+  if (typeof L === 'undefined' || !document.getElementById('siteMap')) return;
+  if (_siteMap) { try { _siteMap.remove(); } catch(e){} _siteMap = null; }
+
+  const defaultCoords = [24.4539, 54.3773];
+  const savedCoords = STATE.data.identity.siteCoords
+    ? STATE.data.identity.siteCoords.split(',').map(s => parseFloat(s.trim()))
+    : null;
+  const initCoords = savedCoords || defaultCoords;
+  const initZoom = savedCoords ? 14 : 5;
+
+  _siteMap = L.map('siteMap', { zoomControl: true }).setView(initCoords, initZoom);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'Map data © OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(_siteMap);
+
+  const markerIcon = L.divIcon({
+    html: '<div style="width:18px;height:18px;background:#00D4FF;border:3px solid #fff;border-radius:50%;box-shadow:0 0 12px rgba(0,212,255,0.8)"></div>',
+    iconSize: [18,18], iconAnchor: [9,9], className: ''
+  });
+
+  if (savedCoords) {
+    _siteMarker = L.marker(savedCoords, { icon: markerIcon, draggable: true }).addTo(_siteMap);
+    _siteMarker.on('dragend', e => setMapCoords(e.target.getLatLng()));
+  }
+
+  _siteMap.on('click', e => {
+    if (_siteMarker) _siteMap.removeLayer(_siteMarker);
+    _siteMarker = L.marker(e.latlng, { icon: markerIcon, draggable: true }).addTo(_siteMap);
+    _siteMarker.on('dragend', ev => setMapCoords(ev.target.getLatLng()));
+    setMapCoords(e.latlng);
+  });
+}
+
+function setMapCoords(latlng) {
+  const coords = latlng.lat.toFixed(6) + ', ' + latlng.lng.toFixed(6);
+  STATE.data.identity.siteCoords = coords;
+  const el = document.getElementById('coordDisplay');
+  if (el) { el.textContent = coords; el.style.color = 'var(--green)'; }
+  autoSave();
+}
+
+function getCurrentLocation() {
+  if (!navigator.geolocation) { showToast('Geolocation not available'); return; }
+  showToast('Getting your location...');
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const ll = L.latLng(pos.coords.latitude, pos.coords.longitude);
+      if (_siteMap) { _siteMap.setView(ll, 15); _siteMap.fire('click', { latlng: ll }); }
+      showToast('Location captured', true);
+    },
+    () => showToast('Could not get location — click the map instead')
+  );
+}
+
+async function searchMapLocation() {
+  const q = document.getElementById('mapSearch')?.value?.trim();
+  if (!q) return;
+  try {
+    const r = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) + '&format=json&limit=1&accept-language=en');
+    const data = await r.json();
+    if (data.length > 0) {
+      const ll = L.latLng(parseFloat(data[0].lat), parseFloat(data[0].lon));
+      if (_siteMap) { _siteMap.setView(ll, 14); _siteMap.fire('click', { latlng: ll }); }
+      showToast('Location found: ' + data[0].display_name.substring(0, 50), true);
+    } else {
+      showToast('Location not found — try a different search term');
+    }
+  } catch(e) { showToast('Search failed — check your connection'); }
 }
 
 // ─── 2. WEATHER ────────────────────────────────────────────────────────────
@@ -1811,7 +1903,10 @@ function renderEquipmentCard(eq, i) {
     <div class="equipment-header">
       <div>
         <div class="equipment-name">${eq.name || 'Equipment ' + (i+1)}</div>
-        ${eq.plantNo ? `<div style="font-family:var(--mono);font-size:11px;color:var(--white-3);margin-top:2px">ID: ${eq.plantNo}</div>` : ''}
+        <div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap">
+          ${eq.plantNo ? `<span style="font-family:var(--mono);font-size:11px;color:var(--white-3)">ID: ${eq.plantNo}</span>` : ''}
+          ${eq.ownership === 'hired' ? `<span style="font-size:10px;padding:1px 7px;background:var(--amber-dim);border:1px solid rgba(244,160,48,0.3);border-radius:10px;color:var(--amber)">Hired — ${eq.hiredFrom||'supplier N/A'}</span>` : eq.ownership === 'owned' ? `<span style="font-size:10px;padding:1px 7px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:10px;color:var(--cyan)">Contractor owned</span>` : ''}
+        </div>
       </div>
       <button class="stepper-remove" onclick="removeEquipment(${i})">✕</button>
     </div>
@@ -1824,11 +1919,24 @@ function renderEquipmentCard(eq, i) {
         <label>Plant / ID Number</label>
         <input type="text" value="${eq.plantNo||''}" onchange="updateEquipment(${i},'plantNo',this.value)" placeholder="e.g. TC-01">
       </div>
+      <div class="field">
+        <label>Ownership <span class="req">*</span></label>
+        <select onchange="updateEquipment(${i},'ownership',this.value);renderPanel(STATE.currentTab)">
+          <option value="" ${!eq.ownership?'selected':''}>Select…</option>
+          <option value="owned" ${eq.ownership==='owned'?'selected':''}>Contractor owned</option>
+          <option value="hired" ${eq.ownership==='hired'?'selected':''}>Hired</option>
+        </select>
+      </div>
+      ${eq.ownership === 'hired' ? `
+      <div class="field span-2">
+        <label>Hired From (supplier name) <span class="req">*</span></label>
+        <input type="text" value="${eq.hiredFrom||''}" onchange="updateEquipment(${i},'hiredFrom',this.value)" placeholder="e.g. Al Futtaim Heavy Equipment">
+      </div>` : ''}
       ${eq.status === 'breakdown' || eq.status === 'repair' ? `
       <div class="field">
         <label>Breakdown Duration (hrs)</label>
         <input type="number" value="${eq.breakdownHrs||''}" onchange="updateEquipment(${i},'breakdownHrs',this.value)" placeholder="e.g. 4">
-      </div>` : `<div></div>`}
+      </div>` : ''}
     </div>
     <div class="eq-status-group">
       <button class="eq-status eq-working ${eq.status==='working'?'active':''}" onclick="setEqStatus(${i},'working')">Working</button>
@@ -1916,60 +2024,127 @@ function renderMaterialRow(m, i) {
 // ─── 8. ACTIVITIES ─────────────────────────────────────────────────────────
 function renderActivities() {
   const d = STATE.data.activities;
+  const p6Lib = STATE.data.p6Library || [];
+  // Build floor list from p6 library or defaults
+  const floors = p6Lib.length > 0
+    ? [...new Set(p6Lib.map(a => a.floor).filter(Boolean))].sort()
+    : ['Basement','Ground Floor','Level 1','Level 2','Level 3','Level 4','Level 5','Level 6','Level 7','Level 8','Level 9','Level 10','Level 11','Level 12','Roof'];
+  const disciplines = ['Civil / Substructure','Structural / Superstructure','Civil Finishes','MEP Installation','MEP Finishes','Fit-Out','External Works','Other'];
+
   return `
   <div class="section-header">
     <div class="section-title">Activities Performed Today</div>
-    <div class="section-desc">Site engineers log progress. Activities carry forward daily until marked Complete. AI maps to P6 Activity IDs automatically.</div>
+    <div class="section-desc">Select activities from the loaded P6 schedule. Activities carry forward daily until marked Complete.</div>
   </div>
+  ${p6Lib.length === 0 ? `
   <div class="card" style="background:var(--bg-3);border-color:rgba(139,92,246,0.2)">
     <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--white-3)">
-      <span style="font-size:16px">🤖</span>
-      <span>Activities are automatically matched to your P6 schedule using AI. High confidence matches are silent. Low confidence will flag for planner review at sign-off.</span>
+      <span style="font-size:16px">📋</span>
+      <span>No P6 schedule uploaded yet. Activities are available as manual entries until the Planner uploads the XER file in Project Setup.</span>
     </div>
-  </div>
-  ${d.items.map((act,i) => renderActivityCard(act,i)).join('')}
+  </div>` : `
+  <div class="card" style="background:var(--bg-3);border-color:rgba(0,196,140,0.2)">
+    <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--green)">
+      <span>✓</span>
+      <span>${p6Lib.length} P6 activities loaded. Select Floor → Discipline → Activity to log progress.</span>
+    </div>
+  </div>`}
+  ${d.items.map((act,i) => renderActivityCard(act,i,floors,disciplines,p6Lib)).join('')}
   <button class="add-btn" onclick="addActivity()"><span class="plus">+</span> Add activity</button>
   <div class="card" style="margin-top:12px">
     <div class="card-title">Activities planned for tomorrow</div>
     <div class="field">
-      <textarea id="f_tomorrowPlan" placeholder="List the main activities planned for the next working day…" style="min-height:100px">${d.tomorrowPlan}</textarea>
+      <textarea id="f_tomorrowPlan" placeholder="List the main activities planned for the next working day…" style="min-height:90px">${d.tomorrowPlan}</textarea>
     </div>
   </div>`;
 }
 
-function renderActivityCard(act, i) {
-  const disciplines = ['Civil','Structural','MEP','Finishes','FF&E','Other'];
-  const tagClass = {'Civil':'tag-civil','MEP':'tag-mep','Structural':'tag-structural','Finishes':'tag-finishes'}[act.discipline] || 'tag-civil';
+function getFilteredActivities(floor, discipline, p6Lib) {
+  if (!p6Lib || p6Lib.length === 0) return [];
+  return p6Lib.filter(a => {
+    const floorMatch = !floor || (a.floor && a.floor === floor);
+    const discMatch  = !discipline || (a.discipline && a.discipline === discipline);
+    return floorMatch && discMatch;
+  });
+}
+
+function renderActivityCard(act, i, floors, disciplines, p6Lib) {
+  const filtered = getFilteredActivities(act.floor, act.discipline, p6Lib);
+  const isOpen = act.expanded !== false;
+  const statusColor = {'ontrack':'var(--green)','delayed':'var(--amber)','blocked':'var(--red)','complete':'var(--cyan)'}[act.status] || 'var(--white-3)';
   return `
-  <div class="activity-card">
-    <div class="activity-card-header">
+  <div class="activity-card" style="margin-bottom:8px">
+    <!-- Collapsed header - always visible -->
+    <div style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:2px 0" onclick="toggleActivityExpand(${i})">
       <div style="flex:1">
-        <div class="field" style="margin-bottom:8px">
-          <label>Activity Description <span class="req">*</span></label>
-          <input type="text" value="${act.description||''}" onchange="updateActivity(${i},'description',this.value)" placeholder="e.g. Blockwork installation level 3-5 Zone 01">
+        <div style="font-size:13px;font-weight:600;color:var(--white)">${act.description || 'New activity — click to expand'}</div>
+        <div style="font-size:11px;color:var(--white-3);margin-top:2px">${[act.floor,act.discipline,act.zone].filter(Boolean).join(' · ') || 'Select floor and discipline below'}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="width:60px;height:5px;background:var(--border-2);border-radius:3px;overflow:hidden">
+            <div style="height:100%;width:${act.progress||0}%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:3px"></div>
+          </div>
+          <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--cyan)">${act.progress||0}%</span>
         </div>
-        <div class="form-grid cols-3">
+        <span style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;background:${statusColor}22;color:${statusColor}">${act.status||'ontrack'}</span>
+        <button class="stepper-remove" onclick="event.stopPropagation();removeActivity(${i})">✕</button>
+        <span style="color:var(--white-3);font-size:12px;transition:transform 0.2s;${isOpen?'transform:rotate(180deg)':''}">▼</span>
+      </div>
+    </div>
+    <!-- Expanded body -->
+    <div id="actBody_${i}" style="${isOpen?'':'display:none'}">
+      <div class="divider" style="margin:12px 0"></div>
+      <div class="activity-card-header">
+      <div style="flex:1">
+        <div class="form-grid cols-3" style="margin-bottom:10px">
+          <div class="field">
+            <label>Floor / Level <span class="req">*</span></label>
+            <select onchange="updateActivity(${i},'floor',this.value);renderPanel(STATE.currentTab)">
+              <option value="">Select floor…</option>
+              ${floors.map(f => `<option ${act.floor===f?'selected':''}>${f}</option>`).join('')}
+            </select>
+          </div>
           <div class="field">
             <label>Discipline <span class="req">*</span></label>
-            <select onchange="updateActivity(${i},'discipline',this.value)">
+            <select onchange="updateActivity(${i},'discipline',this.value);renderPanel(STATE.currentTab)">
+              <option value="">Select discipline…</option>
               ${disciplines.map(d => `<option ${act.discipline===d?'selected':''}>${d}</option>`).join('')}
             </select>
           </div>
           <div class="field">
-            <label>Zone / Level / Location <span class="req">*</span></label>
-            <input type="text" value="${act.zone||''}" onchange="updateActivity(${i},'zone',this.value)" placeholder="e.g. Zone 01, Level 3-5">
-          </div>
-          <div class="field">
-            <label>Actual Start <span class="auto-badge" style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
-            <div class="auto-value" style="font-size:12px">${act.actualStart || getReportDate()}</div>
+            <label>Zone / Area</label>
+            <input type="text" value="${act.zone||''}" onchange="updateActivity(${i},'zone',this.value)" placeholder="e.g. Zone 01, Block A">
           </div>
         </div>
+        <div class="field" style="margin-bottom:10px">
+          <label>Activity <span class="req">*</span>${p6Lib.length > 0 ? '<span style="font-size:9px;margin-left:6px;padding:1px 6px;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);border-radius:4px;color:#8B5CF6">P6 Linked</span>' : ''}</label>
+          ${p6Lib.length > 0 ? `
+          <select onchange="selectP6Activity(${i},this.value)">
+            <option value="">Select activity…</option>
+            ${filtered.length > 0
+              ? filtered.map(a => `<option value="${a.id}" ${act.p6Id===a.id?'selected':''}>${a.activity_id} — ${a.activity_name}</option>`).join('')
+              : `<option disabled>Select floor and discipline first</option>`
+            }
+          </select>` : `
+          <input type="text" value="${act.description||''}" onchange="updateActivity(${i},'description',this.value)" placeholder="e.g. Blockwork installation Level 3 Zone 01">`}
+        </div>
+        ${act.description && p6Lib.length > 0 ? `
+        <div style="font-size:11px;color:var(--purple);margin-bottom:8px;padding:6px 10px;background:rgba(139,92,246,0.08);border-radius:6px;border:1px solid rgba(139,92,246,0.2)">
+          P6 Activity ID: <strong>${act.p6Id || 'Not mapped'}</strong> — ${act.description}
+        </div>` : ''}
       </div>
-      <button class="stepper-remove" style="margin-top:8px" onclick="removeActivity(${i})">✕</button>
+      <button class="stepper-remove" style="margin-top:4px" onclick="removeActivity(${i})">✕</button>
     </div>
     <div class="progress-row">
-      <span class="progress-label">Progress</span>
-      <input type="range" class="progress-slider" min="0" max="100" value="${act.progress||0}" oninput="updateActivityProgress(${i},this.value)">
+      <span class="progress-label">Progress %</span>
+      <input type="number" min="0" max="100"
+        value="${act.progress||0}"
+        onchange="updateActivityProgress(${i},this.value)"
+        style="width:80px;text-align:center;background:var(--bg-2);border:1px solid var(--border-2);border-radius:var(--r-md);padding:8px 10px;font-size:16px;font-weight:700;font-family:var(--mono);color:var(--cyan)">
+      <div style="flex:1;height:6px;background:var(--border-2);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${act.progress||0}%;background:linear-gradient(90deg,var(--cyan),var(--green));border-radius:3px;transition:width 0.3s"></div>
+      </div>
       <span class="progress-value" id="prog_${i}">${act.progress||0}%</span>
     </div>
     <div style="margin-top:10px">
@@ -1981,94 +2156,168 @@ function renderActivityCard(act, i) {
         <button class="status-tag ${act.status==='complete'?'active-complete':''}" onclick="setActivityStatus(${i},'complete')">Complete</button>
       </div>
     </div>
-    ${act.p6Id ? `
-    <div class="ai-map-row">
-      <span class="ai-map-icon">🤖</span>
-      <span class="ai-map-text">P6 mapped →</span>
-      <span class="ai-map-id">${act.p6Id}</span>
-      <span class="ai-confidence ${act.confidence >= 85 ? 'conf-high' : act.confidence >= 60 ? 'conf-med' : 'conf-low'}">${act.confidence}% match</span>
-    </div>` : `
-    <div class="ai-map-row" style="opacity:0.5">
-      <span class="ai-map-icon">🤖</span>
-      <span class="ai-map-text">P6 mapping pending — upload schedule in project setup</span>
-    </div>`}
+    <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--white-4)">
+      <span>Started: ${act.actualStart || 'Today'}</span>
+      ${act.status==='complete' ? `<span style="color:var(--green)">Completed: ${act.actualFinish || 'Today'}</span>` : `<span>Carries forward daily until Complete</span>`}
+    </div>
+    </div><!-- end expanded body -->
   </div>`;
+}
+
+function toggleActivityExpand(i) {
+  STATE.data.activities.items[i].expanded = STATE.data.activities.items[i].expanded === false ? true : false;
+  const body = document.getElementById('actBody_' + i);
+  if (body) body.style.display = body.style.display === 'none' ? '' : 'none';
+  const card = body?.parentElement;
+  const chevron = card?.querySelector('div:first-child span:last-child');
+  if (chevron) chevron.style.transform = body.style.display === 'none' ? '' : 'rotate(180deg)';
+}
+
+function selectP6Activity(i, actId) {
+  const lib = STATE.data.p6Library || [];
+  const found = lib.find(a => a.id === actId);
+  if (found) {
+    STATE.data.activities.items[i].p6Id = found.activity_id;
+    STATE.data.activities.items[i].description = found.activity_name;
+  }
+  renderPanel(STATE.currentTab);
 }
 
 // ─── 9. ALLOCATION ─────────────────────────────────────────────────────────
 function renderAllocation() {
   const acts = STATE.data.activities.items;
+  const isPlanner = STATE.role === 'planner' || STATE.role === 'admin';
+
   return `
   <div class="section-header">
     <div class="section-title">Allocation & Quantities</div>
-    <div class="section-desc">Internal use only. Manpower allocation vs planned quantities achieved. Used for productivity analysis.</div>
+    <div class="section-desc">Log manpower allocation per activity. Internal use only — never appears in external PDF.</div>
   </div>
   <div class="card" style="background:var(--bg-3);border-color:var(--amber-dim)">
     <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--amber)">
       <span>⚠</span>
-      <span>Internal data only — allocation information does not appear in the external PDF report sent to client.</span>
+      <span>Internal data only — not included in external client PDF. Click any activity to expand and fill allocation.</span>
     </div>
   </div>
   ${acts.length === 0 ? `
   <div class="card" style="text-align:center;padding:40px">
     <div style="font-size:32px;margin-bottom:12px">📋</div>
-    <div style="color:var(--white-3);font-size:13px">Add activities in the Activities tab first, then return here to log allocation.</div>
+    <div style="color:var(--white-3);font-size:13px">Add activities in the Activities tab first.</div>
   </div>` :
   acts.map((act, i) => {
     const alloc = STATE.data.allocation.items[i] || {};
-    const manHrs = (alloc.trades || []).reduce((a,t) => a + (parseInt(t.count)||0), 0);
-    const productivity = manHrs > 0 && alloc.achievedQty ? (parseFloat(alloc.achievedQty)/manHrs).toFixed(2) : '—';
-    const pctPlan = alloc.plannedQty && alloc.achievedQty ? Math.round(parseFloat(alloc.achievedQty)/parseFloat(alloc.plannedQty)*100) : 0;
+    const pctPlan = alloc.plannedQty && alloc.achievedQty
+      ? Math.round(parseFloat(alloc.achievedQty)/parseFloat(alloc.plannedQty)*100) : 0;
+    const isOpen = alloc.expanded !== false;
     return `
-    <div class="card">
-      <div class="card-title">${act.description || 'Activity ' + (i+1)} <span style="color:var(--white-3);font-size:10px">${act.zone||''}</span>
-        <span style="margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--cyan)">${act.progress||0}%</span>
+    <div class="card" style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0"
+           onclick="toggleAllocExpand(${i})">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--white)">${act.description || 'Activity ' + (i+1)}</div>
+          <div style="font-size:11px;color:var(--white-3);margin-top:2px">${act.floor||''} ${act.zone ? '· '+act.zone : ''} ${act.discipline ? '· '+act.discipline : ''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-family:var(--mono);font-size:12px;color:var(--cyan)">${act.progress||0}%</span>
+          <span style="font-family:var(--mono);font-size:12px;color:${pctPlan>=100?'var(--green)':pctPlan>=80?'var(--amber)':'var(--red)'}">${pctPlan}% of plan</span>
+          <span style="color:var(--white-3);font-size:14px;transition:transform 0.2s;${isOpen?'transform:rotate(180deg)':''}">▼</span>
+        </div>
       </div>
-      <div class="card-title" style="margin-bottom:8px;border-top:1px solid var(--border);padding-top:12px">Morning manpower allocation</div>
-      ${(alloc.trades||[]).map((t,ti) => `
-      <div class="stepper-row">
-        <span class="stepper-label">${t.name}</span>
-        <div class="stepper-controls">
-          <button class="stepper-btn" onclick="adjustAllocTrade(${i},${ti},-1)">−</button>
-          <input class="stepper-value" type="number" min="0" value="${t.count||0}" onchange="setAllocTrade(${i},${ti},this.value)">
-          <button class="stepper-btn" onclick="adjustAllocTrade(${i},${ti},1)">+</button>
+      <div id="allocBody_${i}" style="${isOpen?'':'display:none'}">
+        <div class="divider" style="margin:12px 0"></div>
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--white-3);margin-bottom:8px">Manpower allocation</div>
+        ${(alloc.trades||[]).map((t,ti) => `
+        <div class="stepper-row">
+          <div style="flex:1">
+            <div style="font-size:13px;color:var(--white-2)">${t.name}</div>
+            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:4px">
+                <span style="font-size:10px;color:var(--white-3);text-transform:uppercase">In-house</span>
+                <button class="stepper-btn" onclick="adjustAllocTradeField(${i},${ti},'inhouse',-1)" style="width:22px;height:22px;font-size:12px">−</button>
+                <input class="stepper-value" type="number" min="0" value="${t.inhouse||0}" onchange="setAllocTradeField(${i},${ti},'inhouse',this.value)" style="width:40px;font-size:11px;padding:2px">
+                <button class="stepper-btn" onclick="adjustAllocTradeField(${i},${ti},'inhouse',1)" style="width:22px;height:22px;font-size:12px">+</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:4px">
+                <span style="font-size:10px;color:var(--amber);text-transform:uppercase">Hired</span>
+                <button class="stepper-btn" onclick="adjustAllocTradeField(${i},${ti},'hired',-1)" style="width:22px;height:22px;font-size:12px">−</button>
+                <input class="stepper-value" type="number" min="0" value="${t.hired||0}" onchange="setAllocTradeField(${i},${ti},'hired',this.value)" style="width:40px;font-size:11px;padding:2px">
+                <button class="stepper-btn" onclick="adjustAllocTradeField(${i},${ti},'hired',1)" style="width:22px;height:22px;font-size:12px">+</button>
+              </div>
+              ${(t.hired||0) > 0 ? `
+              <input type="text" value="${t.supplier||''}" onchange="setAllocTradeField(${i},${ti},'supplier',this.value)"
+                placeholder="Supplier name" style="background:var(--bg-2);border:1px solid var(--amber-dim);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--white);width:150px">` : ''}
+            </div>
+          </div>
           <button class="stepper-remove" onclick="removeAllocTrade(${i},${ti})">✕</button>
+        </div>`).join('')}
+        <button class="add-btn" onclick="addAllocTrade(${i})"><span class="plus">+</span> Add trade</button>
+        <div class="divider" style="margin:12px 0"></div>
+        <div class="form-grid cols-3">
+          <div class="field">
+            <label>Unit</label>
+            <select onchange="updateAlloc(${i},'unit',this.value)">
+              <option ${(alloc.unit||'m²')==='m²'?'selected':''}>m²</option>
+              <option ${alloc.unit==='m³'?'selected':''}>m³</option>
+              <option ${alloc.unit==='m'?'selected':''}>m</option>
+              <option ${alloc.unit==='no.'?'selected':''}>no.</option>
+              <option ${alloc.unit==='tonnes'?'selected':''}>tonnes</option>
+              <option ${alloc.unit==='lm'?'selected':''}>lm</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Planned Qty</label>
+            <input type="number" value="${alloc.plannedQty||''}" onchange="updateAlloc(${i},'plannedQty',this.value)" placeholder="0">
+          </div>
+          <div class="field">
+            <label>Achieved Qty</label>
+            <input type="number" value="${alloc.achievedQty||''}" onchange="updateAlloc(${i},'achievedQty',this.value)" placeholder="0">
+          </div>
         </div>
-      </div>`).join('')}
-      <button class="add-btn" onclick="addAllocTrade(${i})"><span class="plus">+</span> Add trade</button>
-      <div class="divider"></div>
-      <div class="form-grid cols-4">
-        <div class="field">
-          <label>Unit</label>
-          <select onchange="updateAlloc(${i},'unit',this.value)">
-            <option>m²</option><option>m³</option><option>m</option><option>no.</option><option>tonnes</option>
-          </select>
-        </div>
-        <div class="field">
-          <label>Planned Qty</label>
-          <input type="number" value="${alloc.plannedQty||''}" onchange="updateAlloc(${i},'plannedQty',this.value)" placeholder="0">
-        </div>
-        <div class="field">
-          <label>Achieved Qty</label>
-          <input type="number" value="${alloc.achievedQty||''}" onchange="updateAlloc(${i},'achievedQty',this.value)" placeholder="0">
-        </div>
-        <div class="field">
-          <label>% of Plan <span class="auto-badge" style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
-          <div class="auto-value">${pctPlan}%</div>
-        </div>
-      </div>
-      <div style="display:flex;gap:16px;margin-top:10px;padding:10px;background:var(--bg-3);border-radius:var(--r-md)">
-        <div style="text-align:center;flex:1">
-          <div style="font-size:10px;color:var(--white-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Man-hours</div>
-          <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--cyan)">${manHrs}</div>
-        </div>
-        <div style="text-align:center;flex:1">
-          <div style="font-size:10px;color:var(--white-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Productivity</div>
-          <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)">${productivity} ${alloc.unit||'m²'}/man-hr</div>
-        </div>
+        ${isPlanner ? `
+        <div style="display:flex;gap:12px;margin-top:10px;padding:10px;background:var(--bg-3);border-radius:var(--r-md)">
+          <div style="text-align:center;flex:1">
+            <div style="font-size:10px;color:var(--white-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Total Man-hours</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--cyan)">${(alloc.trades||[]).reduce((a,t)=>a+(parseInt(t.inhouse)||0)+(parseInt(t.hired)||0),0)}</div>
+          </div>
+          <div style="text-align:center;flex:1">
+            <div style="font-size:10px;color:var(--white-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Productivity</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green)">${(() => {
+              const mh = (alloc.trades||[]).reduce((a,t)=>a+(parseInt(t.inhouse)||0)+(parseInt(t.hired)||0),0);
+              return mh > 0 && alloc.achievedQty ? (parseFloat(alloc.achievedQty)/mh).toFixed(2) + ' ' + (alloc.unit||'m²') + '/man-hr' : '—';
+            })()}</div>
+          </div>
+          <div style="text-align:center;flex:1">
+            <div style="font-size:10px;color:var(--white-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">% of Plan</div>
+            <div style="font-family:var(--mono);font-size:16px;font-weight:700;color:${pctPlan>=100?'var(--green)':pctPlan>=80?'var(--amber)':'var(--red)'}">${pctPlan}%</div>
+          </div>
+        </div>` : ''}
       </div>
     </div>`;
   }).join('')}`;
+}
+
+function toggleAllocExpand(i) {
+  if (!STATE.data.allocation.items[i]) STATE.data.allocation.items[i] = {};
+  const current = STATE.data.allocation.items[i].expanded;
+  STATE.data.allocation.items[i].expanded = current === false ? true : false;
+  const body = document.getElementById('allocBody_' + i);
+  if (body) body.style.display = body.style.display === 'none' ? '' : 'none';
+  const chevron = body?.previousElementSibling?.querySelector('span:last-child');
+  if (chevron) chevron.style.transform = body.style.display === 'none' ? '' : 'rotate(180deg)';
+}
+
+function adjustAllocTradeField(actIdx, ti, field, delta) {
+  if (!STATE.data.allocation.items[actIdx]) STATE.data.allocation.items[actIdx] = { trades:[] };
+  if (!STATE.data.allocation.items[actIdx].trades[ti]) STATE.data.allocation.items[actIdx].trades[ti] = {};
+  STATE.data.allocation.items[actIdx].trades[ti][field] = Math.max(0, (parseInt(STATE.data.allocation.items[actIdx].trades[ti][field])||0) + delta);
+  renderPanel(STATE.currentTab);
+}
+
+function setAllocTradeField(actIdx, ti, field, val) {
+  if (!STATE.data.allocation.items[actIdx]) STATE.data.allocation.items[actIdx] = { trades:[] };
+  if (!STATE.data.allocation.items[actIdx].trades[ti]) STATE.data.allocation.items[actIdx].trades[ti] = {};
+  STATE.data.allocation.items[actIdx].trades[ti][field] = field === 'supplier' ? val : Math.max(0, parseInt(val)||0);
+  autoSave();
 }
 
 // ─── 10. ISSUES ────────────────────────────────────────────────────────────
@@ -2311,9 +2560,15 @@ function setMatStatus(i, status) { STATE.data.materials.items[i].status = status
 
 // Activities
 function addActivity() {
-  STATE.data.activities.items.push({description:'',discipline:'Civil',zone:'',progress:0,status:'ontrack',actualStart:getReportDate(),actualFinish:null,p6Id:null,confidence:null});
-  STATE.data.allocation.items.push({trades:[],unit:'m²',plannedQty:'',achievedQty:''});
+  // New activities expand by default so engineer sees the form immediately
+  STATE.data.activities.items.push({description:'',floor:'',discipline:'',zone:'',progress:0,status:'ontrack',actualStart:getReportDate(),actualFinish:null,p6Id:null,confidence:null,expanded:true});
+  STATE.data.allocation.items.push({trades:[],unit:'m²',plannedQty:'',achievedQty:'',expanded:true});
   renderPanel(STATE.currentTab);
+  // Scroll to new activity
+  setTimeout(() => {
+    const last = document.querySelectorAll('.activity-card');
+    if (last.length) last[last.length-1].scrollIntoView({behavior:'smooth',block:'start'});
+  }, 100);
 }
 function removeActivity(i) {
   STATE.data.activities.items.splice(i,1);
@@ -2322,10 +2577,16 @@ function removeActivity(i) {
 }
 function updateActivity(i, field, val) { STATE.data.activities.items[i][field] = val; autoSave(); }
 function updateActivityProgress(i, val) {
-  STATE.data.activities.items[i].progress = parseInt(val);
+  val = Math.min(100, Math.max(0, parseInt(val)||0));
+  STATE.data.activities.items[i].progress = val;
   const el = document.getElementById('prog_'+i);
   if (el) el.textContent = val + '%';
-  if (parseInt(val) === 100) STATE.data.activities.items[i].status = 'complete';
+  if (val === 100) {
+    STATE.data.activities.items[i].status = 'complete';
+    STATE.data.activities.items[i].actualFinish = getReportDate();
+    renderPanel(STATE.currentTab);
+  }
+  autoSave();
 }
 function setActivityStatus(i, status) {
   STATE.data.activities.items[i].status = status;
@@ -2335,10 +2596,10 @@ function setActivityStatus(i, status) {
 
 // Allocation
 function addAllocTrade(actIdx) {
-  const name = prompt('Trade name:');
+  const name = prompt('Trade name (e.g. Block mason, Steel fixer):');
   if (!name) return;
   if (!STATE.data.allocation.items[actIdx]) STATE.data.allocation.items[actIdx] = {trades:[],unit:'m²',plannedQty:'',achievedQty:''};
-  STATE.data.allocation.items[actIdx].trades.push({name, count:0});
+  STATE.data.allocation.items[actIdx].trades.push({name, inhouse:0, hired:0, supplier:''});
   renderPanel(STATE.currentTab);
 }
 function removeAllocTrade(actIdx, ti) {
