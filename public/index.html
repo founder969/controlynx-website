@@ -2737,30 +2737,214 @@ function selectWeather(id) { STATE.data.weather.condition = id; renderPanel(STAT
 
 // ─── AUTO SAVE ────────────────────────────────────────────────────────────
 let saveTimer;
-function autoSave() {
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
-    try { localStorage.setItem('controlynx_dpr_draft', JSON.stringify(STATE.data)); } catch(e){}
-  }, 800);
+// ─── DATABASE SYNC ────────────────────────────────────────────────────────
+
+const SUPABASE_URL = 'https://zygnylsbmptucrgganjn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5Z255bHNibXB0dWNyZ2dhbmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzg4NzksImV4cCI6MjA5NTgxNDg3OX0.gRZfLoh7eC58d_HvRgRxHHgpsD28wYDyaQRGQgr8W84';
+
+function getToken() { return localStorage.getItem('cx_token') || ''; }
+
+async function apiCall(method, path, body) {
+  const opts = {
+    method,
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(path, opts);
+  return r.json();
 }
 
-function loadDraft() {
+// Convert STATE.data into flat report fields for Supabase
+function stateToReport() {
+  const d = STATE.data;
+  return {
+    weather_condition:         d.weather.condition,
+    weather_max_temp:          d.weather.maxTemp || null,
+    weather_min_temp:          d.weather.minTemp || null,
+    weather_humidity:          d.weather.humidity || null,
+    weather_wind_speed:        d.weather.windSpeed || null,
+    weather_visibility:        d.weather.visibility,
+    weather_stoppage:          d.weather.workStoppage,
+    weather_ntr:               d.weather.ntr,
+    safety_toolbox_conducted:  d.safety.toolboxConducted,
+    safety_toolbox_attendees:  d.safety.toolboxAttendees || null,
+    safety_toolbox_topic:      d.safety.toolboxTopic,
+    safety_man_hours:          d.safety.manHours || null,
+    safety_walk_conducted:     d.safety.walkConducted,
+    safety_walk_inspector:     d.safety.walkInspector,
+    safety_walk_areas:         d.safety.walkAreas,
+    safety_walk_findings:      d.safety.walkFindings,
+    safety_sors:               d.safety.sors,
+    safety_ncrs:               d.safety.ncrs,
+    safety_incidents:          d.safety.incidents,
+    safety_ntr_sor:            d.safety.ntrSor,
+    safety_ntr_ncr:            d.safety.ntrNcr,
+    safety_ntr_incident:       d.safety.ntrIncident,
+    safety_ntr_walk:           d.safety.ntrWalk,
+    labour_main_contractor:    d.labour.mainContractor,
+    labour_subcontractors:     d.labour.subcontractors,
+    staffing_main_contractor:  d.staffing.mainContractor,
+    staffing_subcontractors:   d.staffing.subcontractors,
+    equipment_items:           d.equipment.items,
+    equipment_mobilisation:    d.equipment.mobilisation,
+    equipment_demobilisation:  d.equipment.demobilisation,
+    equipment_ntr:             d.equipment.ntr,
+    materials_items:           d.materials.items,
+    materials_ntr:             d.materials.ntr,
+    activities_items:          d.activities.items,
+    activities_tomorrow_plan:  d.activities.tomorrowPlan,
+    allocation_items:          d.allocation.items,
+    issues_items:              d.issues.items,
+    issues_ntr:                d.issues.ntr,
+    photos_items:              d.photos.items,
+  };
+}
+
+// Convert Supabase report fields back into STATE.data
+function reportToState(report) {
+  if (!report) return;
+  const d = STATE.data;
+  // Weather
+  d.weather.condition    = report.weather_condition || 'clear';
+  d.weather.maxTemp      = report.weather_max_temp;
+  d.weather.minTemp      = report.weather_min_temp;
+  d.weather.humidity     = report.weather_humidity;
+  d.weather.windSpeed    = report.weather_wind_speed;
+  d.weather.visibility   = report.weather_visibility;
+  d.weather.workStoppage = report.weather_stoppage;
+  d.weather.ntr          = report.weather_ntr || false;
+  // Safety
+  d.safety.toolboxConducted  = report.safety_toolbox_conducted || 'yes';
+  d.safety.toolboxAttendees  = report.safety_toolbox_attendees;
+  d.safety.toolboxTopic      = report.safety_toolbox_topic;
+  d.safety.manHours          = report.safety_man_hours;
+  d.safety.walkConducted     = report.safety_walk_conducted;
+  d.safety.walkInspector     = report.safety_walk_inspector;
+  d.safety.walkAreas         = report.safety_walk_areas;
+  d.safety.walkFindings      = report.safety_walk_findings;
+  d.safety.sors              = report.safety_sors || [];
+  d.safety.ncrs              = report.safety_ncrs || [];
+  d.safety.incidents         = report.safety_incidents || [];
+  d.safety.ntrSor            = report.safety_ntr_sor || false;
+  d.safety.ntrNcr            = report.safety_ntr_ncr || false;
+  d.safety.ntrIncident       = report.safety_ntr_incident || false;
+  d.safety.ntrWalk           = report.safety_ntr_walk || false;
+  // Labour
+  if (report.labour_main_contractor)   d.labour.mainContractor  = report.labour_main_contractor;
+  if (report.labour_subcontractors)    d.labour.subcontractors  = report.labour_subcontractors;
+  if (report.staffing_main_contractor) d.staffing.mainContractor = report.staffing_main_contractor;
+  if (report.staffing_subcontractors)  d.staffing.subcontractors = report.staffing_subcontractors;
+  // Equipment
+  if (report.equipment_items)  d.equipment.items         = report.equipment_items;
+  d.equipment.mobilisation     = report.equipment_mobilisation;
+  d.equipment.demobilisation   = report.equipment_demobilisation;
+  d.equipment.ntr              = report.equipment_ntr || false;
+  // Materials
+  if (report.materials_items)  d.materials.items = report.materials_items;
+  d.materials.ntr              = report.materials_ntr || false;
+  // Activities
+  if (report.activities_items) d.activities.items = report.activities_items;
+  d.activities.tomorrowPlan    = report.activities_tomorrow_plan;
+  if (report.allocation_items) d.allocation.items = report.allocation_items;
+  // Issues
+  if (report.issues_items)     d.issues.items = report.issues_items;
+  d.issues.ntr                 = report.issues_ntr || false;
+  if (report.photos_items)     d.photos.items = report.photos_items;
+  // Store report ID
+  STATE.reportId     = report.id;
+  STATE.reportNumber = report.report_number;
+  STATE.reportDate   = report.report_date;
+}
+
+// Load today's report from server (creates new one if needed)
+async function loadTodayReport() {
+  const project = (() => { try { return JSON.parse(localStorage.getItem('cx_project')||'{}'); } catch(e){ return {}; } })();
+  if (!project.id) {
+    // No project set — fall back to localStorage
+    loadDraftLocal();
+    return;
+  }
+  STATE.projectId = project.id;
+  // Load identity from project
+  STATE.data.identity.projectName  = project.name || '';
+  STATE.data.identity.client       = project.client || '';
+  STATE.data.identity.pmc          = project.pmc || '';
+  STATE.data.identity.consultant   = project.consultant || '';
+  STATE.data.identity.contractor   = project.contractor || '';
+  STATE.data.identity.contractNo   = project.contract_number || '';
+  STATE.data.identity.startDate    = project.start_date || '';
+  STATE.data.identity.plannedFinish= project.planned_finish || '';
+  STATE.data.identity.reportPrefix = project.report_prefix || 'DPR';
+  STATE.data.identity.siteCoords   = project.site_lat ? project.site_lat + ', ' + project.site_lng : '';
+
+  try {
+    const report = await apiCall('GET', '/api/projects/' + project.id + '/today');
+    if (report && report.id) {
+      reportToState(report);
+      showToast('Report loaded — ' + report.report_number, true);
+    }
+  } catch(e) {
+    loadDraftLocal();
+  }
+  init();
+}
+
+function autoSave() {
+  clearTimeout(saveTimer);
+  // Always save to localStorage as backup
+  try { localStorage.setItem('controlynx_dpr_draft', JSON.stringify(STATE.data)); } catch(e){}
+  // Save to Supabase if we have a report ID
+  saveTimer = setTimeout(async () => {
+    if (STATE.reportId) {
+      try {
+        await apiCall('PATCH', '/api/reports/' + STATE.reportId, stateToReport());
+      } catch(e) { console.warn('Auto-save to server failed, saved locally'); }
+    }
+  }, 2000);
+}
+
+function loadDraftLocal() {
   try {
     const saved = localStorage.getItem('controlynx_dpr_draft');
     if (saved) {
       const parsed = JSON.parse(saved);
       Object.assign(STATE.data, parsed);
-      showToast('Draft restored', true);
+      showToast('Draft restored from local storage', true);
     }
   } catch(e){}
 }
 
+function loadDraft() { loadDraftLocal(); }
+
 // ─── SUBMIT ───────────────────────────────────────────────────────────────
-function submitReport() {
-  showToast('Report submitted! PDF generating... AI narrative queued.', true);
-  setTimeout(() => {
-    alert('✅ Report ' + calcReportNo() + ' submitted successfully.\n\nExternal PDF dispatched to distribution list.\nInternal AI narrative being generated.\n3 Excel exports ready for download.');
-  }, 1000);
+async function submitReport() {
+  if (!STATE.reportId) {
+    showToast('No report loaded — please refresh the page', false);
+    return;
+  }
+  const btn = document.querySelector('.submit-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+
+  try {
+    // Final save before submit
+    if (STATE.reportId) {
+      await apiCall('PATCH', '/api/reports/' + STATE.reportId, stateToReport());
+    }
+    // Submit
+    const result = await apiCall('POST', '/api/reports/' + STATE.reportId + '/submit', {});
+    if (result.success) {
+      showToast('Report ' + result.report_number + ' submitted successfully!', true);
+      setTimeout(() => {
+        alert('✅ Report ' + result.report_number + ' submitted.\n\n• PDF generating and will be emailed to distribution list\n• AI narrative being generated\n• Excel exports ready\n\nReport is now locked.');
+      }, 500);
+    } else {
+      showToast(result.error || 'Submission failed', false);
+      if (btn) { btn.disabled = false; btn.textContent = 'Submit Daily Report → Generate PDF & AI Analysis'; }
+    }
+  } catch(e) {
+    showToast('Connection error — please try again', false);
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit Daily Report → Generate PDF & AI Analysis'; }
+  }
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────
@@ -2780,8 +2964,14 @@ function markCurrentComplete() {
 }
 
 // ─── START ────────────────────────────────────────────────────────────────
-loadDraft();
-init();
+// Initialize STATE with extra fields
+STATE.reportId     = null;
+STATE.projectId    = null;
+STATE.reportNumber = null;
+STATE.reportDate   = null;
+
+// Load report from server or fall back to local draft
+loadTodayReport();
 </script>
 </body>
 </html>
