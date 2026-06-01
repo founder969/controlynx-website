@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controlynx — Daily Progress Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── DESIGN TOKENS (extracted from controlynx.ai) ─────────────────────── */
+:root {
+  --bg:          #080D14;
+  --bg-2:        #0C1220;
+  --bg-3:        #101828;
+  --bg-card:     #0F1A27;
+  --bg-card-2:   #111F30;
+  --border:      #1A2D40;
+  --border-2:    #1F3347;
+  --cyan:        #00D4FF;
+  --cyan-dim:    rgba(0,212,255,0.12);
+  --cyan-border: rgba(0,212,255,0.20);
+  --cyan-glow:   rgba(0,212,255,0.07);
+  --green:       #00C48C;
+  --green-dim:   rgba(0,196,140,0.12);
+  --amber:       #F4A030;
+  --amber-dim:   rgba(244,160,48,0.12);
+  --red:         #FF4D4D;
+  --red-dim:     rgba(255,77,77,0.10);
+  --purple:      #8B5CF6;
+  --purple-dim:  rgba(139,92,246,0.12);
+  --white:       #F0F4F8;
+  --white-2:     #B8C5D0;
+  --white-3:     #6B7F8E;
+  --white-4:     #3A4F60;
+  --sans:        'Figtree', sans-serif;
+  --display:     'Syne', sans-serif;
+  --mono:        'JetBrains Mono', monospace;
+  --r-sm:  6px;
+  --r-md:  10px;
+  --r-lg:  16px;
+  --r-xl:  20px;
+  --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 0 0 0.5px var(--border);
+}
+
+/* ─── RESET ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; -webkit-font-smoothing: antialiased; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+input, select, textarea, button { font-family: var(--sans); }
+button { cursor: pointer; border: none; outline: none; }
+input, select, textarea { outline: none; }
+
+/* ─── SCROLLBAR ──────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+
+/* ─── HEADER ─────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 56px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.logo-icon {
+  width: 30px; height: 30px;
+  background: var(--cyan-dim);
+  border: 1px solid var(--cyan-border);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-icon svg { width: 16px; height: 16px; }
+.logo-name { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--white); }
+.logo-name span { color: var(--cyan); }
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.header-title { font-size: 13px; font-weight: 600; color: var(--white); }
+.header-sub { font-size: 11px; color: var(--white-3); font-family: var(--mono); }
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.save-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--green);
+  font-family: var(--mono);
+}
+.save-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+.role-badge {
+  padding: 4px 10px;
+  background: var(--cyan-dim);
+  border: 1px solid var(--cyan-border);
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cyan);
+  font-family: var(--mono);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.step-counter {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--white-3);
+}
+.step-counter span { color: var(--cyan); }
+
+/* ─── PROGRESS BAR ───────────────────────────────────────────────────────── */
+.progress-bar-track {
+  height: 2px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.progress-bar-fill {
+  height: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--green));
+  transition: width 0.4s ease;
+}
+
+/* ─── TAB NAV ────────────────────────────────────────────────────────────── */
+.tab-nav {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 44px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--white-3);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+.tab-btn:hover { color: var(--white-2); background: rgba(255,255,255,0.02); }
+.tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+.tab-btn.complete .tab-icon { color: var(--green); }
+.tab-btn.complete::after {
+  content: '';
+  position: absolute;
+  top: 8px; right: 8px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.tab-btn.ntr-confirmed::after { background: var(--white-3); }
+.tab-icon { font-size: 13px; }
+.tab-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--white-4);
+  margin-right: 2px;
+}
+
+/* ─── MAIN CONTENT ───────────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ─── SECTION HEADER ─────────────────────────────────────────────────────── */
+.section-header {
+  margin-bottom: 20px;
+}
+.section-title {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+.section-desc {
+  font-size: 12px;
+  color: var(--white-3);
+  line-height: 1.5;
+}
+
+/* ─── CARD ───────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-card);
+}
+.card-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--white-3);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title::before {
+  content: '';
+  display: inline-block;
+  width: 3px; height: 12px;
+  background: var(--cyan);
+  border-radius: 2px;
+}
+
+/* ─── FORM GRID ──────────────────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.form-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+.form-grid.full { grid-template-columns: 1fr; }
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+
+/* ─── FIELD ──────────────────────────────────────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--white-3);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.field label .req { color: var(--cyan); font-size: 10px; }
+.field label .auto-badge {
+  padding: 1px 6px;
+  background: var(--cyan-dim);
+  border: 1px solid var(--cyan-border);
+  border-radius: 4px;
+  font-size: 9px;
+  color: var(--cyan);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.field label .ai-badge {
+  padding: 1px 6px;
+  background: var(--purple-dim);
+  border: 1px solid rgba(139,92,246,0.25);
+  border-radius: 4px;
+  font-size: 9px;
+  color: var(--purple);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.field input,
+.field select,
+.field textarea {
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--white);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  width: 100%;
+}
+.field input::placeholder,
+.field textarea::placeholder { color: var(--white-4); }
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--cyan-border);
+  box-shadow: 0 0 0 3px var(--cyan-glow);
+}
+.field input[readonly],
+.field input.auto {
+  color: var(--cyan);
+  font-family: var(--mono);
+  font-size: 12px;
+  background: rgba(0,212,255,0.04);
+  border-color: var(--border);
+  cursor: default;
+}
+.field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+.field select option { background: var(--bg-3); color: var(--white); }
+
+/* ─── AUTO VALUE DISPLAY ─────────────────────────────────────────────────── */
+.auto-value {
+  background: rgba(0,212,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--cyan);
+  font-family: var(--mono);
+}
+
+/* ─── WEATHER TILES ──────────────────────────────────────────────────────── */
+.weather-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.weather-tile {
+  background: var(--bg-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.weather-tile:hover { border-color: var(--cyan-border); }
+.weather-tile.selected {
+  background: var(--cyan-dim);
+  border-color: var(--cyan-border);
+}
+.weather-tile .wt-icon { font-size: 22px; margin-bottom: 4px; }
+.weather-tile .wt-label { font-size: 11px; color: var(--white-2); font-weight: 500; }
+
+/* ─── WEATHER STAT CARDS ─────────────────────────────────────────────────── */
+.weather-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.weather-stat {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px;
+}
+.weather-stat-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--white-3);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.weather-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--cyan);
+  font-family: var(--mono);
+}
+.weather-stat-unit { font-size: 11px; color: var(--white-3); margin-left: 2px; }
+.weather-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--white-3);
+  padding: 8px 0;
+}
+.spin {
+  width: 14px; height: 14px;
+  border: 2px solid var(--border-2);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── STEPPER ────────────────────────────────────────────────────────────── */
+.stepper-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 6px;
+  transition: border-color 0.2s;
+}
+.stepper-row:hover { border-color: var(--border-2); }
+.stepper-label { font-size: 13px; color: var(--white-2); flex: 1; }
+.stepper-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.stepper-btn {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  color: var(--white-2);
+  font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.stepper-btn:hover { background: var(--cyan-dim); border-color: var(--cyan-border); color: var(--cyan); }
+.stepper-value {
+  width: 48px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-sm);
+  padding: 4px;
+}
+.stepper-value:focus { border-color: var(--cyan-border); }
+.stepper-remove {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--white-4);
+  font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.stepper-remove:hover { background: var(--red-dim); border-color: var(--red); color: var(--red); }
+
+/* ─── SECTION GROUP ──────────────────────────────────────────────────────── */
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.group-header:hover { border-color: var(--border-2); }
+.group-header-left { display: flex; align-items: center; gap: 10px; }
+.group-chevron { color: var(--white-3); font-size: 12px; transition: transform 0.2s; }
+.group-chevron.open { transform: rotate(180deg); }
+.group-name { font-size: 13px; font-weight: 600; color: var(--white); }
+.group-total {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.group-body { padding-left: 8px; margin-bottom: 8px; }
+
+/* ─── ADD BUTTON ─────────────────────────────────────────────────────────── */
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r-md);
+  color: var(--white-3);
+  font-size: 12px;
+  font-family: var(--sans);
+  font-weight: 500;
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+.add-btn:hover { border-color: var(--cyan-border); color: var(--cyan); background: var(--cyan-dim); }
+.add-btn .plus { font-size: 16px; }
+
+/* ─── ACTIVITY CARD ──────────────────────────────────────────────────────── */
+.activity-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+.activity-card:hover { border-color: var(--border-2); }
+.activity-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+.activity-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.activity-tag {
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.tag-civil { background: var(--cyan-dim); color: var(--cyan); }
+.tag-mep { background: var(--purple-dim); color: var(--purple); }
+.tag-structural { background: var(--amber-dim); color: var(--amber); }
+.tag-finishes { background: var(--green-dim); color: var(--green); }
+
+/* ─── STATUS TAGS ────────────────────────────────────────────────────────── */
+.status-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.status-tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  background: var(--bg-3);
+  color: var(--white-3);
+}
+.status-tag:hover { border-color: var(--border-2); }
+.status-tag.active-ontrack { background: var(--green-dim); color: var(--green); border-color: rgba(0,196,140,0.3); }
+.status-tag.active-delayed { background: var(--amber-dim); color: var(--amber); border-color: rgba(244,160,48,0.3); }
+.status-tag.active-blocked { background: var(--red-dim); color: var(--red); border-color: rgba(255,77,77,0.3); }
+.status-tag.active-complete { background: var(--cyan-dim); color: var(--cyan); border-color: var(--cyan-border); }
+
+/* ─── PROGRESS SLIDER ────────────────────────────────────────────────────── */
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.progress-label { font-size: 11px; color: var(--white-3); white-space: nowrap; }
+.progress-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--border-2);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.progress-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--cyan);
+  cursor: pointer;
+  transition: transform 0.15s;
+  box-shadow: 0 0 8px rgba(0,212,255,0.4);
+}
+.progress-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.progress-value {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--cyan);
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ─── AI MAP INDICATOR ───────────────────────────────────────────────────── */
+.ai-map-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 7px 10px;
+  background: var(--purple-dim);
+  border: 1px solid rgba(139,92,246,0.2);
+  border-radius: var(--r-sm);
+  font-size: 11px;
+}
+.ai-map-icon { color: var(--purple); }
+.ai-map-text { color: var(--white-3); flex: 1; }
+.ai-map-id { font-family: var(--mono); color: var(--purple); font-weight: 600; }
+.ai-confidence {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.conf-high { background: var(--green-dim); color: var(--green); }
+.conf-med { background: var(--amber-dim); color: var(--amber); }
+.conf-low { background: var(--red-dim); color: var(--red); }
+
+/* ─── EQUIPMENT CARD ─────────────────────────────────────────────────────── */
+.equipment-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.equipment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.equipment-name { font-size: 13px; font-weight: 600; color: var(--white); }
+.eq-status-group { display: flex; gap: 5px; }
+.eq-status {
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: var(--bg-3);
+  color: var(--white-3);
+  transition: all 0.15s;
+}
+.eq-working.active { background: var(--green-dim); color: var(--green); border-color: rgba(0,196,140,0.3); }
+.eq-breakdown.active { background: var(--red-dim); color: var(--red); border-color: rgba(255,77,77,0.3); }
+.eq-repair.active { background: var(--amber-dim); color: var(--amber); border-color: rgba(244,160,48,0.3); }
+.eq-demob.active { background: var(--white-4); color: var(--white-2); border-color: var(--border-2); }
+
+/* ─── ISSUE CARD ─────────────────────────────────────────────────────────── */
+.issue-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px;
+  margin-bottom: 8px;
+  border-left: 3px solid transparent;
+}
+.issue-card.sev-high { border-left-color: var(--red); }
+.issue-card.sev-medium { border-left-color: var(--amber); }
+.issue-card.sev-low { border-left-color: var(--white-3); }
+.sev-group { display: flex; gap: 5px; }
+.sev-tag {
+  padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 600;
+  cursor: pointer; border: 1px solid transparent;
+  background: var(--bg-3); color: var(--white-3); transition: all 0.15s;
+}
+.sev-high.active { background: var(--red-dim); color: var(--red); border-color: rgba(255,77,77,0.3); }
+.sev-medium.active { background: var(--amber-dim); color: var(--amber); border-color: rgba(244,160,48,0.3); }
+.sev-low.active { background: var(--green-dim); color: var(--green); border-color: rgba(0,196,140,0.3); }
+
+/* ─── MATERIAL ROW ───────────────────────────────────────────────────────── */
+.material-row {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+}
+.mat-status-group { display: flex; gap: 5px; }
+.mat-status {
+  padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 600;
+  cursor: pointer; border: 1px solid transparent;
+  background: var(--bg-3); color: var(--white-3); transition: all 0.15s;
+}
+.mat-accepted.active { background: var(--green-dim); color: var(--green); border-color: rgba(0,196,140,0.3); }
+.mat-rejected.active { background: var(--red-dim); color: var(--red); border-color: rgba(255,77,77,0.3); }
+.mat-hold.active { background: var(--amber-dim); color: var(--amber); border-color: rgba(244,160,48,0.3); }
+
+/* ─── NOTHING TO REPORT ──────────────────────────────────────────────────── */
+.ntr-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--bg-2);
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r-md);
+  margin-bottom: 12px;
+}
+.ntr-toggle {
+  position: relative;
+  width: 36px; height: 20px;
+  flex-shrink: 0;
+}
+.ntr-toggle input {
+  opacity: 0; width: 0; height: 0; position: absolute;
+}
+.ntr-slider {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--border-2);
+  border-radius: 20px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+.ntr-slider::before {
+  content: '';
+  position: absolute;
+  width: 14px; height: 14px;
+  left: 3px; bottom: 3px;
+  background: var(--white);
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+.ntr-toggle input:checked + .ntr-slider { background: var(--green); }
+.ntr-toggle input:checked + .ntr-slider::before { transform: translateX(16px); }
+.ntr-label {
+  font-size: 12px;
+  color: var(--white-3);
+}
+.ntr-label strong { color: var(--white-2); }
+
+/* ─── PHOTO UPLOAD ───────────────────────────────────────────────────────── */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.photo-thumb {
+  aspect-ratio: 1;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  overflow: hidden;
+  position: relative;
+}
+.photo-thumb:hover { border-color: var(--cyan-border); }
+.photo-thumb.has-photo { border-color: var(--border-2); }
+.photo-thumb.has-photo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.photo-thumb .photo-add-icon { font-size: 20px; color: var(--white-4); }
+.photo-thumb .photo-add-label { font-size: 10px; color: var(--white-4); margin-top: 4px; }
+.photo-remove {
+  position: absolute;
+  top: 4px; right: 4px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.7);
+  color: var(--white);
+  font-size: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+.photo-thumb.has-photo:hover .photo-remove { display: flex; }
+
+/* ─── SIGNOFF / REVIEW ───────────────────────────────────────────────────── */
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.review-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+}
+.review-icon { font-size: 16px; }
+.review-tab-name { font-size: 12px; font-weight: 500; color: var(--white-2); flex: 1; }
+.review-status { font-size: 11px; font-weight: 600; }
+.rs-complete { color: var(--green); }
+.rs-ntr { color: var(--white-3); }
+.rs-pending { color: var(--amber); }
+.rs-empty { color: var(--red); }
+
+/* ─── SUBMIT BUTTON ──────────────────────────────────────────────────────── */
+.submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--cyan) 0%, #0099bb 100%);
+  color: var(--bg);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--display);
+  border-radius: var(--r-lg);
+  letter-spacing: 0.03em;
+  transition: all 0.2s;
+  box-shadow: 0 0 30px rgba(0,212,255,0.2);
+}
+.submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 40px rgba(0,212,255,0.35);
+}
+.submit-btn:disabled {
+  background: var(--border-2);
+  color: var(--white-4);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ─── NAVIGATION BUTTONS ─────────────────────────────────────────────────── */
+.nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: var(--bg-2);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--r-md);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--sans);
+  transition: all 0.2s;
+}
+.nav-btn.back {
+  background: transparent;
+  border: 1px solid var(--border-2);
+  color: var(--white-2);
+}
+.nav-btn.back:hover { border-color: var(--white-3); color: var(--white); }
+.nav-btn.next {
+  background: var(--cyan);
+  border: none;
+  color: var(--bg);
+}
+.nav-btn.next:hover { background: #00b8e0; box-shadow: 0 0 20px rgba(0,212,255,0.3); }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── DIVIDER ────────────────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 16px 0;
+}
+
+/* ─── TOAST ──────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--bg-card-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r-md);
+  padding: 10px 18px;
+  font-size: 12px;
+  color: var(--white-2);
+  opacity: 0;
+  transition: all 0.3s;
+  z-index: 999;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(0,196,140,0.4); color: var(--green); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid.cols-3 { grid-template-columns: 1fr; }
+  .form-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+  .span-2, .span-3 { grid-column: span 1; }
+  .weather-tiles { grid-template-columns: repeat(2,1fr); }
+  .weather-stats { grid-template-columns: repeat(2,1fr); }
+  .photo-grid { grid-template-columns: repeat(3,1fr); }
+  .review-grid { grid-template-columns: 1fr; }
+  .main { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    </div>
+    <span class="logo-name">Controlynx<span>.ai</span></span>
+  </a>
+  <div class="header-center">
+    <div class="header-title">Daily Progress Report</div>
+    <div class="header-sub" id="headerSub">New Report</div>
+  </div>
+  <div class="header-right">
+    <div class="save-indicator">
+      <div class="save-dot"></div>
+      <span>Saved</span>
+    </div>
+    <div class="role-badge" id="roleBadge">Planner / PCE</div>
+    <div class="step-counter"><span id="stepCurrent">1</span> / <span id="stepTotal">11</span></div>
+  </div>
+</header>
+
+<!-- PROGRESS BAR -->
+<div class="progress-bar-track">
+  <div class="progress-bar-fill" id="progressFill" style="width:9%"></div>
+</div>
+
+<!-- TAB NAV -->
+<nav class="tab-nav" id="tabNav">
+  <!-- Tabs injected by JS -->
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="mainContent">
+  <!-- Panels injected by JS -->
+</main>
+
+<!-- NAV ROW -->
+<div class="nav-row">
+  <button class="nav-btn back" id="btnBack" onclick="navigate(-1)">← Back</button>
+  <div id="navCenter" style="font-size:11px;color:var(--white-3)"></div>
+  <button class="nav-btn next" id="btnNext" onclick="navigate(1)">Continue →</button>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── APP STATE ─────────────────────────────────────────────────────────────
+const STATE = {
+  role: 'planner',  // planner | safety | timekeeper | storekeeper | engineer | qaqc
+  currentTab: 0,
+  tabStatus: new Array(11).fill('empty'),  // empty | complete | ntr
+  data: {
+    identity: {
+      projectName:'', client:'', pmc:'', consultant:'', contractor:'',
+      startDate:'', plannedFinish:'', contractNo:'', reportPrefix:'DPR',
+      siteCoords:'', shift:'day', zone:'', submittedBy:''
+    },
+    weather: {
+      condition:'clear', maxTemp:'', minTemp:'', humidity:'', windSpeed:'', visibility:'',
+      workStoppage:'', stoppageDuration:'', affectedWorks:'', ntr:false, fetching:false
+    },
+    safety: {
+      toolboxConducted:'yes', toolboxAttendees:'', toolboxTopic:'',
+      manHours:'', walkConducted:'yes', walkInspector:'', walkAreas:'', walkFindings:'',
+      sors:[], ncrs:[], incidents:[], ntrSor:false, ntrNcr:false, ntrIncident:false, ntrWalk:false
+    },
+    labour: {
+      mainContractor:{ name:'Main Contractor', trades:[] },
+      subcontractors:[]
+    },
+    staffing: {
+      mainContractor:{ name:'Main Contractor', positions:[] },
+      subcontractors:[]
+    },
+    equipment: { items:[], mobilisation:'', demobilisation:'', ntr:false },
+    materials: { items:[], ntr:false },
+    activities: { items:[], tomorrowPlan:'' },
+    allocation: { items:[] },
+    issues: { items:[], ntr:false },
+    photos: { items:[] }
+  }
+};
+
+// ─── TAB DEFINITIONS ──────────────────────────────────────────────────────
+const TABS = [
+  { id:'identity',   label:'Identity',    icon:'🏗', roles:['planner'] },
+  { id:'weather',    label:'Weather',     icon:'🌤', roles:['planner'] },
+  { id:'safety',     label:'Safety',      icon:'🦺', roles:['safety','planner'] },
+  { id:'labour',     label:'Labour',      icon:'👷', roles:['timekeeper','planner'] },
+  { id:'staffing',   label:'Staffing',    icon:'👔', roles:['timekeeper','planner'] },
+  { id:'equipment',  label:'Equipment',   icon:'🏗', roles:['storekeeper','planner'] },
+  { id:'materials',  label:'Materials',   icon:'📦', roles:['qaqc','planner'] },
+  { id:'activities', label:'Activities',  icon:'📋', roles:['engineer','planner'] },
+  { id:'allocation', label:'Allocation',  icon:'⚙', roles:['engineer','planner'] },
+  { id:'issues',     label:'Issues',      icon:'⚠', roles:['engineer','planner'] },
+  { id:'sign-off',   label:'Sign-off',    icon:'✅', roles:['planner'] }
+];
+
+// ─── CALCULATED FIELDS ────────────────────────────────────────────────────
+function calcDuration() {
+  const s = STATE.data.identity.startDate;
+  const f = STATE.data.identity.plannedFinish;
+  if (!s || !f) return '—';
+  const d = Math.ceil((new Date(f) - new Date(s)) / 86400000);
+  return d > 0 ? d + 'd' : '—';
+}
+function calcElapsed() {
+  const s = STATE.data.identity.startDate;
+  if (!s) return '—';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(s);
+  const d = Math.ceil((today - start) / 86400000);
+  return d >= 0 ? d + 'd' : '—';
+}
+function calcRemaining() {
+  const s = STATE.data.identity.startDate;
+  const f = STATE.data.identity.plannedFinish;
+  if (!s || !f) return '—';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const finish = new Date(f);
+  const d = Math.ceil((finish - today) / 86400000);
+  return d >= 0 ? d + 'd' : '<span style="color:var(--red)">' + Math.abs(d) + 'd overdue</span>';
+}
+function calcReportNo() {
+  const prefix = STATE.data.identity.reportPrefix || 'DPR';
+  const today = new Date();
+  const s = STATE.data.identity.startDate;
+  if (!s) return prefix + '-0001';
+  const n = Math.max(1, Math.ceil((today - new Date(s)) / 86400000));
+  return prefix + '-' + String(n).padStart(4,'0');
+}
+function getReportDate() {
+  return new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'});
+}
+
+// ─── WEATHER FETCH ────────────────────────────────────────────────────────
+async function fetchWeather() {
+  const coords = STATE.data.identity.siteCoords;
+  if (!coords || STATE.data.weather.ntr) return;
+  const [lat, lng] = coords.split(',').map(s => s.trim());
+  if (!lat || !lng) return;
+  STATE.data.weather.fetching = true;
+  renderWeatherFetching();
+  try {
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,visibility&daily=temperature_2m_max,temperature_2m_min&forecast_days=1&timezone=auto`);
+    const d = await r.json();
+    STATE.data.weather.maxTemp = Math.round(d.daily.temperature_2m_max[0]);
+    STATE.data.weather.minTemp = Math.round(d.daily.temperature_2m_min[0]);
+    STATE.data.weather.humidity = d.current.relative_humidity_2m;
+    STATE.data.weather.windSpeed = Math.round(d.current.wind_speed_10m);
+    STATE.data.weather.visibility = d.current.visibility ? Math.round(d.current.visibility/1000) + 'km' : 'Good';
+    const wc = d.current.weather_code;
+    STATE.data.weather.condition = wc === 0 ? 'clear' : wc < 50 ? 'cloudy' : wc < 70 ? 'rain' : 'sandstorm';
+  } catch(e) {
+    showToast('Weather fetch failed — please enter manually');
+  }
+  STATE.data.weather.fetching = false;
+  if (STATE.currentTab === 1) renderPanel(1);
+}
+
+function renderWeatherFetching() {
+  const el = document.getElementById('weatherAutoArea');
+  if (el) el.innerHTML = '<div class="weather-loading"><div class="spin"></div>Fetching live weather data…</div>';
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+function init() {
+  buildTabNav();
+  renderPanel(STATE.currentTab);
+  updateHeaderSub();
+}
+
+function buildTabNav() {
+  const nav = document.getElementById('tabNav');
+  nav.innerHTML = TABS.map((t, i) => `
+    <button class="tab-btn${i===STATE.currentTab?' active':''}${STATE.tabStatus[i]==='complete'?' complete':''}${STATE.tabStatus[i]==='ntr'?' ntr-confirmed':''}"
+      id="tabBtn${i}" onclick="jumpToTab(${i})">
+      <span class="tab-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="tab-icon">${t.icon}</span>
+      ${t.label}
+    </button>
+  `).join('');
+}
+
+function jumpToTab(i) {
+  STATE.currentTab = i;
+  buildTabNav();
+  renderPanel(i);
+  updateProgress();
+  scrollTabIntoView(i);
+}
+
+function scrollTabIntoView(i) {
+  const btn = document.getElementById('tabBtn'+i);
+  if (btn) btn.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+}
+
+function navigate(dir) {
+  const next = STATE.currentTab + dir;
+  if (next < 0 || next >= TABS.length) return;
+  STATE.currentTab = next;
+  buildTabNav();
+  renderPanel(next);
+  updateProgress();
+  scrollTabIntoView(next);
+  document.getElementById('mainContent').scrollTop = 0;
+}
+
+function updateProgress() {
+  const pct = ((STATE.currentTab + 1) / TABS.length * 100).toFixed(0);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepCurrent').textContent = STATE.currentTab + 1;
+  document.getElementById('btnBack').disabled = STATE.currentTab === 0;
+  document.getElementById('btnNext').textContent = STATE.currentTab === TABS.length - 1 ? 'Submit ✓' : 'Continue →';
+  if (STATE.currentTab === TABS.length - 1) {
+    document.getElementById('btnNext').classList.add('next');
+    document.getElementById('btnNext').onclick = () => submitReport();
+  } else {
+    document.getElementById('btnNext').onclick = () => navigate(1);
+  }
+}
+
+function updateHeaderSub() {
+  const sub = document.getElementById('headerSub');
+  if (STATE.data.identity.projectName) {
+    sub.textContent = STATE.data.identity.projectName + ' · ' + getReportDate();
+  } else {
+    sub.textContent = getReportDate();
+  }
+}
+
+// ─── PANEL RENDERERS ──────────────────────────────────────────────────────
+function renderPanel(i) {
+  const mc = document.getElementById('mainContent');
+  const renderers = [
+    renderIdentity, renderWeather, renderSafety,
+    renderLabour, renderStaffing, renderEquipment,
+    renderMaterials, renderActivities, renderAllocation,
+    renderIssues, renderSignoff
+  ];
+  mc.innerHTML = renderers[i]();
+  bindPanel(i);
+  updateProgress();
+}
+
+// ─── 1. IDENTITY ───────────────────────────────────────────────────────────
+function renderIdentity() {
+  const d = STATE.data.identity;
+  return `
+  <div class="section-header">
+    <div class="section-title">Project Identity</div>
+    <div class="section-desc">Set up your project once. These details auto-populate every report.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Project information — set once</div>
+    <div class="form-grid">
+      <div class="field span-2">
+        <label>Project Name <span class="req">*</span></label>
+        <input type="text" id="f_projectName" value="${d.projectName}" placeholder="e.g. Aldar Manarat Residential Tower — Phase 02">
+      </div>
+      <div class="field">
+        <label>Client / Employer <span class="req">*</span></label>
+        <input type="text" id="f_client" value="${d.client}" placeholder="e.g. Aldar Properties">
+      </div>
+      <div class="field">
+        <label>Main Contractor <span class="req">*</span></label>
+        <input type="text" id="f_contractor" value="${d.contractor}" placeholder="e.g. Bright Accord General Contracting LLC">
+      </div>
+      <div class="field">
+        <label>PMC</label>
+        <input type="text" id="f_pmc" value="${d.pmc}" placeholder="e.g. Hill International">
+      </div>
+      <div class="field">
+        <label>Consultant</label>
+        <input type="text" id="f_consultant" value="${d.consultant}" placeholder="e.g. Ultra-Architectural Consultancy">
+      </div>
+      <div class="field">
+        <label>Contract Number</label>
+        <input type="text" id="f_contractNo" value="${d.contractNo}" placeholder="e.g. SIMR2-EW-BAG-P2">
+      </div>
+      <div class="field">
+        <label>Report Number Prefix <span class="req">*</span></label>
+        <input type="text" id="f_reportPrefix" value="${d.reportPrefix}" placeholder="e.g. DPR or BAGC-DPR">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Contract dates</div>
+    <div class="form-grid cols-3">
+      <div class="field">
+        <label>Contract Start Date <span class="req">*</span></label>
+        <input type="date" id="f_startDate" value="${d.startDate}">
+      </div>
+      <div class="field">
+        <label>Planned Finish Date <span class="req">*</span></label>
+        <input type="date" id="f_plannedFinish" value="${d.plannedFinish}">
+      </div>
+      <div class="field">
+        <label>Site Coordinates <span class="req">*</span> <span style="font-size:10px;color:var(--white-4)">(for weather)</span></label>
+        <input type="text" id="f_siteCoords" value="${d.siteCoords}" placeholder="e.g. 24.4539, 54.3773">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Auto-calculated — every report <span class="auto-badge" style="font-size:10px;padding:2px 8px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></div>
+    <div class="form-grid cols-4">
+      <div class="field">
+        <label>Duration</label>
+        <div class="auto-value" id="calc_duration">${calcDuration()}</div>
+      </div>
+      <div class="field">
+        <label>Elapsed</label>
+        <div class="auto-value" id="calc_elapsed">${calcElapsed()}</div>
+      </div>
+      <div class="field">
+        <label>Remaining</label>
+        <div class="auto-value" id="calc_remaining">${calcRemaining()}</div>
+      </div>
+      <div class="field">
+        <label>Report No.</label>
+        <div class="auto-value" id="calc_reportNo">${calcReportNo()}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Today's report details</div>
+    <div class="form-grid cols-3">
+      <div class="field">
+        <label>Report Date <span class="auto-badge" style="font-size:10px;padding:2px 8px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
+        <div class="auto-value">${getReportDate()}</div>
+      </div>
+      <div class="field">
+        <label>Shift <span class="req">*</span></label>
+        <select id="f_shift">
+          <option value="day" ${d.shift==='day'?'selected':''}>Day shift (06:00–18:00)</option>
+          <option value="night" ${d.shift==='night'?'selected':''}>Night shift (18:00–06:00)</option>
+          <option value="split" ${d.shift==='split'?'selected':''}>Split shift (24hr)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Area / Zone</label>
+        <input type="text" id="f_zone" value="${d.zone}" placeholder="e.g. Zone C-4">
+      </div>
+      <div class="field span-2">
+        <label>Submitted By <span class="req">*</span></label>
+        <input type="text" id="f_submittedBy" value="${d.submittedBy}" placeholder="Your full name">
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindIdentity() {
+  const fields = ['projectName','client','pmc','consultant','contractor','contractNo','reportPrefix','startDate','plannedFinish','siteCoords','shift','zone','submittedBy'];
+  fields.forEach(f => {
+    const el = document.getElementById('f_'+f);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      STATE.data.identity[f] = el.value;
+      const calcFields = ['calc_duration','calc_elapsed','calc_remaining','calc_reportNo'];
+      document.getElementById('calc_duration').textContent = calcDuration();
+      document.getElementById('calc_elapsed').textContent = calcElapsed();
+      document.getElementById('calc_remaining').innerHTML = calcRemaining();
+      document.getElementById('calc_reportNo').textContent = calcReportNo();
+      updateHeaderSub();
+      autoSave();
+    });
+  });
+}
+
+// ─── 2. WEATHER ────────────────────────────────────────────────────────────
+function renderWeather() {
+  const d = STATE.data.weather;
+  const conditions = [
+    { id:'clear', icon:'☀️', label:'Clear' },
+    { id:'cloudy', icon:'⛅', label:'Cloudy' },
+    { id:'rain', icon:'🌧', label:'Rain' },
+    { id:'sandstorm', icon:'🌫', label:'Sandstorm' },
+  ];
+  return `
+  <div class="section-header">
+    <div class="section-title">Site Conditions</div>
+    <div class="section-desc">Weather data is fetched automatically from your site coordinates. Only fill work stoppage details if applicable.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Weather condition</div>
+    <div class="weather-tiles">
+      ${conditions.map(c => `
+        <div class="weather-tile${d.condition===c.id?' selected':''}" onclick="selectWeather('${c.id}')">
+          <div class="wt-icon">${c.icon}</div>
+          <div class="wt-label">${c.label}</div>
+        </div>`).join('')}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      Live weather data
+      <span style="font-size:10px;padding:2px 8px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO-FETCHED</span>
+      <button onclick="fetchWeather()" style="margin-left:auto;padding:4px 12px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:6px;color:var(--cyan);font-size:11px;font-family:var(--sans)">↻ Refresh</button>
+    </div>
+    <div id="weatherAutoArea">
+      ${d.maxTemp ? `
+      <div class="weather-stats">
+        <div class="weather-stat">
+          <div class="weather-stat-label">Max Temp</div>
+          <div class="weather-stat-value">${d.maxTemp}<span class="weather-stat-unit">°C</span></div>
+        </div>
+        <div class="weather-stat">
+          <div class="weather-stat-label">Min Temp</div>
+          <div class="weather-stat-value">${d.minTemp}<span class="weather-stat-unit">°C</span></div>
+        </div>
+        <div class="weather-stat">
+          <div class="weather-stat-label">Humidity</div>
+          <div class="weather-stat-value">${d.humidity}<span class="weather-stat-unit">%</span></div>
+        </div>
+        <div class="weather-stat">
+          <div class="weather-stat-label">Wind</div>
+          <div class="weather-stat-value">${d.windSpeed}<span class="weather-stat-unit">km/h</span></div>
+        </div>
+      </div>` : `
+      <div class="weather-loading"><div class="spin"></div>Set site coordinates in Identity tab to enable auto-fetch</div>
+      <div class="divider"></div>
+      <div class="form-grid cols-4" style="margin-top:12px">
+        <div class="field">
+          <label>Max Temp (°C)</label>
+          <input type="number" id="f_maxTemp" value="${d.maxTemp}" placeholder="42">
+        </div>
+        <div class="field">
+          <label>Min Temp (°C)</label>
+          <input type="number" id="f_minTemp" value="${d.minTemp}" placeholder="32">
+        </div>
+        <div class="field">
+          <label>Humidity (%)</label>
+          <input type="number" id="f_humidity" value="${d.humidity}" placeholder="52">
+        </div>
+        <div class="field">
+          <label>Visibility</label>
+          <input type="text" id="f_visibility" value="${d.visibility}" placeholder="Good">
+        </div>
+      </div>`}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Work stoppage due to weather</div>
+    <div class="ntr-banner">
+      <label class="ntr-toggle">
+        <input type="checkbox" id="ntr_weather" ${d.ntr?'checked':''} onchange="toggleNtr('weather')">
+        <span class="ntr-slider"></span>
+      </label>
+      <span class="ntr-label"><strong>Nothing to report</strong> — No work stoppage today</span>
+    </div>
+    <div id="weatherStoppage" style="${d.ntr?'opacity:0.3;pointer-events:none':''}">
+      <div class="form-grid">
+        <div class="field">
+          <label>Stoppage Duration (hrs)</label>
+          <input type="number" id="f_stoppageDuration" value="${d.stoppageDuration}" placeholder="e.g. 2.5">
+        </div>
+        <div class="field">
+          <label>Affected Works</label>
+          <input type="text" id="f_affectedWorks" value="${d.affectedWorks}" placeholder="e.g. Concrete pours Zone 01">
+        </div>
+        <div class="field span-2">
+          <label>Description</label>
+          <textarea id="f_workStoppage" placeholder="Describe the stoppage, duration, crew count affected…">${d.workStoppage}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function bindWeather() {
+  const weatherFields = ['maxTemp','minTemp','humidity','visibility','stoppageDuration','affectedWorks','workStoppage'];
+  weatherFields.forEach(f => {
+    const el = document.getElementById('f_'+f);
+    if (!el) return;
+    el.addEventListener('input', () => { STATE.data.weather[f] = el.value; autoSave(); });
+  });
+  if (STATE.data.identity.siteCoords && !STATE.data.weather.maxTemp) fetchWeather();
+}
+
+function selectWeather(id) {
+  STATE.data.weather.condition = id;
+  renderPanel(1);
+}
+
+// ─── 3. SAFETY ─────────────────────────────────────────────────────────────
+function renderSafety() {
+  const d = STATE.data.safety;
+  return `
+  <div class="section-header">
+    <div class="section-title">Safety</div>
+    <div class="section-desc">HSE data entered by Safety Manager, Safety Engineer, or Safety Officer.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Toolbox talk</div>
+    <div class="form-grid cols-3">
+      <div class="field">
+        <label>Conducted <span class="req">*</span></label>
+        <select id="f_toolboxConducted">
+          <option value="yes" ${d.toolboxConducted==='yes'?'selected':''}>Yes — conducted</option>
+          <option value="no" ${d.toolboxConducted==='no'?'selected':''}>No — not conducted</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Attendees Count</label>
+        <input type="number" id="f_toolboxAttendees" value="${d.toolboxAttendees}" placeholder="e.g. 112">
+      </div>
+      <div class="field">
+        <label>Man Hours Worked Today <span class="req">*</span></label>
+        <input type="number" id="f_manHours" value="${d.manHours}" placeholder="e.g. 850">
+      </div>
+      <div class="field span-3">
+        <label>Topic Covered</label>
+        <input type="text" id="f_toolboxTopic" value="${d.toolboxTopic}" placeholder="e.g. Heat stress management, working at height">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Safety site walk</div>
+    <div class="ntr-banner">
+      <label class="ntr-toggle">
+        <input type="checkbox" id="ntr_walk" ${d.ntrWalk?'checked':''} onchange="toggleNtrSafety('walk')">
+        <span class="ntr-slider"></span>
+      </label>
+      <span class="ntr-label"><strong>Nothing to report</strong> — No site walk today</span>
+    </div>
+    <div id="walkArea" style="${d.ntrWalk?'opacity:0.3;pointer-events:none':''}">
+      <div class="form-grid">
+        <div class="field">
+          <label>Walk Conducted</label>
+          <select id="f_walkConducted">
+            <option value="yes" ${d.walkConducted==='yes'?'selected':''}>Yes</option>
+            <option value="no" ${d.walkConducted==='no'?'selected':''}>No</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Inspector Name</label>
+          <input type="text" id="f_walkInspector" value="${d.walkInspector}" placeholder="e.g. Ahmed Hassan">
+        </div>
+        <div class="field">
+          <label>Areas Covered</label>
+          <input type="text" id="f_walkAreas" value="${d.walkAreas}" placeholder="e.g. Zone 01 Floors 3–5, Zone 02">
+        </div>
+        <div class="field">
+          <label>Findings / Observations</label>
+          <input type="text" id="f_walkFindings" value="${d.walkFindings}" placeholder="e.g. Unsafe scaffolding Zone 02 Level 4">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">HSE — SORs issued today</div>
+    <div class="ntr-banner">
+      <label class="ntr-toggle">
+        <input type="checkbox" id="ntr_sor" ${d.ntrSor?'checked':''} onchange="toggleNtrSafety('sor')">
+        <span class="ntr-slider"></span>
+      </label>
+      <span class="ntr-label"><strong>Nothing to report</strong> — No SORs issued today</span>
+    </div>
+    <div id="sorArea" style="${d.ntrSor?'opacity:0.3;pointer-events:none':''}">
+      ${d.sors.map((s,i) => renderSorRow(s,i)).join('')}
+      <button class="add-btn" onclick="addSor()"><span class="plus">+</span> Add SOR</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">HSE — Safety NCRs issued today</div>
+    <div class="ntr-banner">
+      <label class="ntr-toggle">
+        <input type="checkbox" id="ntr_ncr" ${d.ntrNcr?'checked':''} onchange="toggleNtrSafety('ncr')">
+        <span class="ntr-slider"></span>
+      </label>
+      <span class="ntr-label"><strong>Nothing to report</strong> — No NCRs issued today</span>
+    </div>
+    <div id="ncrArea" style="${d.ntrNcr?'opacity:0.3;pointer-events:none':''}">
+      ${d.ncrs.map((n,i) => renderNcrRow(n,i)).join('')}
+      <button class="add-btn" onclick="addNcr()"><span class="plus">+</span> Add Safety NCR</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Incident log</div>
+    <div class="ntr-banner">
+      <label class="ntr-toggle">
+        <input type="checkbox" id="ntr_incident" ${d.ntrIncident?'checked':''} onchange="toggleNtrSafety('incident')">
+        <span class="ntr-slider"></span>
+      </label>
+      <span class="ntr-label"><strong>Nothing to report</strong> — No incidents today</span>
+    </div>
+    <div id="incidentArea" style="${d.ntrIncident?'opacity:0.3;pointer-events:none':''}">
+      ${d.incidents.map((inc,i) => renderIncidentRow(inc,i)).join('')}
+      <button class="add-btn" onclick="addIncident()"><span class="plus">+</span> Log incident / near miss</button>
+    </div>
+  </div>`;
+}
+
+function renderSorRow(s, i) {
+  return `
+  <div class="material-row" style="margin-bottom:8px">
+    <div class="form-grid cols-3" style="margin-bottom:8px">
+      <div class="field">
+        <label>SOR Reference</label>
+        <input type="text" value="${s.ref||''}" onchange="updateSor(${i},'ref',this.value)" placeholder="e.g. SOR-001">
+      </div>
+      <div class="field">
+        <label>Issued To</label>
+        <input type="text" value="${s.issuedTo||''}" onchange="updateSor(${i},'issuedTo',this.value)" placeholder="Company / person">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select onchange="updateSor(${i},'status',this.value)">
+          <option ${s.status==='open'?'selected':''}>Open</option>
+          <option ${s.status==='closed'?'selected':''}>Closed</option>
+        </select>
+      </div>
+      <div class="field span-3">
+        <label>Description</label>
+        <input type="text" value="${s.description||''}" onchange="updateSor(${i},'description',this.value)" placeholder="Describe the safety observation…">
+      </div>
+    </div>
+    <button class="add-btn" style="border-style:solid;border-color:var(--red);color:var(--red);background:var(--red-dim)" onclick="removeSor(${i})">Remove SOR</button>
+  </div>`;
+}
+
+function renderNcrRow(n, i) {
+  return `
+  <div class="material-row" style="margin-bottom:8px">
+    <div class="form-grid cols-3" style="margin-bottom:8px">
+      <div class="field">
+        <label>NCR Reference</label>
+        <input type="text" value="${n.ref||''}" onchange="updateNcr(${i},'ref',this.value)" placeholder="e.g. NCR-HSE-001">
+      </div>
+      <div class="field">
+        <label>Trade / Subcontractor</label>
+        <input type="text" value="${n.trade||''}" onchange="updateNcr(${i},'trade',this.value)" placeholder="e.g. Main Contractor — Steelwork">
+      </div>
+      <div class="field">
+        <label>Target Close Date</label>
+        <input type="date" value="${n.targetDate||''}" onchange="updateNcr(${i},'targetDate',this.value)">
+      </div>
+      <div class="field span-2">
+        <label>Description of Non-Conformance</label>
+        <input type="text" value="${n.description||''}" onchange="updateNcr(${i},'description',this.value)" placeholder="Describe the non-conformance…">
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select onchange="updateNcr(${i},'status',this.value)">
+          <option ${n.status==='open'?'selected':''}>Open</option>
+          <option ${n.status==='closed'?'selected':''}>Closed</option>
+        </select>
+      </div>
+    </div>
+    <button class="add-btn" style="border-style:solid;border-color:var(--red);color:var(--red);background:var(--red-dim)" onclick="removeNcr(${i})">Remove NCR</button>
+  </div>`;
+}
+
+function renderIncidentRow(inc, i) {
+  return `
+  <div class="material-row" style="margin-bottom:8px">
+    <div class="form-grid cols-3" style="margin-bottom:8px">
+      <div class="field">
+        <label>Incident Type</label>
+        <select onchange="updateIncident(${i},'type',this.value)">
+          <option ${inc.type==='nearmiss'?'selected':''}>Near miss</option>
+          <option ${inc.type==='firstaid'?'selected':''}>First aid</option>
+          <option ${inc.type==='lti'?'selected':''}>LTI</option>
+          <option ${inc.type==='dangerous'?'selected':''}>Dangerous occurrence</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Responsible Person</label>
+        <input type="text" value="${inc.responsible||''}" onchange="updateIncident(${i},'responsible',this.value)" placeholder="Name">
+      </div>
+      <div class="field">
+        <label>Corrective Action</label>
+        <input type="text" value="${inc.action||''}" onchange="updateIncident(${i},'action',this.value)" placeholder="Action taken">
+      </div>
+      <div class="field span-3">
+        <label>Description</label>
+        <textarea onchange="updateIncident(${i},'description',this.value)" placeholder="Describe the incident…" style="min-height:60px">${inc.description||''}</textarea>
+      </div>
+    </div>
+    <button class="add-btn" style="border-style:solid;border-color:var(--red);color:var(--red);background:var(--red-dim)" onclick="removeIncident(${i})">Remove</button>
+  </div>`;
+}
+
+// ─── 4. LABOUR ─────────────────────────────────────────────────────────────
+function renderLabour() {
+  const d = STATE.data.labour;
+  const mainTotal = d.mainContractor.trades.reduce((a,t)=>a+(parseInt(t.count)||0),0);
+  return `
+  <div class="section-header">
+    <div class="section-title">Direct Labour</div>
+    <div class="section-desc">Enter headcount per trade. Timekeeper enters and updates this tab.</div>
+  </div>
+  <div class="card">
+    <div class="group-header" onclick="toggleGroup('labour_main')">
+      <div class="group-header-left">
+        <span class="group-chevron open" id="chev_labour_main">▼</span>
+        <span class="group-name">${d.mainContractor.name}</span>
+      </div>
+      <span class="group-total">${mainTotal}</span>
+    </div>
+    <div id="group_labour_main" class="group-body">
+      ${d.mainContractor.trades.map((t,i) => renderTradeRow(t,i,'main')).join('')}
+      <button class="add-btn" onclick="addTrade('main')"><span class="plus">+</span> Add trade — main contractor</button>
+    </div>
+  </div>
+  ${d.subcontractors.map((sub,si) => {
+    const subTotal = sub.trades.reduce((a,t)=>a+(parseInt(t.count)||0),0);
+    return `
+    <div class="card">
+      <div class="group-header" onclick="toggleGroup('labour_sub_${si}')">
+        <div class="group-header-left">
+          <span class="group-chevron open" id="chev_labour_sub_${si}">▼</span>
+          <span class="group-name">${sub.name}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="group-total">${subTotal}</span>
+          <button onclick="removeSubcontractor('labour',${si})" style="padding:3px 8px;background:var(--red-dim);border:1px solid rgba(255,77,77,0.3);border-radius:6px;color:var(--red);font-size:11px">Remove</button>
+        </div>
+      </div>
+      <div id="group_labour_sub_${si}" class="group-body">
+        ${sub.trades.map((t,ti) => renderTradeRow(t,ti,'sub',si)).join('')}
+        <button class="add-btn" onclick="addTrade('sub',${si})"><span class="plus">+</span> Add trade — ${sub.name}</button>
+      </div>
+    </div>`;
+  }).join('')}
+  <button class="add-btn" onclick="addSubcontractor('labour')"><span class="plus">+</span> Add subcontractor</button>
+  <div class="card" style="margin-top:12px;background:var(--bg-3)">
+    <div class="form-grid cols-3" style="text-align:center">
+      <div>
+        <div style="font-size:11px;color:var(--white-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Main Contractor</div>
+        <div style="font-size:24px;font-weight:700;font-family:var(--mono);color:var(--cyan)">${mainTotal}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--white-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Subcontractors</div>
+        <div style="font-size:24px;font-weight:700;font-family:var(--mono);color:var(--amber)">${d.subcontractors.reduce((a,s)=>a+s.trades.reduce((b,t)=>b+(parseInt(t.count)||0),0),0)}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--white-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Grand Total</div>
+        <div style="font-size:24px;font-weight:700;font-family:var(--mono);color:var(--white)">${mainTotal + d.subcontractors.reduce((a,s)=>a+s.trades.reduce((b,t)=>b+(parseInt(t.count)||0),0),0)}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderTradeRow(t, i, group, subIdx) {
+  const key = group === 'main' ? `labour_main_${i}` : `labour_sub_${subIdx}_${i}`;
+  return `
+  <div class="stepper-row">
+    <span class="stepper-label">${t.name}</span>
+    <div class="stepper-controls">
+      <button class="stepper-btn" onclick="adjustCount('${group}','labour',${i},${subIdx},-1)">−</button>
+      <input class="stepper-value" type="number" min="0" value="${t.count||0}" onchange="setCount('${group}','labour',${i},${subIdx},this.value)">
+      <button class="stepper-btn" onclick="adjustCount('${group}','labour',${i},${subIdx},1)">+</button>
+      <button class="stepper-remove" onclick="removeTrade('${group}','labour',${i},${subIdx})">✕</button>
+    </div>
+  </div>`;
+}
+
+// ─── 5. STAFFING ───────────────────────────────────────────────────────────
+function renderStaffing() {
+  const d = STATE.data.staffing;
+  const mainTotal = d.mainContractor.positions.reduce((a,p)=>a+(parseInt(p.count)||0),0);
+  return `
+  <div class="section-header">
+    <div class="section-title">Staff on Site</div>
+    <div class="section-desc">Professional and managerial staff headcount per company.</div>
+  </div>
+  <div class="card">
+    <div class="group-header" onclick="toggleGroup('staffing_main')">
+      <div class="group-header-left">
+        <span class="group-chevron open" id="chev_staffing_main">▼</span>
+        <span class="group-name">${d.mainContractor.name}</span>
+      </div>
+      <span class="group-total">${mainTotal}</span>
+    </div>
+    <div id="group_staffing_main" class="group-body">
+      ${d.mainContractor.positions.map((p,i) => renderPositionRow(p,i,'main')).join('')}
+      <button class="add-btn" onclick="addPosition('main')"><span class="plus">+</span> Add position — main contractor</button>
+    </div>
+  </div>
+  ${d.subcontractors.map((sub,si) => {
+    const subTotal = sub.positions.reduce((a,p)=>a+(parseInt(p.count)||0),0);
+    return `
+    <div class="card">
+      <div class="group-header" onclick="toggleGroup('staffing_sub_${si}')">
+        <div class="group-header-left">
+          <span class="group-chevron open" id="chev_staffing_sub_${si}">▼</span>
+          <span class="group-name">${sub.name}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="group-total">${subTotal}</span>
+          <button onclick="removeSubcontractor('staffing',${si})" style="padding:3px 8px;background:var(--red-dim);border:1px solid rgba(255,77,77,0.3);border-radius:6px;color:var(--red);font-size:11px">Remove</button>
+        </div>
+      </div>
+      <div id="group_staffing_sub_${si}" class="group-body">
+        ${sub.positions.map((p,pi) => renderPositionRow(p,pi,'sub',si)).join('')}
+        <button class="add-btn" onclick="addPosition('sub',${si})"><span class="plus">+</span> Add position — ${sub.name}</button>
+      </div>
+    </div>`;
+  }).join('')}
+  <button class="add-btn" onclick="addSubcontractor('staffing')"><span class="plus">+</span> Add subcontractor</button>
+  <div class="card" style="margin-top:12px;background:var(--bg-3)">
+    <div class="form-grid cols-2" style="text-align:center">
+      <div>
+        <div style="font-size:11px;color:var(--white-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Total Staff</div>
+        <div style="font-size:32px;font-weight:700;font-family:var(--mono);color:var(--cyan)">${mainTotal + d.subcontractors.reduce((a,s)=>a+s.positions.reduce((b,p)=>b+(parseInt(p.count)||0),0),0)}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--white-3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Companies on site</div>
+        <div style="font-size:32px;font-weight:700;font-family:var(--mono);color:var(--amber)">${1 + d.subcontractors.length}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderPositionRow(p, i, group, subIdx) {
+  return `
+  <div class="stepper-row">
+    <span class="stepper-label">${p.name}</span>
+    <div class="stepper-controls">
+      <button class="stepper-btn" onclick="adjustCount('${group}','staffing',${i},${subIdx},-1)">−</button>
+      <input class="stepper-value" type="number" min="0" value="${p.count||0}" onchange="setCount('${group}','staffing',${i},${subIdx},this.value)">
+      <button class="stepper-btn" onclick="adjustCount('${group}','staffing',${i},${subIdx},1)">+</button>
+      <button class="stepper-remove" onclick="removeTrade('${group}','staffing',${i},${subIdx})">✕</button>
+    </div>
+  </div>`;
+}
+
+// ─── 6. EQUIPMENT ──────────────────────────────────────────────────────────
+function renderEquipment() {
+  const d = STATE.data.equipment;
+  return `
+  <div class="section-header">
+    <div class="section-title">Equipment & Machinery</div>
+    <div class="section-desc">Track all plant and equipment status. Storekeeper enters this tab.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Equipment on site</div>
+    <div class="ntr-banner">
+      <label class="ntr-toggle">
+        <input type="checkbox" id="ntr_equipment" ${d.ntr?'checked':''} onchange="toggleNtr('equipment')">
+        <span class="ntr-slider"></span>
+      </label>
+      <span class="ntr-label"><strong>Nothing to report</strong> — No equipment movements today</span>
+    </div>
+    <div id="equipArea" style="${d.ntr?'opacity:0.3;pointer-events:none':''}">
+      ${d.items.map((eq,i) => renderEquipmentCard(eq,i)).join('')}
+      <button class="add-btn" onclick="addEquipment()"><span class="plus">+</span> Add equipment</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Equipment movements</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Mobilisation Requested</label>
+        <textarea id="f_mobilisation" placeholder="List equipment requested to be mobilised to site…" style="min-height:60px">${d.mobilisation}</textarea>
+      </div>
+      <div class="field">
+        <label>Demobilisation Planned</label>
+        <textarea id="f_demobilisation" placeholder="List equipment to be demobilised…" style="min-height:60px">${d.demobilisation}</textarea>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderEquipmentCard(eq, i) {
+  return `
+  <div class="equipment-card">
+    <div class="equipment-header">
+      <div>
+        <div class="equipment-name">${eq.name || 'Equipment ' + (i+1)}</div>
+        ${eq.plantNo ? `<div style="font-family:var(--mono);font-size:11px;color:var(--white-3);margin-top:2px">ID: ${eq.plantNo}</div>` : ''}
+      </div>
+      <button class="stepper-remove" onclick="removeEquipment(${i})">✕</button>
+    </div>
+    <div class="form-grid cols-3" style="margin-bottom:10px">
+      <div class="field">
+        <label>Equipment Type</label>
+        <input type="text" value="${eq.name||''}" onchange="updateEquipment(${i},'name',this.value)" placeholder="e.g. Tower Crane">
+      </div>
+      <div class="field">
+        <label>Plant / ID Number</label>
+        <input type="text" value="${eq.plantNo||''}" onchange="updateEquipment(${i},'plantNo',this.value)" placeholder="e.g. TC-01">
+      </div>
+      ${eq.status === 'breakdown' || eq.status === 'repair' ? `
+      <div class="field">
+        <label>Breakdown Duration (hrs)</label>
+        <input type="number" value="${eq.breakdownHrs||''}" onchange="updateEquipment(${i},'breakdownHrs',this.value)" placeholder="e.g. 4">
+      </div>` : `<div></div>`}
+    </div>
+    <div class="eq-status-group">
+      <button class="eq-status eq-working ${eq.status==='working'?'active':''}" onclick="setEqStatus(${i},'working')">Working</button>
+      <button class="eq-status eq-breakdown ${eq.status==='breakdown'?'active':''}" onclick="setEqStatus(${i},'breakdown')">Breakdown</button>
+      <button class="eq-status eq-repair ${eq.status==='repair'?'active':''}" onclick="setEqStatus(${i},'repair')">In repair</button>
+      <button class="eq-status eq-demob ${eq.status==='demob'?'active':''}" onclick="setEqStatus(${i},'demob')">Demob</button>
+    </div>
+  </div>`;
+}
+
+// ─── 7. MATERIALS ──────────────────────────────────────────────────────────
+function renderMaterials() {
+  const d = STATE.data.materials;
+  return `
+  <div class="section-header">
+    <div class="section-title">Material Deliveries</div>
+    <div class="section-desc">QA/QC engineer logs all material deliveries received today.</div>
+  </div>
+  <div class="card">
+    <div class="ntr-banner">
+      <label class="ntr-toggle">
+        <input type="checkbox" id="ntr_materials" ${d.ntr?'checked':''} onchange="toggleNtr('materials')">
+        <span class="ntr-slider"></span>
+      </label>
+      <span class="ntr-label"><strong>Nothing to report</strong> — No material deliveries today</span>
+    </div>
+    <div id="matArea" style="${d.ntr?'opacity:0.3;pointer-events:none':''}">
+      ${d.items.map((m,i) => renderMaterialRow(m,i)).join('')}
+      <button class="add-btn" onclick="addMaterial()"><span class="plus">+</span> Log delivery</button>
+    </div>
+  </div>`;
+}
+
+function renderMaterialRow(m, i) {
+  return `
+  <div class="material-row">
+    <div class="form-grid cols-3" style="margin-bottom:10px">
+      <div class="field span-2">
+        <label>Material Description <span class="req">*</span></label>
+        <input type="text" value="${m.description||''}" onchange="updateMaterial(${i},'description',this.value)" placeholder="e.g. Solid concrete blocks 200mm">
+      </div>
+      <div class="field">
+        <label>Category <span class="req">*</span></label>
+        <select onchange="updateMaterial(${i},'category',this.value)">
+          <option ${m.category==='civil'?'selected':''} value="civil">Civil</option>
+          <option ${m.category==='structural'?'selected':''} value="structural">Structural</option>
+          <option ${m.category==='finishes'?'selected':''} value="finishes">Finishes</option>
+          <option ${m.category==='mep'?'selected':''} value="mep">MEP</option>
+          <option ${m.category==='ffe'?'selected':''} value="ffe">FF&E</option>
+          <option ${m.category==='other'?'selected':''} value="other">Other</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Unit</label>
+        <select onchange="updateMaterial(${i},'unit',this.value)">
+          <option>no.</option><option>m³</option><option>m²</option><option>m</option>
+          <option>tonnes</option><option>kg</option><option>litres</option><option>bags</option><option>rolls</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Quantity <span class="req">*</span></label>
+        <input type="number" value="${m.qty||''}" onchange="updateMaterial(${i},'qty',this.value)" placeholder="e.g. 500">
+      </div>
+      <div class="field">
+        <label>Delivery Note Ref <span class="req">*</span></label>
+        <input type="text" value="${m.dnRef||''}" onchange="updateMaterial(${i},'dnRef',this.value)" placeholder="e.g. DN-20240531-001">
+      </div>
+      <div class="field span-2">
+        <label>Supplier</label>
+        <input type="text" value="${m.supplier||''}" onchange="updateMaterial(${i},'supplier',this.value)" placeholder="e.g. Emirates Building Materials">
+      </div>
+      <div class="field">
+        <label>Status <span class="req">*</span></label>
+        <div class="mat-status-group" style="margin-top:4px">
+          <button class="mat-status mat-accepted ${m.status==='accepted'?'active':''}" onclick="setMatStatus(${i},'accepted')">Accepted</button>
+          <button class="mat-status mat-rejected ${m.status==='rejected'?'active':''}" onclick="setMatStatus(${i},'rejected')">Rejected</button>
+          <button class="mat-status mat-hold ${m.status==='hold'?'active':''}" onclick="setMatStatus(${i},'hold')">On hold</button>
+        </div>
+      </div>
+    </div>
+    <button class="add-btn" style="border-style:solid;border-color:var(--red);color:var(--red);background:var(--red-dim)" onclick="removeMaterial(${i})">Remove delivery</button>
+  </div>`;
+}
+
+// ─── 8. ACTIVITIES ─────────────────────────────────────────────────────────
+function renderActivities() {
+  const d = STATE.data.activities;
+  return `
+  <div class="section-header">
+    <div class="section-title">Activities Performed Today</div>
+    <div class="section-desc">Site engineers log progress. Activities carry forward daily until marked Complete. AI maps to P6 Activity IDs automatically.</div>
+  </div>
+  <div class="card" style="background:var(--bg-3);border-color:rgba(139,92,246,0.2)">
+    <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--white-3)">
+      <span style="font-size:16px">🤖</span>
+      <span>Activities are automatically matched to your P6 schedule using AI. High confidence matches are silent. Low confidence will flag for planner review at sign-off.</span>
+    </div>
+  </div>
+  ${d.items.map((act,i) => renderActivityCard(act,i)).join('')}
+  <button class="add-btn" onclick="addActivity()"><span class="plus">+</span> Add activity</button>
+  <div class="card" style="margin-top:12px">
+    <div class="card-title">Activities planned for tomorrow</div>
+    <div class="field">
+      <textarea id="f_tomorrowPlan" placeholder="List the main activities planned for the next working day…" style="min-height:100px">${d.tomorrowPlan}</textarea>
+    </div>
+  </div>`;
+}
+
+function renderActivityCard(act, i) {
+  const disciplines = ['Civil','Structural','MEP','Finishes','FF&E','Other'];
+  const tagClass = {'Civil':'tag-civil','MEP':'tag-mep','Structural':'tag-structural','Finishes':'tag-finishes'}[act.discipline] || 'tag-civil';
+  return `
+  <div class="activity-card">
+    <div class="activity-card-header">
+      <div style="flex:1">
+        <div class="field" style="margin-bottom:8px">
+          <label>Activity Description <span class="req">*</span></label>
+          <input type="text" value="${act.description||''}" onchange="updateActivity(${i},'description',this.value)" placeholder="e.g. Blockwork installation level 3-5 Zone 01">
+        </div>
+        <div class="form-grid cols-3">
+          <div class="field">
+            <label>Discipline <span class="req">*</span></label>
+            <select onchange="updateActivity(${i},'discipline',this.value)">
+              ${disciplines.map(d => `<option ${act.discipline===d?'selected':''}>${d}</option>`).join('')}
+            </select>
+          </div>
+          <div class="field">
+            <label>Zone / Level / Location <span class="req">*</span></label>
+            <input type="text" value="${act.zone||''}" onchange="updateActivity(${i},'zone',this.value)" placeholder="e.g. Zone 01, Level 3-5">
+          </div>
+          <div class="field">
+            <label>Actual Start <span class="auto-badge" style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
+            <div class="auto-value" style="font-size:12px">${act.actualStart || getReportDate()}</div>
+          </div>
+        </div>
+      </div>
+      <button class="stepper-remove" style="margin-top:8px" onclick="removeActivity(${i})">✕</button>
+    </div>
+    <div class="progress-row">
+      <span class="progress-label">Progress</span>
+      <input type="range" class="progress-slider" min="0" max="100" value="${act.progress||0}" oninput="updateActivityProgress(${i},this.value)">
+      <span class="progress-value" id="prog_${i}">${act.progress||0}%</span>
+    </div>
+    <div style="margin-top:10px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--white-3);margin-bottom:6px;font-weight:600">Status</div>
+      <div class="status-group">
+        <button class="status-tag ${act.status==='ontrack'?'active-ontrack':''}" onclick="setActivityStatus(${i},'ontrack')">On track</button>
+        <button class="status-tag ${act.status==='delayed'?'active-delayed':''}" onclick="setActivityStatus(${i},'delayed')">Delayed</button>
+        <button class="status-tag ${act.status==='blocked'?'active-blocked':''}" onclick="setActivityStatus(${i},'blocked')">Blocked</button>
+        <button class="status-tag ${act.status==='complete'?'active-complete':''}" onclick="setActivityStatus(${i},'complete')">Complete</button>
+      </div>
+    </div>
+    ${act.p6Id ? `
+    <div class="ai-map-row">
+      <span class="ai-map-icon">🤖</span>
+      <span class="ai-map-text">P6 mapped →</span>
+      <span class="ai-map-id">${act.p6Id}</span>
+      <span class="ai-confidence ${act.confidence >= 85 ? 'conf-high' : act.confidence >= 60 ? 'conf-med' : 'conf-low'}">${act.confidence}% match</span>
+    </div>` : `
+    <div class="ai-map-row" style="opacity:0.5">
+      <span class="ai-map-icon">🤖</span>
+      <span class="ai-map-text">P6 mapping pending — upload schedule in project setup</span>
+    </div>`}
+  </div>`;
+}
+
+// ─── 9. ALLOCATION ─────────────────────────────────────────────────────────
+function renderAllocation() {
+  const acts = STATE.data.activities.items;
+  return `
+  <div class="section-header">
+    <div class="section-title">Allocation & Quantities</div>
+    <div class="section-desc">Internal use only. Manpower allocation vs planned quantities achieved. Used for productivity analysis.</div>
+  </div>
+  <div class="card" style="background:var(--bg-3);border-color:var(--amber-dim)">
+    <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--amber)">
+      <span>⚠</span>
+      <span>Internal data only — allocation information does not appear in the external PDF report sent to client.</span>
+    </div>
+  </div>
+  ${acts.length === 0 ? `
+  <div class="card" style="text-align:center;padding:40px">
+    <div style="font-size:32px;margin-bottom:12px">📋</div>
+    <div style="color:var(--white-3);font-size:13px">Add activities in the Activities tab first, then return here to log allocation.</div>
+  </div>` :
+  acts.map((act, i) => {
+    const alloc = STATE.data.allocation.items[i] || {};
+    const manHrs = (alloc.trades || []).reduce((a,t) => a + (parseInt(t.count)||0), 0);
+    const productivity = manHrs > 0 && alloc.achievedQty ? (parseFloat(alloc.achievedQty)/manHrs).toFixed(2) : '—';
+    const pctPlan = alloc.plannedQty && alloc.achievedQty ? Math.round(parseFloat(alloc.achievedQty)/parseFloat(alloc.plannedQty)*100) : 0;
+    return `
+    <div class="card">
+      <div class="card-title">${act.description || 'Activity ' + (i+1)} <span style="color:var(--white-3);font-size:10px">${act.zone||''}</span>
+        <span style="margin-left:auto;font-family:var(--mono);font-size:13px;color:var(--cyan)">${act.progress||0}%</span>
+      </div>
+      <div class="card-title" style="margin-bottom:8px;border-top:1px solid var(--border);padding-top:12px">Morning manpower allocation</div>
+      ${(alloc.trades||[]).map((t,ti) => `
+      <div class="stepper-row">
+        <span class="stepper-label">${t.name}</span>
+        <div class="stepper-controls">
+          <button class="stepper-btn" onclick="adjustAllocTrade(${i},${ti},-1)">−</button>
+          <input class="stepper-value" type="number" min="0" value="${t.count||0}" onchange="setAllocTrade(${i},${ti},this.value)">
+          <button class="stepper-btn" onclick="adjustAllocTrade(${i},${ti},1)">+</button>
+          <button class="stepper-remove" onclick="removeAllocTrade(${i},${ti})">✕</button>
+        </div>
+      </div>`).join('')}
+      <button class="add-btn" onclick="addAllocTrade(${i})"><span class="plus">+</span> Add trade</button>
+      <div class="divider"></div>
+      <div class="form-grid cols-4">
+        <div class="field">
+          <label>Unit</label>
+          <select onchange="updateAlloc(${i},'unit',this.value)">
+            <option>m²</option><option>m³</option><option>m</option><option>no.</option><option>tonnes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Planned Qty</label>
+          <input type="number" value="${alloc.plannedQty||''}" onchange="updateAlloc(${i},'plannedQty',this.value)" placeholder="0">
+        </div>
+        <div class="field">
+          <label>Achieved Qty</label>
+          <input type="number" value="${alloc.achievedQty||''}" onchange="updateAlloc(${i},'achievedQty',this.value)" placeholder="0">
+        </div>
+        <div class="field">
+          <label>% of Plan <span class="auto-badge" style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
+          <div class="auto-value">${pctPlan}%</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:10px;padding:10px;background:var(--bg-3);border-radius:var(--r-md)">
+        <div style="text-align:center;flex:1">
+          <div style="font-size:10px;color:var(--white-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Man-hours</div>
+          <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--cyan)">${manHrs}</div>
+        </div>
+        <div style="text-align:center;flex:1">
+          <div style="font-size:10px;color:var(--white-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Productivity</div>
+          <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green)">${productivity} ${alloc.unit||'m²'}/man-hr</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('')}`;
+}
+
+// ─── 10. ISSUES ────────────────────────────────────────────────────────────
+function renderIssues() {
+  const d = STATE.data.issues;
+  return `
+  <div class="section-header">
+    <div class="section-title">Issues & Concerns</div>
+    <div class="section-desc">Log all issues, concerns, and blockers identified today.</div>
+  </div>
+  <div class="ntr-banner">
+    <label class="ntr-toggle">
+      <input type="checkbox" id="ntr_issues" ${d.ntr?'checked':''} onchange="toggleNtr('issues')">
+      <span class="ntr-slider"></span>
+    </label>
+    <span class="ntr-label"><strong>Nothing to report</strong> — No issues raised today</span>
+  </div>
+  <div id="issueArea" style="${d.ntr?'opacity:0.3;pointer-events:none':''}">
+    ${d.items.map((iss,i) => renderIssueCard(iss,i)).join('')}
+    <button class="add-btn" onclick="addIssue()"><span class="plus">+</span> Add issue</button>
+  </div>`;
+}
+
+function renderIssueCard(iss, i) {
+  return `
+  <div class="issue-card sev-${iss.severity||'medium'}">
+    <div class="form-grid cols-3" style="margin-bottom:10px">
+      <div class="field span-3">
+        <label>Description <span class="req">*</span></label>
+        <textarea onchange="updateIssue(${i},'description',this.value)" placeholder="Describe the issue, cause, and impact…" style="min-height:70px">${iss.description||''}</textarea>
+      </div>
+      <div class="field">
+        <label>Category</label>
+        <select onchange="updateIssue(${i},'category',this.value)">
+          ${['Access','Design','Material','Labour','Equipment','Weather','Other'].map(c => `<option ${iss.category===c?'selected':''}>${c}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field">
+        <label>Responsible Party</label>
+        <input type="text" value="${iss.responsible||''}" onchange="updateIssue(${i},'responsible',this.value)" placeholder="Company or person">
+      </div>
+      <div class="field">
+        <label>Target Resolution Date</label>
+        <input type="date" value="${iss.targetDate||''}" onchange="updateIssue(${i},'targetDate',this.value)">
+      </div>
+      <div class="field">
+        <label>Severity</label>
+        <div class="sev-group" style="margin-top:4px">
+          <button class="sev-tag sev-high ${iss.severity==='high'?'active':''}" onclick="setIssueSeverity(${i},'high')">High</button>
+          <button class="sev-tag sev-medium ${iss.severity==='medium'?'active':''}" onclick="setIssueSeverity(${i},'medium')">Medium</button>
+          <button class="sev-tag sev-low ${iss.severity==='low'?'active':''}" onclick="setIssueSeverity(${i},'low')">Low</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Status</label>
+        <select onchange="updateIssue(${i},'status',this.value)">
+          <option ${iss.status==='open'?'selected':''}>Open</option>
+          <option ${iss.status==='inprogress'?'selected':''}>In progress</option>
+          <option ${iss.status==='closed'?'selected':''}>Closed</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Programme Impact</label>
+        <select onchange="updateIssue(${i},'impact',this.value)">
+          <option ${iss.impact==='no'?'selected':''}>No</option>
+          <option ${iss.impact==='yes'?'selected':''}>Yes</option>
+          <option ${iss.impact==='tbc'?'selected':''}>TBC</option>
+        </select>
+      </div>
+    </div>
+    <button class="add-btn" style="border-style:solid;border-color:var(--red);color:var(--red);background:var(--red-dim)" onclick="removeIssue(${i})">Remove issue</button>
+  </div>`;
+}
+
+// ─── 11. SIGN-OFF ──────────────────────────────────────────────────────────
+function renderSignoff() {
+  const tabs = TABS.slice(0,10);
+  const allReady = STATE.tabStatus.slice(0,10).every(s => s === 'complete' || s === 'ntr');
+  return `
+  <div class="section-header">
+    <div class="section-title">Review & Submit</div>
+    <div class="section-desc">Planner/PCE reviews all sections before final submission. All tabs must be confirmed before submitting.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Submission checklist</div>
+    <div class="review-grid">
+      ${tabs.map((t,i) => {
+        const s = STATE.tabStatus[i];
+        let icon = '○', cls = 'rs-empty', label = 'Not filled';
+        if (s === 'complete') { icon = '✓'; cls = 'rs-complete'; label = 'Complete'; }
+        else if (s === 'ntr') { icon = '—'; cls = 'rs-ntr'; label = 'Nothing to report'; }
+        return `
+        <div class="review-item" onclick="jumpToTab(${i})" style="cursor:pointer">
+          <span class="review-icon">${t.icon}</span>
+          <span class="review-tab-name">${t.label}</span>
+          <span class="review-status ${cls}">${icon} ${label}</span>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>
+  ${!allReady ? `
+  <div class="card" style="background:var(--red-dim);border-color:rgba(255,77,77,0.3)">
+    <div style="font-size:13px;color:var(--red)">⚠ Some tabs are not yet confirmed. Please complete all sections or mark them as "Nothing to report" before submitting.</div>
+  </div>` : ''}
+  <div class="card">
+    <div class="card-title">Submission details</div>
+    <div class="form-grid">
+      <div class="field">
+        <label>Submitted By <span class="req">*</span></label>
+        <input type="text" id="f_finalSubmittedBy" value="${STATE.data.identity.submittedBy}" placeholder="Planner / PCE full name">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <input type="text" value="Planner / Project Controls Engineer" readonly style="color:var(--white-3)">
+      </div>
+      <div class="field">
+        <label>Report Reference <span class="auto-badge" style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
+        <div class="auto-value">${calcReportNo()}</div>
+      </div>
+      <div class="field">
+        <label>Report Date <span class="auto-badge" style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
+        <div class="auto-value">${getReportDate()}</div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:8px">
+    <button class="submit-btn" ${!allReady?'disabled':''} onclick="submitReport()">
+      Submit Daily Report → Generate PDF & AI Analysis
+    </button>
+    <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--white-4)">
+      Submission triggers: External PDF → Email to PM, Site Manager, CM, DC · Internal AI narrative → Controlynx dashboard · 3 Excel exports generated
+    </div>
+  </div>`;
+}
+
+// ─── BIND PANEL ────────────────────────────────────────────────────────────
+function bindPanel(i) {
+  if (i === 0) bindIdentity();
+  if (i === 1) bindWeather();
+  if (i === 7) {
+    const ta = document.getElementById('f_tomorrowPlan');
+    if (ta) ta.addEventListener('input', () => { STATE.data.activities.tomorrowPlan = ta.value; autoSave(); });
+  }
+  if (i === 5) {
+    ['mobilisation','demobilisation'].forEach(f => {
+      const el = document.getElementById('f_'+f);
+      if (el) el.addEventListener('input', () => { STATE.data.equipment[f] = el.value; autoSave(); });
+    });
+  }
+}
+
+// ─── INTERACTION HANDLERS ─────────────────────────────────────────────────
+
+function toggleNtr(section) {
+  STATE.data[section].ntr = !STATE.data[section].ntr;
+  if (STATE.data[section].ntr) STATE.tabStatus[STATE.currentTab] = 'ntr';
+  renderPanel(STATE.currentTab);
+}
+
+function toggleNtrSafety(sub) {
+  STATE.data.safety['ntr'+sub.charAt(0).toUpperCase()+sub.slice(1)] = !STATE.data.safety['ntr'+sub.charAt(0).toUpperCase()+sub.slice(1)];
+  renderPanel(STATE.currentTab);
+}
+
+function toggleGroup(id) {
+  const body = document.getElementById('group_'+id);
+  const chev = document.getElementById('chev_'+id);
+  if (!body) return;
+  const hidden = body.style.display === 'none';
+  body.style.display = hidden ? '' : 'none';
+  if (chev) chev.textContent = hidden ? '▼' : '▶';
+  if (chev) chev.classList.toggle('open', hidden);
+}
+
+// Labour / Staffing helpers
+function addTrade(group, subIdx) {
+  const name = prompt('Trade name:');
+  if (!name) return;
+  if (group === 'main') STATE.data.labour.mainContractor.trades.push({name, count:0});
+  else STATE.data.labour.subcontractors[subIdx].trades.push({name, count:0});
+  renderPanel(STATE.currentTab);
+}
+
+function addPosition(group, subIdx) {
+  const name = prompt('Position:');
+  if (!name) return;
+  if (group === 'main') STATE.data.staffing.mainContractor.positions.push({name, count:0});
+  else STATE.data.staffing.subcontractors[subIdx].positions.push({name, count:0});
+  renderPanel(STATE.currentTab);
+}
+
+function addSubcontractor(section) {
+  const name = prompt('Subcontractor name:');
+  if (!name) return;
+  if (section === 'labour') STATE.data.labour.subcontractors.push({name, trades:[]});
+  else STATE.data.staffing.subcontractors.push({name, positions:[]});
+  renderPanel(STATE.currentTab);
+}
+
+function removeSubcontractor(section, idx) {
+  if (!confirm('Remove this subcontractor?')) return;
+  STATE.data[section].subcontractors.splice(idx, 1);
+  renderPanel(STATE.currentTab);
+}
+
+function removeTrade(group, section, idx, subIdx) {
+  if (group === 'main') STATE.data[section].mainContractor[section==='labour'?'trades':'positions'].splice(idx, 1);
+  else STATE.data[section].subcontractors[subIdx][section==='labour'?'trades':'positions'].splice(idx, 1);
+  renderPanel(STATE.currentTab);
+}
+
+function adjustCount(group, section, idx, subIdx, delta) {
+  const arr = group === 'main' ? STATE.data[section].mainContractor[section==='labour'?'trades':'positions'] : STATE.data[section].subcontractors[subIdx][section==='labour'?'trades':'positions'];
+  arr[idx].count = Math.max(0, (parseInt(arr[idx].count)||0) + delta);
+  renderPanel(STATE.currentTab);
+}
+
+function setCount(group, section, idx, subIdx, val) {
+  const arr = group === 'main' ? STATE.data[section].mainContractor[section==='labour'?'trades':'positions'] : STATE.data[section].subcontractors[subIdx][section==='labour'?'trades':'positions'];
+  arr[idx].count = Math.max(0, parseInt(val)||0);
+}
+
+// Equipment
+function addEquipment() {
+  STATE.data.equipment.items.push({name:'',plantNo:'',status:'working',breakdownHrs:''});
+  renderPanel(STATE.currentTab);
+}
+function removeEquipment(i) { STATE.data.equipment.items.splice(i,1); renderPanel(STATE.currentTab); }
+function updateEquipment(i, field, val) { STATE.data.equipment.items[i][field] = val; autoSave(); }
+function setEqStatus(i, status) { STATE.data.equipment.items[i].status = status; renderPanel(STATE.currentTab); }
+
+// Materials
+function addMaterial() {
+  STATE.data.materials.items.push({description:'',category:'civil',unit:'no.',qty:'',dnRef:'',supplier:'',status:'accepted'});
+  renderPanel(STATE.currentTab);
+}
+function removeMaterial(i) { STATE.data.materials.items.splice(i,1); renderPanel(STATE.currentTab); }
+function updateMaterial(i, field, val) { STATE.data.materials.items[i][field] = val; autoSave(); }
+function setMatStatus(i, status) { STATE.data.materials.items[i].status = status; renderPanel(STATE.currentTab); }
+
+// Activities
+function addActivity() {
+  STATE.data.activities.items.push({description:'',discipline:'Civil',zone:'',progress:0,status:'ontrack',actualStart:getReportDate(),actualFinish:null,p6Id:null,confidence:null});
+  STATE.data.allocation.items.push({trades:[],unit:'m²',plannedQty:'',achievedQty:''});
+  renderPanel(STATE.currentTab);
+}
+function removeActivity(i) {
+  STATE.data.activities.items.splice(i,1);
+  STATE.data.allocation.items.splice(i,1);
+  renderPanel(STATE.currentTab);
+}
+function updateActivity(i, field, val) { STATE.data.activities.items[i][field] = val; autoSave(); }
+function updateActivityProgress(i, val) {
+  STATE.data.activities.items[i].progress = parseInt(val);
+  const el = document.getElementById('prog_'+i);
+  if (el) el.textContent = val + '%';
+  if (parseInt(val) === 100) STATE.data.activities.items[i].status = 'complete';
+}
+function setActivityStatus(i, status) {
+  STATE.data.activities.items[i].status = status;
+  if (status === 'complete') { STATE.data.activities.items[i].progress = 100; STATE.data.activities.items[i].actualFinish = getReportDate(); }
+  renderPanel(STATE.currentTab);
+}
+
+// Allocation
+function addAllocTrade(actIdx) {
+  const name = prompt('Trade name:');
+  if (!name) return;
+  if (!STATE.data.allocation.items[actIdx]) STATE.data.allocation.items[actIdx] = {trades:[],unit:'m²',plannedQty:'',achievedQty:''};
+  STATE.data.allocation.items[actIdx].trades.push({name, count:0});
+  renderPanel(STATE.currentTab);
+}
+function removeAllocTrade(actIdx, ti) {
+  STATE.data.allocation.items[actIdx].trades.splice(ti,1);
+  renderPanel(STATE.currentTab);
+}
+function adjustAllocTrade(actIdx, ti, delta) {
+  STATE.data.allocation.items[actIdx].trades[ti].count = Math.max(0,(parseInt(STATE.data.allocation.items[actIdx].trades[ti].count)||0)+delta);
+  renderPanel(STATE.currentTab);
+}
+function setAllocTrade(actIdx, ti, val) {
+  STATE.data.allocation.items[actIdx].trades[ti].count = Math.max(0,parseInt(val)||0);
+}
+function updateAlloc(actIdx, field, val) {
+  if (!STATE.data.allocation.items[actIdx]) STATE.data.allocation.items[actIdx] = {trades:[],unit:'m²',plannedQty:'',achievedQty:''};
+  STATE.data.allocation.items[actIdx][field] = val;
+  renderPanel(STATE.currentTab);
+}
+
+// Issues
+function addIssue() {
+  STATE.data.issues.items.push({description:'',category:'Access',severity:'medium',responsible:'',targetDate:'',status:'open',impact:'tbc'});
+  renderPanel(STATE.currentTab);
+}
+function removeIssue(i) { STATE.data.issues.items.splice(i,1); renderPanel(STATE.currentTab); }
+function updateIssue(i, field, val) { STATE.data.issues.items[i][field] = val; autoSave(); }
+function setIssueSeverity(i, sev) {
+  STATE.data.issues.items[i].severity = sev;
+  renderPanel(STATE.currentTab);
+}
+
+// Safety helpers
+function addSor() { STATE.data.safety.sors.push({ref:'',description:'',issuedTo:'',status:'open'}); renderPanel(STATE.currentTab); }
+function removeSor(i) { STATE.data.safety.sors.splice(i,1); renderPanel(STATE.currentTab); }
+function updateSor(i,f,v) { STATE.data.safety.sors[i][f]=v; autoSave(); }
+function addNcr() { STATE.data.safety.ncrs.push({ref:'',description:'',trade:'',targetDate:'',status:'open'}); renderPanel(STATE.currentTab); }
+function removeNcr(i) { STATE.data.safety.ncrs.splice(i,1); renderPanel(STATE.currentTab); }
+function updateNcr(i,f,v) { STATE.data.safety.ncrs[i][f]=v; autoSave(); }
+function addIncident() { STATE.data.safety.incidents.push({type:'nearmiss',description:'',action:'',responsible:''}); renderPanel(STATE.currentTab); }
+function removeIncident(i) { STATE.data.safety.incidents.splice(i,1); renderPanel(STATE.currentTab); }
+function updateIncident(i,f,v) { STATE.data.safety.incidents[i][f]=v; autoSave(); }
+
+// ─── AUTO SAVE ────────────────────────────────────────────────────────────
+let saveTimer;
+function autoSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try { localStorage.setItem('controlynx_dpr_draft', JSON.stringify(STATE.data)); } catch(e){}
+  }, 800);
+}
+
+function loadDraft() {
+  try {
+    const saved = localStorage.getItem('controlynx_dpr_draft');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      Object.assign(STATE.data, parsed);
+      showToast('Draft restored', true);
+    }
+  } catch(e){}
+}
+
+// ─── SUBMIT ───────────────────────────────────────────────────────────────
+function submitReport() {
+  showToast('Report submitted! PDF generating... AI narrative queued.', true);
+  setTimeout(() => {
+    alert('✅ Report ' + calcReportNo() + ' submitted successfully.\n\nExternal PDF dispatched to distribution list.\nInternal AI narrative being generated.\n3 Excel exports ready for download.');
+  }, 1000);
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────
+function showToast(msg, success=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (success ? ' success' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.className = 'toast', 3000);
+}
+
+// ─── MARK TAB COMPLETE (shortcut) ─────────────────────────────────────────
+function markCurrentComplete() {
+  STATE.tabStatus[STATE.currentTab] = 'complete';
+  buildTabNav();
+  showToast('Tab marked complete', true);
+}
+
+// ─── START ────────────────────────────────────────────────────────────────
+loadDraft();
+init();
+</script>
+</body>
+</html>
