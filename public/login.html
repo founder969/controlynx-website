@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controlynx — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080D14;--card:#0F1A27;--bg2:#0C1220;--bg3:#101828;
+  --border:#1A2D40;--border2:#1F3347;
+  --cyan:#00D4FF;--cyan-dim:rgba(0,212,255,0.12);--cyan-border:rgba(0,212,255,0.20);--cyan-glow:rgba(0,212,255,0.06);
+  --green:#00C48C;--red:#FF4D4D;
+  --white:#F0F4F8;--w2:#B8C5D0;--w3:#6B7F8E;--w4:#3A4F60;
+  --sans:'Figtree',sans-serif;--display:'Syne',sans-serif;
+}
+html{-webkit-font-smoothing:antialiased}
+body{font-family:var(--sans);background:var(--bg);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+.bg1{position:fixed;top:-100px;right:-60px;width:380px;height:380px;border-radius:50%;background:rgba(0,212,255,0.04);pointer-events:none}
+.bg2{position:fixed;bottom:-60px;left:-40px;width:260px;height:260px;border-radius:50%;background:rgba(0,196,140,0.03);pointer-events:none}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:36px;text-decoration:none}
+.logo-icon{width:34px;height:34px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:17px;height:17px}
+.logo-name{font-family:var(--display);font-size:19px;font-weight:700;color:var(--white)}
+.logo-name span{color:var(--cyan)}
+.card{width:100%;max-width:400px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:32px}
+.card-title{font-family:var(--display);font-size:21px;font-weight:700;color:var(--white);margin-bottom:5px}
+.card-sub{font-size:13px;color:var(--w3);margin-bottom:26px;line-height:1.5}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.field label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--w3)}
+.field input{background:var(--bg2);border:1px solid var(--border2);border-radius:9px;padding:11px 13px;font-size:14px;color:var(--white);font-family:var(--sans);width:100%;transition:border-color .2s,box-shadow .2s}
+.field input::placeholder{color:var(--w4)}
+.field input:focus{outline:none;border-color:var(--cyan-border);box-shadow:0 0 0 3px var(--cyan-glow)}
+.forgot{display:block;text-align:right;font-size:12px;color:var(--w3);text-decoration:none;margin:-8px 0 14px;transition:color .2s}
+.forgot:hover{color:var(--cyan)}
+.btn{width:100%;padding:13px;background:var(--cyan);color:#080D14;font-size:14px;font-weight:700;font-family:var(--display);border:none;border-radius:9px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+.btn:hover{background:#00b8e0;box-shadow:0 0 24px rgba(0,212,255,0.28)}
+.btn:disabled{background:var(--border2);color:var(--w3);cursor:not-allowed;box-shadow:none}
+.error{background:rgba(255,77,77,0.09);border:1px solid rgba(255,77,77,0.28);border-radius:9px;padding:11px 13px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
+.error.show{display:block}
+.welcome{background:rgba(0,196,140,0.09);border:1px solid rgba(0,196,140,0.28);border-radius:9px;padding:11px 13px;font-size:13px;color:var(--green);margin-top:14px;display:none}
+.welcome.show{display:block}
+.spin{width:15px;height:15px;border:2px solid rgba(8,13,20,.3);border-top-color:#080D14;border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.foot{margin-top:28px;text-align:center;font-size:11px;color:var(--w4);line-height:1.8}
+.foot a{color:var(--w3);text-decoration:none}
+.foot a:hover{color:var(--cyan)}
+</style>
+</head>
+<body>
+<div class="bg1"></div><div class="bg2"></div>
+
+<a class="logo" href="https://controlynx.ai" target="_blank">
+  <div class="logo-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#00D4FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+    </svg>
+  </div>
+  <span class="logo-name">Controlynx<span>.ai</span></span>
+</a>
+
+<div class="card">
+  <div class="card-title">Sign in</div>
+  <div class="card-sub">Access your project controls workspace</div>
+
+  <div class="error" id="err"></div>
+
+  <div class="field">
+    <label>Email</label>
+    <input type="email" id="email" placeholder="you@company.com" autocomplete="email" autofocus>
+  </div>
+  <div class="field">
+    <label>Password</label>
+    <input type="password" id="pw" placeholder="Your password" autocomplete="current-password">
+  </div>
+  <a href="#" class="forgot" onclick="forgot(event)">Forgot password?</a>
+
+  <button class="btn" id="btn" onclick="signIn()">Sign in to Controlynx</button>
+  <div class="welcome" id="welcome"></div>
+</div>
+
+<div class="foot">
+  <p><a href="https://controlynx.ai/terms">Terms of Service</a> &nbsp;·&nbsp; <a href="mailto:founder@controlynx.ai">Support</a></p>
+  <p style="margin-top:8px">controlynx.ai · Wyoming, USA</p>
+</div>
+
+<script>
+const ROLES = {planner:'Planner / PCE',safety:'Safety Engineer',timekeeper:'Timekeeper',storekeeper:'Storekeeper',engineer:'Site Engineer',qaqc:'QA/QC Engineer',admin:'Administrator'};
+
+async function signIn() {
+  const email = document.getElementById('email').value.trim();
+  const pw    = document.getElementById('pw').value;
+  const btn   = document.getElementById('btn');
+  const err   = document.getElementById('err');
+
+  err.className = 'error';
+  if (!email || !pw) { showErr('Please enter your email and password.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Signing in…';
+
+  try {
+    const r = await fetch('/api/auth/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw })
+    });
+    const d = await r.json();
+    if (!r.ok) { showErr(d.error || 'Sign in failed.'); btn.disabled=false; btn.textContent='Sign in to Controlynx'; return; }
+
+    localStorage.setItem('cx_token',   d.token);
+    localStorage.setItem('cx_refresh', d.refresh_token);
+    localStorage.setItem('cx_user',    JSON.stringify(d.user));
+
+    const welcome = document.getElementById('welcome');
+    welcome.innerHTML = `Welcome, <strong>${d.user.full_name}</strong> — ${ROLES[d.user.role]||d.user.role}<br>Redirecting to your workspace…`;
+    welcome.classList.add('show');
+    btn.innerHTML = '✓ Signed in';
+    btn.style.background = '#00C48C';
+
+    setTimeout(() => window.location.href = '/', 1200);
+  } catch(e) {
+    showErr('Connection error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Sign in to Controlynx';
+  }
+}
+
+async function forgot(e) {
+  e.preventDefault();
+  const email = document.getElementById('email').value.trim();
+  if (!email) { showErr('Enter your email first, then click Forgot password.'); return; }
+  const r = await fetch('https://zygnylsbmptucrgganjn.supabase.co/auth/v1/recover', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp5Z255bHNibXB0dWNyZ2dhbmpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAyMzg4NzksImV4cCI6MjA5NTgxNDg3OX0.gRZfLoh7eC58d_HvRgRxHHgpsD28wYDyaQRGQgr8W84' },
+    body: JSON.stringify({ email })
+  });
+  const err = document.getElementById('err');
+  err.style.color = r.ok ? 'var(--green)' : 'var(--red)';
+  err.style.borderColor = r.ok ? 'rgba(0,196,140,0.3)' : 'rgba(255,77,77,0.3)';
+  err.style.background = r.ok ? 'rgba(0,196,140,0.08)' : 'rgba(255,77,77,0.09)';
+  err.textContent = r.ok ? `✓ Reset email sent to ${email}` : 'Could not send reset email.';
+  err.classList.add('show');
+}
+
+function showErr(msg) {
+  const e = document.getElementById('err');
+  e.textContent = msg;
+  e.className = 'error show';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') signIn(); });
+if (localStorage.getItem('cx_token')) window.location.href = '/';
+</script>
+</body>
+</html>

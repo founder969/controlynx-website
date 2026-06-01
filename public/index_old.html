@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controlynx — Daily Progress Report</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0F2B4A;--teal:#1D9E75;--tll:#E1F5EE;--tld:#0F6E56;
+  --am:#BA7517;--aml:#FAEEDA;--rd:#A32D2D;--rdl:#FCEBEB;
+  --white:#fff;--off:#F4F2EB;--tx:#0D2137;--mu:#5F5E5A;
+  --border:#E8E6DF;--surf:#F9F9F7;
+}
+body{font-family:'Segoe UI',sans-serif;background:var(--off);color:var(--tx);min-height:100vh}
+.hdr{background:var(--navy);padding:13px 18px;display:flex;align-items:center;gap:11px;position:sticky;top:0;z-index:100}
+.logo{width:28px;height:28px;background:var(--teal);border-radius:4px;transform:rotate(45deg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo span{transform:rotate(-45deg);font-size:10px;font-weight:700;color:#fff}
+.hdr-info{flex:1}
+.hdr-info h1{color:#fff;font-size:13px;font-weight:600}
+.hdr-info p{color:rgba(255,255,255,.45);font-size:11px;margin-top:1px}
+.save-ind{display:flex;align-items:center;gap:4px;font-size:10px;color:#5DCAA5}
+.sd{width:5px;height:5px;border-radius:50%;background:#5DCAA5;animation:pd 2s ease-in-out infinite}
+@keyframes pd{0%,100%{opacity:1}50%{opacity:.2}}
+.pgw{background:var(--navy);padding:0 18px 11px}
+.pgl{display:flex;justify-content:space-between;margin-bottom:4px}
+.pgn{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.5px}
+.pgc{font-size:10px;color:#5DCAA5}
+.pgt{height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.pgf{height:100%;background:var(--teal);border-radius:2px;transition:width .3s}
+.tbar{background:#fff;border-bottom:1px solid var(--border);display:flex;overflow-x:auto;scrollbar-width:none;padding:0 6px;position:sticky;top:68px;z-index:99}
+.tbar::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;padding:10px 13px 9px;font-size:12px;color:var(--mu);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;font-family:'Segoe UI',sans-serif;transition:all .2s}
+.tab.on{color:var(--teal);border-bottom-color:var(--teal);font-weight:500}
+.panel{display:none;max-width:680px;margin:18px auto;padding:0 14px 90px}
+.panel.on{display:block}
+.card{background:#fff;border-radius:10px;border:1px solid var(--border);margin-bottom:14px;overflow:hidden}
+.ch{background:var(--navy);padding:10px 16px;color:#fff;font-size:11px;font-weight:500;letter-spacing:.4px;text-transform:uppercase}
+.cb{padding:16px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
+.fr.t{grid-template-columns:1fr 1fr 1fr}
+.fr.f{grid-template-columns:1fr}
+.fr.four{grid-template-columns:1fr 1fr 1fr 1fr}
+.fg{display:flex;flex-direction:column;gap:4px}
+label{font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.req{color:var(--teal);margin-left:2px}
+input[type=text],input[type=date],input[type=number],input[type=time],select,textarea{padding:8px 10px;font-size:13px;font-family:'Segoe UI',sans-serif;color:var(--tx);background:var(--surf);border:1px solid var(--border);border-radius:7px;width:100%}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 2px rgba(29,158,117,.12)}
+textarea{resize:vertical;min-height:80px}
+.hint{font-size:11px;color:var(--mu);margin-top:3px}
+.dv{height:1px;background:var(--border);margin:12px 0}
+.wxg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:11px}
+.wc{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:9px 5px;text-align:center;cursor:pointer;transition:all .15s}
+.wc.on{background:var(--tll);border-color:var(--teal)}
+.wi{font-size:19px;margin-bottom:2px}
+.wl{font-size:11px;color:var(--mu)}
+.wc.on .wl{color:var(--tld);font-weight:500}
+.tr{display:flex;align-items:center;gap:7px;padding:7px 0;border-bottom:1px solid var(--border)}
+.tr:last-of-type{border-bottom:none}
+.tn{flex:1;font-size:12px;color:var(--tx)}
+.ct{display:flex;align-items:center;gap:5px}
+.ctb{width:23px;height:23px;border:1px solid var(--border);border-radius:5px;background:var(--surf);cursor:pointer;font-size:14px;color:var(--tx);display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'Segoe UI',sans-serif}
+.ctb:hover{background:var(--tll);color:var(--tld);border-color:var(--teal)}
+.ctv{width:46px;text-align:center;font-size:13px;font-weight:500;color:var(--tx);background:var(--surf);border:1px solid var(--border);border-radius:5px;padding:2px 4px;}
+.ctv:focus{outline:none;border-color:var(--teal);}
+.db{background:none;border:none;cursor:pointer;color:var(--mu);font-family:'Segoe UI',sans-serif;font-size:16px;padding:0 2px;line-height:1}
+.db:hover{color:var(--rd)}
+.coh{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;background:var(--surf);border-radius:7px;margin-bottom:7px;border:1px solid var(--border)}
+.con{font-size:12px;font-weight:500;color:var(--tx)}
+.cot{font-size:14px;font-weight:500;color:var(--teal)}
+.gtr{display:flex;justify-content:space-between;align-items:center;padding:9px 0 2px;border-top:1px solid var(--border);margin-top:5px}
+.gtl{font-size:12px;color:var(--mu)}
+.gtv{font-size:18px;font-weight:600;color:var(--teal)}
+.eqc{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px}
+.eqt{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px}
+.eqn{font-size:13px;font-weight:500;color:var(--tx)}
+.eqi{font-size:11px;color:var(--mu)}
+.scr{display:flex;gap:5px;flex-wrap:wrap}
+.sc{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--mu);transition:all .15s;font-family:'Segoe UI',sans-serif}
+.sc.wk.s{background:var(--tll);color:var(--tld);border-color:var(--teal)}
+.sc.bk.s{background:var(--rdl);color:var(--rd);border-color:var(--rd)}
+.sc.rp.s{background:var(--aml);color:var(--am);border-color:var(--am)}
+.sc.dm.s{background:#f0f0f0;color:#666;border-color:#ccc}
+.mc{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px}
+.mr{font-size:10px;color:var(--tld);font-weight:500;margin-bottom:2px}
+.mm{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:4px}
+.mmt{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.mt{font-size:11px;color:var(--mu)}
+.bge{font-size:11px;padding:2px 8px;border-radius:20px}
+.bge.a{background:var(--tll);color:var(--tld)}
+.bge.r{background:var(--rdl);color:var(--rd)}
+.bge.h{background:var(--aml);color:var(--am)}
+.ic{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px}
+.ih{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.it2{font-size:11px;font-weight:500;color:var(--rd);background:var(--rdl);padding:2px 8px;border-radius:20px}
+.itm{font-size:11px;color:var(--mu)}
+.id2{font-size:12px;color:var(--tx);line-height:1.5}
+.ac{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:9px;margin-bottom:7px}
+.am2{font-size:10px;color:var(--mu);margin-bottom:2px}
+.an{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:7px}
+.pr{display:flex;align-items:center;gap:9px}
+.pr input[type=range]{flex:1}
+.pb{font-size:12px;font-weight:500;min-width:30px;text-align:right}
+.chips{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
+.chip{font-size:11px;padding:3px 9px;border-radius:20px;border:1px solid var(--border);background:#fff;cursor:pointer;color:var(--mu);transition:all .15s;font-family:'Segoe UI',sans-serif}
+.chip.ot.s{background:var(--tll);color:var(--tld);border-color:var(--teal)}
+.chip.dl.s{background:var(--aml);color:var(--am);border-color:var(--am)}
+.chip.bl.s{background:var(--rdl);color:var(--rd);border-color:var(--rd)}
+.chip.cp.s{background:#EAF3DE;color:#3B6D11;border-color:#639922}
+.alc{background:#fff;border:1px solid var(--border);border-radius:10px;margin-bottom:11px;overflow:hidden}
+.alh{background:var(--tll);border-bottom:1px solid rgba(29,158,117,.2);padding:9px 13px;display:flex;justify-content:space-between;align-items:flex-start}
+.ald{font-size:10px;color:var(--tld);margin-bottom:2px;display:flex;align-items:center;gap:5px}
+.aln{font-size:12px;font-weight:500;color:var(--tld)}
+.alp{font-size:12px;font-weight:500;color:var(--tld);flex-shrink:0}
+.alb{padding:11px 13px}
+.als{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;margin-top:4px}
+.mht{font-size:11px;color:var(--mu);padding:4px 0;border-top:1px solid var(--border);margin-top:3px}
+.mht span{color:var(--teal);font-weight:500}
+.qg{display:grid;grid-template-columns:80px 1fr 1fr;gap:7px;align-items:end}
+.ql{font-size:10px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.qi{width:100%;padding:7px 9px;font-size:13px;color:var(--tx);background:var(--surf);border:1px solid var(--border);border-radius:7px;font-family:'Segoe UI',sans-serif}
+.qi:focus{outline:none;border-color:var(--teal)}
+.pdb{display:flex;justify-content:space-between;align-items:center;padding:7px 0 2px;border-top:1px solid var(--border);margin-top:7px}
+.pdr{font-size:11px;color:var(--mu)}
+.pdr span{color:var(--tx);font-weight:500}
+.ir{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ir:last-of-type{border-bottom:none}
+.sv{width:4px;flex-shrink:0;border-radius:2px;align-self:stretch}
+.sv.h{background:var(--rd)}
+.sv.m{background:var(--am)}
+.sv.l{background:var(--teal)}
+.it3{font-size:12px;color:var(--tx);line-height:1.5}
+.im2{font-size:11px;color:var(--mu);margin-top:2px}
+.addb{width:100%;padding:8px;border:1px dashed var(--border);border-radius:8px;background:none;color:var(--mu);cursor:pointer;font-size:12px;font-family:'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;margin:7px 0}
+.addb:hover{border-color:var(--teal);color:var(--teal)}
+.af{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:9px}
+.aft{font-size:12px;font-weight:500;color:var(--tx);margin-bottom:9px}
+.smt{width:100%;border-collapse:collapse;font-size:13px}
+.smt tr{border-bottom:1px solid var(--border)}
+.smt tr:last-child{border-bottom:none}
+.smt td{padding:6px 0}
+.smt td:last-child{font-weight:500;text-align:right}
+.sok{color:var(--tld)}
+.ftr{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:10px 15px;display:flex;gap:8px;z-index:100}
+.btnb{padding:9px 15px;font-size:13px;font-family:'Segoe UI',sans-serif;background:none;border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--mu);transition:all .15s}
+.btnb:hover{border-color:var(--teal);color:var(--teal)}
+.btnn{flex:1;padding:10px;font-size:13px;font-weight:500;font-family:'Segoe UI',sans-serif;background:var(--teal);color:#fff;border:none;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity .15s}
+.btnn:hover{opacity:.88}
+.btng{flex:1;padding:10px;font-size:13px;font-weight:500;font-family:'Segoe UI',sans-serif;background:var(--navy);color:#fff;border:none;border-radius:8px;cursor:pointer;display:none;align-items:center;justify-content:center;gap:6px}
+.lov{display:none;position:fixed;inset:0;background:rgba(15,43,74,.92);z-index:200;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.lov.show{display:flex}
+.sp{width:42px;height:42px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lov p{color:#fff;font-size:14px}
+.lov small{color:rgba(255,255,255,.5);font-size:12px}
+.rw{display:none;max-width:680px;margin:18px auto;padding:14px 14px 80px}
+.rw.show{display:block}
+.rc{background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden}
+.rch{background:var(--teal);padding:13px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.rch h2{color:#fff;font-size:14px;font-weight:600}
+.rch-btns{display:flex;gap:8px;flex-wrap:wrap}
+.bcpy{background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);padding:6px 13px;font-size:12px;border-radius:6px;cursor:pointer;transition:background .2s;font-family:'Segoe UI',sans-serif;white-space:nowrap}
+.bcpy:hover{background:rgba(255,255,255,.3)}
+.bcpy:disabled{opacity:.5;cursor:not-allowed}
+.bdl{background:rgba(15,43,74,.6);color:#fff;border:1px solid rgba(255,255,255,.3);padding:6px 13px;font-size:12px;border-radius:6px;cursor:pointer;transition:background .2s;font-family:'Segoe UI',sans-serif;white-space:nowrap}
+.bdl:hover{background:rgba(15,43,74,.9)}
+.bdl:disabled{opacity:.5;cursor:not-allowed}
+.rcn{padding:26px;font-size:13px;line-height:1.8;color:var(--tx);white-space:pre-wrap}
+@media(max-width:520px){.fr,.fr.t,.fr.four{grid-template-columns:1fr 1fr}.wxg{grid-template-columns:1fr 1fr}.qg{grid-template-columns:1fr 1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="lov" id="lov">
+  <div class="sp"></div>
+  <p>Generating your Daily Progress Report...</p>
+  <small>Claude AI is writing your report — about 15 seconds</small>
+</div>
+
+<div class="rw" id="rw">
+  <div class="rc">
+    <div class="rch">
+      <h2>✓ Daily Progress Report — Generated</h2>
+      <div class="rch-btns">
+        <button class="bcpy" onclick="cpyRpt()">Copy to clipboard</button>
+        <button class="bdl" id="btnWord" onclick="dlWord()">⬇ Download Word</button>
+      </div>
+    </div>
+    <div class="rcn" id="rcn"></div>
+  </div>
+  <button class="btnn" style="margin-top:14px;display:flex" onclick="newRpt()">← Submit another report</button>
+</div>
+
+<div id="mf">
+<div class="hdr">
+  <div class="logo"><span>CX</span></div>
+  <div class="hdr-info">
+    <h1>Daily Progress Report</h1>
+    <p>Controlynx — AI Project Controls</p>
+  </div>
+  <div class="save-ind"><div class="sd"></div>Saved</div>
+</div>
+<div class="pgw">
+  <div class="pgl"><span class="pgn" id="pn">Identity</span><span class="pgc" id="pc">1 of 11</span></div>
+  <div class="pgt"><div class="pgf" id="pf" style="width:9.1%"></div></div>
+</div>
+<div class="tbar" id="tb">
+  <button class="tab on" onclick="go(0)">Identity</button>
+  <button class="tab" onclick="go(1)">Weather</button>
+  <button class="tab" onclick="go(2)">Safety</button>
+  <button class="tab" onclick="go(3)">Labour</button>
+  <button class="tab" onclick="go(4)">Staffing</button>
+  <button class="tab" onclick="go(5)">Equipment</button>
+  <button class="tab" onclick="go(6)">Materials</button>
+  <button class="tab" onclick="go(7)">Activities</button>
+  <button class="tab" onclick="go(8)">Allocation</button>
+  <button class="tab" onclick="go(9)">Issues</button>
+  <button class="tab" onclick="go(10)">Sign-off</button>
+</div>
+
+<!-- P0 IDENTITY -->
+<div class="panel on" id="p0">
+  <div class="card"><div class="ch">Project Identity</div><div class="cb">
+    <div class="fr">
+      <div class="fg"><label>Project name<span class="req">*</span></label><input type="text" id="pn2" placeholder="e.g. Aldar Manarat Residential Tower - Phase 02"></div>
+      <div class="fg"><label>Contract number</label><input type="text" id="cn" placeholder="e.g. SIMR2-EW-BAG-P2"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Contractor<span class="req">*</span></label><input type="text" id="ct" placeholder="Main contractor name" value="Bright Accord General Contracting LLC"></div>
+      <div class="fg"><label>PMC</label><input type="text" id="pm" placeholder="PMC company name" value="Hill International"></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>Consultant / Client</label><input type="text" id="cs" placeholder="Consultant name" value="Ultra-Architectural Consultancy"></div>
+      <div class="fg"><label>Area / Zone</label><input type="text" id="az" placeholder="e.g. Zone C-4"></div>
+    </div>
+    <div class="fr t">
+      <div class="fg"><label>Date<span class="req">*</span></label><input type="date" id="dt"></div>
+      <div class="fg"><label>Report number</label><input type="text" id="rn" placeholder="DPR-0001"></div>
+      <div class="fg"><label>Shift</label><select id="sh"><option>Day shift (06:00–18:00)</option><option>Night shift (18:00–06:00)</option><option>Double shift</option></select></div>
+    </div>
+    <div class="fr t">
+      <div class="fg"><label>Project Time (days)</label><input type="number" id="ptime" placeholder="e.g. 792"></div>
+      <div class="fg"><label>Elapsed Days</label><input type="number" id="edays" placeholder="e.g. 596"></div>
+      <div class="fg"><label>Submitted by<span class="req">*</span></label><input type="text" id="sb" placeholder="Your name"></div>
+    </div>
+  </div></div>
+</div>
+
+<!-- P1 WEATHER -->
+<div class="panel" id="p1">
+  <div class="card"><div class="ch">Site Conditions</div><div class="cb">
+    <div class="hint" style="margin-bottom:9px">Tap to select weather condition</div>
+    <div class="wxg">
+      <div class="wc on" onclick="selWx(this)"><div class="wi">☀️</div><div class="wl">Clear</div></div>
+      <div class="wc" onclick="selWx(this)"><div class="wi">⛅</div><div class="wl">Cloudy</div></div>
+      <div class="wc" onclick="selWx(this)"><div class="wi">🌧</div><div class="wl">Rain</div></div>
+      <div class="wc" onclick="selWx(this)"><div class="wi">💨</div><div class="wl">Sandstorm</div></div>
+    </div>
+    <div class="fr four">
+      <div class="fg"><label>Max Temp (°C)</label><input type="number" id="tmp" placeholder="42"></div>
+      <div class="fg"><label>Min Temp (°C)</label><input type="number" id="tmpmin" placeholder="32"></div>
+      <div class="fg"><label>Humidity (%)</label><input type="number" id="hum" placeholder="52"></div>
+      <div class="fg"><label>Visibility</label><select id="vis"><option>Good</option><option>Poor</option><option>Restricted</option></select></div>
+    </div>
+    <div class="dv"></div>
+    <div class="fg"><label>Work stoppage due to weather</label>
+      <textarea id="ws" placeholder="Describe stoppage, duration, affected works, crew count. Leave blank if none."></textarea>
+    </div>
+  </div></div>
+</div>
+
+<!-- P2 SAFETY -->
+<div class="panel" id="p2">
+  <div class="card"><div class="ch">Safety</div><div class="cb">
+    <div class="fr">
+      <div class="fg"><label>Toolbox talk</label><select id="tbt"><option>Yes — conducted</option><option>No</option></select></div>
+      <div class="fg"><label>Attendees</label><input type="number" id="tba" placeholder="112"></div>
+    </div>
+    <div class="fg" style="margin-bottom:12px"><label>Topic covered</label><input type="text" id="tbt2" placeholder="e.g. Heat stress management"></div>
+    <div class="dv"></div>
+    <div style="font-size:11px;font-weight:600;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Incident log</div>
+    <div id="incl"></div>
+    <button class="addb" onclick="tog('incf')">+ Log incident / near miss</button>
+    <div id="incf" style="display:none">
+      <div class="af"><div class="aft">New incident</div>
+        <div class="fr" style="margin-bottom:9px">
+          <div class="fg"><label>Type</label><select id="inct"><option>Near miss</option><option>First aid</option><option>Medical treatment</option><option>Lost time</option><option>Property damage</option></select></div>
+          <div class="fg"><label>Time</label><input type="time" id="inctm"></div>
+        </div>
+        <div class="fg"><label>Description & action taken</label><textarea id="incd" placeholder="What happened, who was involved, action taken…"></textarea></div>
+        <div style="display:flex;gap:8px;margin-top:9px">
+          <button class="btnb" style="flex:1" onclick="tog('incf')">Cancel</button>
+          <button class="btnn" style="flex:1" onclick="addInc()">Add</button>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- P3 LABOUR -->
+<div class="panel" id="p3">
+  <div class="card"><div class="ch">Direct Labour</div><div class="cb">
+    <div class="hint" style="margin-bottom:9px">Enter count directly or use +/− buttons. × removes a trade.</div>
+    <div class="coh"><span class="con">Main Contractor (BAGC)</span><span class="cot" id="mct">104</span></div>
+    <div id="mctd">
+      <div class="tr"><span class="tn">Block mason</span><div class="ct"><button class="ctb" onclick="aL('l0',-1)">−</button><input type="number" class="ctv" id="l0" value="14" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('l0',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Steel fixer</span><div class="ct"><button class="ctb" onclick="aL('l1',-1)">−</button><input type="number" class="ctv" id="l1" value="22" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('l1',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Carpenter / formwork</span><div class="ct"><button class="ctb" onclick="aL('l2',-1)">−</button><input type="number" class="ctv" id="l2" value="12" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('l2',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Helper / labourer</span><div class="ct"><button class="ctb" onclick="aL('l3',-1)">−</button><input type="number" class="ctv" id="l3" value="34" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('l3',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Scaffolder</span><div class="ct"><button class="ctb" onclick="aL('l4',-1)">−</button><input type="number" class="ctv" id="l4" value="6" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('l4',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Painter</span><div class="ct"><button class="ctb" onclick="aL('l5',-1)">−</button><input type="number" class="ctv" id="l5" value="0" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('l5',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Equipment operator</span><div class="ct"><button class="ctb" onclick="aL('l6',-1)">−</button><input type="number" class="ctv" id="l6" value="5" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('l6',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Welder</span><div class="ct"><button class="ctb" onclick="aL('l7',-1)">−</button><input type="number" class="ctv" id="l7" value="3" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('l7',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div id="mce"></div>
+    </div>
+    <button class="addb" onclick="aTr('mce','mc')">+ Add trade — main contractor</button>
+    <div class="dv"></div>
+    <div class="coh"><span class="con">MEP Subcontractor (BAGC MEP)</span><span class="cot" id="mpt">18</span></div>
+    <div id="meptd">
+      <div class="tr"><span class="tn">Electrician</span><div class="ct"><button class="ctb" onclick="aL('e0',-1)">−</button><input type="number" class="ctv" id="e0" value="8" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('e0',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Plumber</span><div class="ct"><button class="ctb" onclick="aL('e1',-1)">−</button><input type="number" class="ctv" id="e1" value="4" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('e1',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">HVAC technician</span><div class="ct"><button class="ctb" onclick="aL('e2',-1)">−</button><input type="number" class="ctv" id="e2" value="4" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('e2',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">MEP helper</span><div class="ct"><button class="ctb" onclick="aL('e3',-1)">−</button><input type="number" class="ctv" id="e3" value="2" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('e3',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div id="mepe"></div>
+    </div>
+    <button class="addb" onclick="aTr('mepe','mep')">+ Add trade — MEP sub</button>
+    <div class="dv"></div>
+    <div class="coh"><span class="con">Aluminium Subcontractor</span><span class="cot" id="alt">12</span></div>
+    <div id="altd">
+      <div class="tr"><span class="tn">Aluminium installer</span><div class="ct"><button class="ctb" onclick="aL('a0',-1)">−</button><input type="number" class="ctv" id="a0" value="6" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('a0',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Glazier</span><div class="ct"><button class="ctb" onclick="aL('a1',-1)">−</button><input type="number" class="ctv" id="a1" value="4" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('a1',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div class="tr"><span class="tn">Caulker / sealant</span><div class="ct"><button class="ctb" onclick="aL('a2',-1)">−</button><input type="number" class="ctv" id="a2" value="2" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('a2',1)">+</button><button class="db" onclick="dTr(this)">×</button></div></div>
+      <div id="ale"></div>
+    </div>
+    <button class="addb" onclick="aTr('ale','al')">+ Add trade — aluminium sub</button>
+    <div class="gtr"><span class="gtl">Grand total on site</span><span class="gtv" id="gtl">134</span></div>
+  </div></div>
+</div>
+
+<!-- P4 STAFFING -->
+<div class="panel" id="p4">
+  <div class="card"><div class="ch">Staff on Site</div><div class="cb">
+    <div class="coh"><span class="con">Main Contractor (BAGC)</span><span class="cot" id="mcs">23</span></div>
+    <div id="mcst">
+      <div class="tr"><span class="tn">Sr. Project Manager</span><div class="ct"><button class="ctb" onclick="aS('s0',-1)">−</button><input type="number" class="ctv" id="s0" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s0',1)">+</button></div></div>
+      <div class="tr"><span class="tn">Site Manager</span><div class="ct"><button class="ctb" onclick="aS('s1',-1)">−</button><input type="number" class="ctv" id="s1" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s1',1)">+</button></div></div>
+      <div class="tr"><span class="tn">SR. Project Engineer</span><div class="ct"><button class="ctb" onclick="aS('s2',-1)">−</button><input type="number" class="ctv" id="s2" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s2',1)">+</button></div></div>
+      <div class="tr"><span class="tn">Planning Manager</span><div class="ct"><button class="ctb" onclick="aS('s3',-1)">−</button><input type="number" class="ctv" id="s3" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s3',1)">+</button></div></div>
+      <div class="tr"><span class="tn">Planning Engineer</span><div class="ct"><button class="ctb" onclick="aS('s4',-1)">−</button><input type="number" class="ctv" id="s4" value="2" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s4',1)">+</button></div></div>
+      <div class="tr"><span class="tn">QA/QC Manager</span><div class="ct"><button class="ctb" onclick="aS('s5',-1)">−</button><input type="number" class="ctv" id="s5" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s5',1)">+</button></div></div>
+      <div class="tr"><span class="tn">QA/QC Engineer</span><div class="ct"><button class="ctb" onclick="aS('s6',-1)">−</button><input type="number" class="ctv" id="s6" value="3" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s6',1)">+</button></div></div>
+      <div class="tr"><span class="tn">HSE Manager</span><div class="ct"><button class="ctb" onclick="aS('s7',-1)">−</button><input type="number" class="ctv" id="s7" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s7',1)">+</button></div></div>
+      <div class="tr"><span class="tn">HSE Engineer</span><div class="ct"><button class="ctb" onclick="aS('s8',-1)">−</button><input type="number" class="ctv" id="s8" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s8',1)">+</button></div></div>
+      <div class="tr"><span class="tn">Safety Officer</span><div class="ct"><button class="ctb" onclick="aS('s9',-1)">−</button><input type="number" class="ctv" id="s9" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s9',1)">+</button></div></div>
+      <div class="tr"><span class="tn">Site Engineer (Civil)</span><div class="ct"><button class="ctb" onclick="aS('s10',-1)">−</button><input type="number" class="ctv" id="s10" value="3" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s10',1)">+</button></div></div>
+      <div class="tr"><span class="tn">QC Inspector</span><div class="ct"><button class="ctb" onclick="aS('s11',-1)">−</button><input type="number" class="ctv" id="s11" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s11',1)">+</button></div></div>
+      <div class="tr"><span class="tn">Land Surveyor</span><div class="ct"><button class="ctb" onclick="aS('s12',-1)">−</button><input type="number" class="ctv" id="s12" value="2" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s12',1)">+</button></div></div>
+      <div class="tr"><span class="tn">Document Controller</span><div class="ct"><button class="ctb" onclick="aS('s13',-1)">−</button><input type="number" class="ctv" id="s13" value="4" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s13',1)">+</button></div></div>
+      <div class="tr"><span class="tn">Time Keeper</span><div class="ct"><button class="ctb" onclick="aS('s14',-1)">−</button><input type="number" class="ctv" id="s14" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('s14',1)">+</button></div></div>
+      <div id="mcse"></div>
+    </div>
+    <button class="addb" onclick="aSt('mcse')">+ Add position</button>
+    <div class="dv"></div>
+    <div class="coh"><span class="con">MEP Subcontractor (BAGC MEP)</span><span class="cot" id="meps">4</span></div>
+    <div>
+      <div class="tr"><span class="tn">MEP Project Manager</span><div class="ct"><button class="ctb" onclick="aS('m0',-1)">−</button><input type="number" class="ctv" id="m0" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('m0',1)">+</button></div></div>
+      <div class="tr"><span class="tn">MEP Site Engineer</span><div class="ct"><button class="ctb" onclick="aS('m1',-1)">−</button><input type="number" class="ctv" id="m1" value="2" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('m1',1)">+</button></div></div>
+      <div class="tr"><span class="tn">MEP Supervisor</span><div class="ct"><button class="ctb" onclick="aS('m2',-1)">−</button><input type="number" class="ctv" id="m2" value="1" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('m2',1)">+</button></div></div>
+    </div>
+    <div class="gtr"><span class="gtl">Grand total staff</span><span class="gtv" id="gts">27</span></div>
+  </div></div>
+</div>
+
+<!-- P5 EQUIPMENT -->
+<div class="panel" id="p5">
+  <div class="card"><div class="ch">Equipment & Machinery</div><div class="cb">
+    <div class="hint" style="margin-bottom:9px">× removes demobilised equipment</div>
+    <div id="eql">
+      <div class="eqc"><div class="eqt"><span class="eqn">Tower Crane</span><div style="display:flex;align-items:center;gap:6px"><span class="eqi">x2</span><button class="db" onclick="this.closest('.eqc').remove()">×</button></div></div><div class="scr"><div class="sc wk s" onclick="sEq(this)">Working</div><div class="sc bk" onclick="sEq(this)">Breakdown</div><div class="sc rp" onclick="sEq(this)">In repair</div><div class="sc dm" onclick="sEq(this)">Demob</div></div></div>
+      <div class="eqc"><div class="eqt"><span class="eqn">Excavator</span><div style="display:flex;align-items:center;gap:6px"><span class="eqi">x1</span><button class="db" onclick="this.closest('.eqc').remove()">×</button></div></div><div class="scr"><div class="sc wk s" onclick="sEq(this)">Working</div><div class="sc bk" onclick="sEq(this)">Breakdown</div><div class="sc rp" onclick="sEq(this)">In repair</div><div class="sc dm" onclick="sEq(this)">Demob</div></div></div>
+      <div class="eqc"><div class="eqt"><span class="eqn">Boom Loader</span><div style="display:flex;align-items:center;gap:6px"><span class="eqi">x2</span><button class="db" onclick="this.closest('.eqc').remove()">×</button></div></div><div class="scr"><div class="sc wk s" onclick="sEq(this)">Working</div><div class="sc bk" onclick="sEq(this)">Breakdown</div><div class="sc rp" onclick="sEq(this)">In repair</div><div class="sc dm" onclick="sEq(this)">Demob</div></div></div>
+      <div class="eqc"><div class="eqt"><span class="eqn">Bar Bending Machine</span><div style="display:flex;align-items:center;gap:6px"><span class="eqi">x2</span><button class="db" onclick="this.closest('.eqc').remove()">×</button></div></div><div class="scr"><div class="sc wk s" onclick="sEq(this)">Working</div><div class="sc bk" onclick="sEq(this)">Breakdown</div><div class="sc rp" onclick="sEq(this)">In repair</div><div class="sc dm" onclick="sEq(this)">Demob</div></div></div>
+      <div class="eqc"><div class="eqt"><span class="eqn">Bar Cutting Machine</span><div style="display:flex;align-items:center;gap:6px"><span class="eqi">x9</span><button class="db" onclick="this.closest('.eqc').remove()">×</button></div></div><div class="scr"><div class="sc wk s" onclick="sEq(this)">Working</div><div class="sc bk" onclick="sEq(this)">Breakdown</div><div class="sc rp" onclick="sEq(this)">In repair</div><div class="sc dm" onclick="sEq(this)">Demob</div></div></div>
+    </div>
+    <button class="addb" onclick="tog('eqaf')">+ Add equipment</button>
+    <div id="eqaf" style="display:none">
+      <div class="af"><div class="aft">New equipment</div>
+        <div class="fr" style="margin-bottom:9px">
+          <div class="fg"><label>Equipment name</label><input type="text" id="eqnm" placeholder="e.g. Generator GN-01"></div>
+          <div class="fg"><label>Reference / Qty</label><input type="text" id="eqrf" placeholder="e.g. x2"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:9px">
+          <button class="btnb" style="flex:1" onclick="tog('eqaf')">Cancel</button>
+          <button class="btnn" style="flex:1" onclick="addEq()">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="dv"></div>
+    <div class="fg" style="margin-bottom:10px"><label>Mobilisation requested</label><textarea id="mob" placeholder="List equipment requested to be mobilised to site…"></textarea></div>
+    <div class="fg"><label>Demobilisation planned</label><textarea id="dem" placeholder="List equipment to be demobilised…"></textarea></div>
+  </div></div>
+</div>
+
+<!-- P6 MATERIALS -->
+<div class="panel" id="p6">
+  <div class="card"><div class="ch">Material Deliveries</div><div class="cb">
+    <div class="hint" style="margin-bottom:9px">Log against MIR references. × deletes a same-day entry.</div>
+    <div id="mirl"></div>
+    <button class="addb" onclick="tog('mirf')">+ Log delivery</button>
+    <div id="mirf" style="display:none">
+      <div class="af"><div class="aft">New delivery</div>
+        <div class="fr" style="margin-bottom:9px">
+          <div class="fg"><label>MIR ref.</label><input type="text" id="mrf" placeholder="MIR-0000"></div>
+          <div class="fg"><label>DO / waybill</label><input type="text" id="mdo" placeholder="DO number"></div>
+        </div>
+        <div class="fg" style="margin-bottom:9px"><label>Material & quantity</label><input type="text" id="mmt2" placeholder="e.g. Rebar T20 — 5.2 MT"></div>
+        <div class="fr">
+          <div class="fg"><label>Supplier</label><input type="text" id="msp"></div>
+          <div class="fg"><label>Status</label><select id="mst"><option>Accepted</option><option>Rejected</option><option>Hold</option></select></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:9px">
+          <button class="btnb" style="flex:1" onclick="tog('mirf')">Cancel</button>
+          <button class="btnn" style="flex:1" onclick="addMir()">Log</button>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</div>
+
+<!-- P7 ACTIVITIES -->
+<div class="panel" id="p7">
+  <div class="card"><div class="ch">Activities Performed Today</div><div class="cb">
+    <div class="hint" style="margin-bottom:9px">Activities carry forward daily until Complete. Allocation tab updates automatically.</div>
+    <div id="actl"></div>
+    <button class="addb" onclick="tog('actf')">+ Add activity</button>
+    <div id="actf" style="display:none">
+      <div class="af"><div class="aft">New activity</div>
+        <div class="fg" style="margin-bottom:9px"><label>Description<span class="req">*</span></label><input type="text" id="adsc" placeholder="Describe the work being carried out…"></div>
+        <div class="fr t">
+          <div class="fg"><label>Zone</label>
+            <select id="azon"><option>Zone 01</option><option>Zone 02</option><option>Zone 01 & 02</option></select>
+          </div>
+          <div class="fg"><label>Discipline</label>
+            <select id="adis"><option>Civil</option><option>Structural</option><option>MEP</option><option>Finishing</option><option>Landscaping</option><option>External works</option></select>
+          </div>
+          <div class="fg"><label>Start %</label><input type="number" id="apct" value="0" min="0" max="100"></div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:9px">
+          <button class="btnb" style="flex:1" onclick="tog('actf')">Cancel</button>
+          <button class="btnn" style="flex:1" onclick="addAct()">Add</button>
+        </div>
+      </div>
+    </div>
+    <div class="dv"></div>
+    <div class="fg"><label>Activities planned for tomorrow</label><textarea id="pt" placeholder="List activities planned for the next working day…"></textarea></div>
+  </div></div>
+</div>
+
+<!-- P8 ALLOCATION -->
+<div class="panel" id="p8">
+  <div class="card"><div class="ch">Allocation & Quantities</div><div class="cb">
+    <div class="hint" style="margin-bottom:9px">Activities auto-linked from Activities tab. Enter manpower in the morning and achieved quantities at end of day.</div>
+    <div id="alcl"></div>
+    <div style="font-size:12px;color:var(--mu);text-align:center;padding:8px 0;border-top:1px solid var(--border)">Add activities in the Activities tab — they appear here automatically</div>
+  </div></div>
+</div>
+
+<!-- P9 ISSUES -->
+<div class="panel" id="p9">
+  <div class="card"><div class="ch">Issues & Concerns</div><div class="cb">
+    <div class="hint" style="margin-bottom:9px">× deletes a same-day entry.</div>
+    <div id="issl"></div>
+    <div class="dv"></div>
+    <div class="af"><div class="aft">Add issue</div>
+      <div class="fg" style="margin-bottom:9px"><label>Description</label><textarea id="isd" placeholder="Describe the issue, cause, and impact…"></textarea></div>
+      <div class="fr">
+        <div class="fg"><label>Severity</label><select id="isv"><option value="h">High</option><option value="m" selected>Medium</option><option value="l">Low</option></select></div>
+        <div class="fg"><label>Category</label><select id="isc"><option>Equipment</option><option>Procurement</option><option>Client</option><option>Labour</option><option>Safety</option><option>Design</option><option>Weather</option></select></div>
+      </div>
+      <button class="addb" onclick="addIss()">+ Add issue</button>
+    </div>
+  </div></div>
+</div>
+
+<!-- P10 SIGN-OFF -->
+<div class="panel" id="p10">
+  <div class="card"><div class="ch">Review & Generate Report</div><div class="cb">
+    <div class="hint" style="margin-bottom:11px">Review before generating. AI produces a client-ready DPR in ~15 seconds. Then download the formatted Word document.</div>
+    <table class="smt">
+      <tr><td style="color:var(--mu)">Project</td><td class="sok" id="sm1">—</td></tr>
+      <tr><td style="color:var(--mu)">Date</td><td id="sm2">—</td></tr>
+      <tr><td style="color:var(--mu)">Weather</td><td id="sm3">—</td></tr>
+      <tr><td style="color:var(--mu)">Total labour</td><td id="sm4">—</td></tr>
+      <tr><td style="color:var(--mu)">Total staff</td><td id="sm5">—</td></tr>
+      <tr><td style="color:var(--mu)">Activities</td><td id="sm6">—</td></tr>
+      <tr><td style="color:var(--mu)">Issues</td><td id="sm7">—</td></tr>
+      <tr><td style="color:var(--mu)">Deliveries</td><td id="sm8">—</td></tr>
+      <tr><td style="color:var(--mu)">Incidents</td><td id="sm9">—</td></tr>
+    </table>
+    <div class="dv"></div>
+    <div class="fg"><label>Additional notes</label><textarea id="an" placeholder="Any final notes to include in the report…"></textarea></div>
+    <div class="hint" style="margin-top:10px">🤖 Step 1: Generate AI report preview<br>📄 Step 2: Download formatted Word document matching ALDAR template</div>
+  </div></div>
+</div>
+
+<div class="ftr">
+  <button class="btnb" id="bkb" onclick="back()" style="display:none">← Back</button>
+  <button class="btnn" id="nxb" onclick="nxt()">Continue →</button>
+  <button class="btng" id="gnb" onclick="gen()">🤖 Generate DPR</button>
+</div>
+</div>
+
+<script>
+const TABS=['Identity','Weather','Safety','Labour','Staffing','Equipment','Materials','Activities','Allocation','Issues','Sign-off'];
+const SL={ot:'On track',dl:'Delayed',bl:'Blocked',cp:'Complete'};
+const UNITS=['m²','m³','no.','lm','kg','MT','m','sets'];
+let cur=0,xn=0,lastData=null;
+let acts=[
+  {id:0,disc:'Civil',zone:'Zone 01 & 02',name:'Blockwork — 3F-4F-5F',pct:45,status:'ot',alloc:[{t:'Block mason',n:52}],unit:'m²',pld:200,ach:90},
+  {id:1,disc:'Structural',zone:'Zone 01',name:'Reinforcement works for vertical elements — 11F',pct:100,status:'cp',alloc:[{t:'Steel fixer',n:53}],unit:'no.',pld:1,ach:1},
+  {id:2,disc:'MEP',zone:'Zone 01 & 02',name:'MEP 2nd fix — Chilled Water Pipe FF-4F',pct:35,status:'dl',alloc:[{t:'Plumber',n:29}],unit:'lm',pld:150,ach:52}
+];
+let actN=3;
+let wxSel='Clear / Sunny';
+const mcL=['l0','l1','l2','l3','l4','l5','l6','l7'],mepL=['e0','e1','e2','e3'],alL=['a0','a1','a2'];
+const mcLx=[],mepLx=[],alLx=[];
+const mcS=['s0','s1','s2','s3','s4','s5','s6','s7','s8','s9','s10','s11','s12','s13','s14'],mepS=['m0','m1','m2'];
+const mcSx=[];
+
+function go(i){
+  document.getElementById('p'+cur).classList.remove('on');
+  document.querySelectorAll('.tab')[cur].classList.remove('on');
+  cur=i;
+  document.getElementById('p'+cur).classList.add('on');
+  const tabs=document.querySelectorAll('.tab');
+  tabs[cur].classList.add('on');
+  tabs[cur].scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  updNav();
+  if(i===8)rAlc();
+  if(i===10)updSum();
+  window.scrollTo(0,0);
+}
+function nxt(){if(cur<10)go(cur+1);}
+function back(){if(cur>0)go(cur-1);}
+function updNav(){
+  const l=cur===10;
+  document.getElementById('pn').textContent=TABS[cur];
+  document.getElementById('pc').textContent=(cur+1)+' of 11';
+  document.getElementById('pf').style.width=Math.round((cur+1)/11*100)+'%';
+  document.getElementById('bkb').style.display=cur>0?'block':'none';
+  document.getElementById('nxb').style.display=l?'none':'flex';
+  document.getElementById('gnb').style.display=l?'flex':'none';
+}
+
+function selWx(el){document.querySelectorAll('.wc').forEach(c=>c.classList.remove('on'));el.classList.add('on');wxSel=el.querySelector('.wl').textContent;}
+function sEq(btn){btn.parentElement.querySelectorAll('.sc').forEach(c=>c.classList.remove('s'));btn.classList.add('s');}
+function tog(id){const f=document.getElementById(id);f.style.display=f.style.display==='none'?'block':'none';}
+
+function sumI(ids){return ids.reduce((a,id)=>{const el=document.getElementById(id);return a+(el?parseInt(el.value||el.textContent)||0:0);},0);}
+
+function aL(id,d){
+  const el=document.getElementById(id);if(!el)return;
+  const v=parseInt(el.value||el.textContent)||0;
+  el.tagName==='INPUT'?el.value=Math.max(0,v+d):el.textContent=Math.max(0,v+d);
+  updLab();
+}
+function updLab(){
+  const mc=sumI([...mcL,...mcLx]),mep=sumI([...mepL,...mepLx]),al=sumI([...alL,...alLx]);
+  document.getElementById('mct').textContent=mc;
+  document.getElementById('mpt').textContent=mep;
+  document.getElementById('alt').textContent=al;
+  document.getElementById('gtl').textContent=mc+mep+al;
+}
+function aTr(cid,pfx){
+  const n=prompt('Trade name:');if(!n)return;
+  const id=pfx+'x'+xn++;
+  if(pfx==='mc')mcLx.push(id);else if(pfx==='mep')mepLx.push(id);else alLx.push(id);
+  const r=document.createElement('div');r.className='tr';
+  r.innerHTML=`<span class="tn">${n}</span><div class="ct"><button class="ctb" onclick="aL('${id}',-1)">−</button><input type="number" class="ctv" id="${id}" value="0" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aL('${id}',1)">+</button><button class="db" onclick="dTr(this)">×</button></div>`;
+  document.getElementById(cid).appendChild(r);updLab();
+}
+function dTr(btn){btn.closest('.tr').remove();updLab();updStf();}
+
+function aS(id,d){
+  const el=document.getElementById(id);if(!el)return;
+  const v=parseInt(el.value||el.textContent)||0;
+  el.tagName==='INPUT'?el.value=Math.max(0,v+d):el.textContent=Math.max(0,v+d);
+  updStf();
+}
+function updStf(){
+  const mc=sumI([...mcS,...mcSx]),mep=sumI(mepS);
+  document.getElementById('mcs').textContent=mc;
+  document.getElementById('meps').textContent=mep;
+  document.getElementById('gts').textContent=mc+mep;
+}
+function aSt(cid){
+  const n=prompt('Position:');if(!n)return;
+  const id='sx'+xn++;mcSx.push(id);
+  const r=document.createElement('div');r.className='tr';
+  r.innerHTML=`<span class="tn">${n}</span><div class="ct"><button class="ctb" onclick="aS('${id}',-1)">−</button><input type="number" class="ctv" id="${id}" value="0" min="0" oninput="updLab();updStf();"><button class="ctb" onclick="aS('${id}',1)">+</button></div>`;
+  document.getElementById(cid).appendChild(r);updStf();
+}
+
+function addEq(){
+  const n=document.getElementById('eqnm').value;if(!n.trim())return;
+  const id=document.getElementById('eqrf').value;
+  const c=document.createElement('div');c.className='eqc';
+  c.innerHTML=`<div class="eqt"><span class="eqn">${n}</span><div style="display:flex;align-items:center;gap:6px"><span class="eqi">${id}</span><button class="db" onclick="this.closest('.eqc').remove()">×</button></div></div><div class="scr"><div class="sc wk s" onclick="sEq(this)">Working</div><div class="sc bk" onclick="sEq(this)">Breakdown</div><div class="sc rp" onclick="sEq(this)">In repair</div><div class="sc dm" onclick="sEq(this)">Demob</div></div>`;
+  document.getElementById('eql').appendChild(c);
+  document.getElementById('eqnm').value='';document.getElementById('eqrf').value='';tog('eqaf');
+}
+
+function addMir(){
+  const mat=document.getElementById('mmt2').value;if(!mat.trim())return;
+  const ref=document.getElementById('mrf').value||'MIR-????';
+  const sup=document.getElementById('msp').value;
+  const doN=document.getElementById('mdo').value;
+  const st=document.getElementById('mst').value;
+  const bc=st==='Accepted'?'a':st==='Rejected'?'r':'h';
+  const c=document.createElement('div');c.className='mc';
+  c.innerHTML=`<div style="display:flex;justify-content:space-between"><div class="mr">${ref}</div><button class="db" onclick="this.closest('.mc').remove()">×</button></div><div class="mm">${mat}</div><div class="mmt"><span class="mt">${sup}</span>${doN?`<span class="mt">DO: ${doN}</span>`:''}<span class="bge ${bc}">${st}</span></div>`;
+  document.getElementById('mirl').appendChild(c);document.getElementById('mmt2').value='';tog('mirf');
+}
+
+function addInc(){
+  const t=document.getElementById('inct').value;
+  const ti=document.getElementById('inctm').value||'--:--';
+  const d=document.getElementById('incd').value;if(!d.trim())return;
+  const c=document.createElement('div');c.className='ic';
+  c.innerHTML=`<div class="ih"><span class="it2">${t}</span><span class="itm">${ti}</span><button class="db" onclick="this.closest('.ic').remove()">×</button></div><div class="id2">${d}</div>`;
+  document.getElementById('incl').appendChild(c);document.getElementById('incd').value='';tog('incf');
+}
+
+function rActs(){
+  document.getElementById('actl').innerHTML=acts.map((a,i)=>`
+    <div class="ac">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="am2">${a.disc} · ${a.zone||''}</div>
+        <button class="db" onclick="dAct(${i})">×</button>
+      </div>
+      <div class="an">${a.name}</div>
+      <div class="pr">
+        <input type="range" min="0" max="100" step="1" value="${a.pct}" oninput="uPct(${i},this.value)">
+        <span class="pb" id="pb${i}" style="color:${a.pct===100?'#3B6D11':a.pct<40?'var(--am)':'var(--teal)'}">${a.pct}%</span>
+      </div>
+      <div class="chips">${['ot','dl','bl','cp'].map(s=>`<div class="chip ${s}${a.status===s?' s':''}" onclick="sSt(${i},'${s}')">${SL[s]}</div>`).join('')}</div>
+    </div>`).join('');
+}
+function uPct(i,v){acts[i].pct=parseInt(v);const el=document.getElementById('pb'+i);if(el){el.textContent=v+'%';el.style.color=v==100?'#3B6D11':v<40?'var(--am)':'var(--teal)';}rAlc();}
+function sSt(i,s){acts[i].status=s;rActs();}
+function dAct(i){acts.splice(i,1);rActs();rAlc();}
+function addAct(){
+  const n=document.getElementById('adsc').value;if(!n.trim())return;
+  const d=document.getElementById('adis').value;
+  const z=document.getElementById('azon').value;
+  const p=Math.min(100,Math.max(0,parseInt(document.getElementById('apct').value)||0));
+  acts.push({id:actN++,disc:d,zone:z,name:n,pct:p,status:'ot',alloc:[],unit:'m²',pld:0,ach:0});
+  document.getElementById('adsc').value='';tog('actf');rActs();rAlc();
+}
+
+function rAlc(){
+  document.getElementById('alcl').innerHTML=acts.map((a,i)=>{
+    const mh=a.alloc.reduce((s,al)=>s+al.n*8,0);
+    const prod=mh>0&&a.ach>0?(a.ach/mh).toFixed(2):null;
+    const rat=a.pld>0?Math.round(a.ach/a.pld*100):0;
+    const pc=rat>=90?'var(--teal)':rat>=70?'var(--am)':'var(--rd)';
+    const uO=UNITS.map(u=>`<option${u===a.unit?' selected':''}>${u}</option>`).join('');
+    const aR=a.alloc.map((al,j)=>`<div class="tr"><span class="tn">${al.t}</span><div class="ct"><button class="ctb" onclick="aAl(${i},${j},-1)">−</button><input type="number" class="ctv" id="al${i}_${j}" value="${al.n}" min="0" oninput="acts[${i}].alloc[${j}].n=parseInt(this.value)||0;rAlc();"><button class="ctb" onclick="aAl(${i},${j},1)">+</button><button class="db" onclick="dAl(${i},${j})">×</button></div></div>`).join('');
+    return`<div class="alc"><div class="alh"><div><div class="ald">${a.disc} · ${a.zone||''} <span style="font-size:9px;background:rgba(15,110,86,.15);color:var(--tld);padding:1px 5px;border-radius:20px">linked</span></div><div class="aln">${a.name}</div></div><div class="alp">${a.pct}%</div></div>
+    <div class="alb">
+      <div class="als">Morning — manpower allocation</div>${aR}
+      <button class="addb" style="margin-top:3px" onclick="aAlT(${i})">+ Add trade</button>
+      <div class="mht">Total man-hours: <span>${mh} hrs</span></div>
+      <div class="dv" style="margin:7px 0"></div>
+      <div class="als">End of day — quantities achieved</div>
+      <div class="qg">
+        <div><div class="ql">Unit</div><select class="qi" onchange="acts[${i}].unit=this.value;rAlc()">${uO}</select></div>
+        <div><div class="ql">Planned</div><input type="number" class="qi" value="${a.pld}" onchange="acts[${i}].pld=parseFloat(this.value)||0;rAlc()"></div>
+        <div><div class="ql">Achieved</div><input type="number" class="qi" value="${a.ach}" onchange="acts[${i}].ach=parseFloat(this.value)||0;rAlc()"></div>
+      </div>
+      ${prod?`<div class="pdb"><div class="pdr">Productivity: <span>${prod} ${a.unit}/man-hr</span></div><div style="font-size:12px;font-weight:500;color:${pc}">${rat}% of plan</div></div>`:''}
+    </div></div>`;
+  }).join('');
+}
+function aAl(i,j,d){acts[i].alloc[j].n=Math.max(0,acts[i].alloc[j].n+d);rAlc();}
+function dAl(i,j){acts[i].alloc.splice(j,1);rAlc();}
+function aAlT(i){const t=prompt('Trade:');if(!t)return;acts[i].alloc.push({t,n:0});rAlc();}
+
+function addIss(){
+  const d=document.getElementById('isd').value;if(!d.trim())return;
+  const s=document.getElementById('isv').value;
+  const c=document.getElementById('isc').value;
+  const r=document.createElement('div');r.className='ir';
+  r.innerHTML=`<div class="sv ${s}"></div><div style="flex:1"><div class="it3">${d}</div><div class="im2">${c}</div></div><button class="db" onclick="this.closest('.ir').remove()">×</button>`;
+  document.getElementById('issl').appendChild(r);document.getElementById('isd').value='';
+}
+
+function updSum(){
+  document.getElementById('sm1').textContent=document.getElementById('pn2').value||'—';
+  document.getElementById('sm2').textContent=document.getElementById('dt').value||'—';
+  document.getElementById('sm3').textContent=wxSel;
+  document.getElementById('sm4').textContent=document.getElementById('gtl').textContent+' workers';
+  document.getElementById('sm5').textContent=document.getElementById('gts').textContent+' staff';
+  document.getElementById('sm6').textContent=acts.length+' updated';
+  document.getElementById('sm7').textContent=document.querySelectorAll('#issl .ir').length+' logged';
+  document.getElementById('sm8').textContent=document.querySelectorAll('#mirl .mc').length+' deliveries';
+  document.getElementById('sm9').textContent=document.querySelectorAll('#incl .ic').length+' reported';
+}
+
+function collect(){
+  const lab=[];
+  document.querySelectorAll('#mctd .tr,#mce .tr').forEach(r=>{const n=r.querySelector('.ctv'),nm=r.querySelector('.tn');if(n&&nm&&parseInt(n.value||n.textContent)>0)lab.push(`MC — ${nm.textContent}: ${n.value||n.textContent}`);});
+  document.querySelectorAll('#meptd .tr,#mepe .tr').forEach(r=>{const n=r.querySelector('.ctv'),nm=r.querySelector('.tn');if(n&&nm&&parseInt(n.value||n.textContent)>0)lab.push(`MEP Sub — ${nm.textContent}: ${n.value||n.textContent}`);});
+  document.querySelectorAll('#altd .tr,#ale .tr').forEach(r=>{const n=r.querySelector('.ctv'),nm=r.querySelector('.tn');if(n&&nm&&parseInt(n.value||n.textContent)>0)lab.push(`AL Sub — ${nm.textContent}: ${n.value||n.textContent}`);});
+  const eq=[];document.querySelectorAll('#eql .eqc').forEach(c=>{const n=c.querySelector('.eqn').textContent;const s=c.querySelector('.sc.s')?.textContent||'Working';eq.push(`${n}: ${s}`);});
+  const mat=[];document.querySelectorAll('#mirl .mc').forEach(c=>{const r=c.querySelector('.mr')?.textContent||'';const m=c.querySelector('.mm')?.textContent||'';const s=c.querySelector('.bge')?.textContent||'';mat.push(`${r}: ${m} — ${s}`);});
+  const inc=[];document.querySelectorAll('#incl .ic').forEach(c=>{const t=c.querySelector('.it2')?.textContent||'';const ti=c.querySelector('.itm')?.textContent||'';const d=c.querySelector('.id2')?.textContent||'';inc.push(`${t} at ${ti}: ${d}`);});
+  const iss=[];document.querySelectorAll('#issl .ir').forEach(r=>{const s=r.querySelector('.sv.h')?'HIGH':r.querySelector('.sv.m')?'MEDIUM':'LOW';const t=r.querySelector('.it3')?.textContent||'';const m=r.querySelector('.im2')?.textContent||'';iss.push(`[${s}] ${t} (${m})`);});
+  const stf=[];document.querySelectorAll('#mcst .tr,#mcse .tr').forEach(r=>{const n=r.querySelector('.ctv'),nm=r.querySelector('.tn');if(n&&nm&&parseInt(n.value||n.textContent)>0)stf.push(`${nm.textContent}: ${n.value||n.textContent}`);});
+  const actD=acts.map(a=>{
+    const alloc=a.alloc.length>0?a.alloc.map(al=>`${al.t}: ${al.n}`).join(', '):'Not recorded';
+    const mh=a.alloc.reduce((s,al)=>s+al.n*8,0);
+    const prod=mh>0&&a.ach>0?`${(a.ach/mh).toFixed(2)} ${a.unit}/man-hr`:'Not recorded';
+    return`${a.name} (${a.disc}) zone: ${a.zone||'Zone 01'}: ${a.pct}% — ${SL[a.status]}\n  Allocated: ${alloc}\n  Quantities: Planned ${a.pld} ${a.unit}, Achieved ${a.ach} ${a.unit}\n  Productivity: ${prod}`;
+  }).join('\n\n');
+  return{
+    projectName:document.getElementById('pn2').value,
+    contractNumber:document.getElementById('cn').value,
+    contractor:document.getElementById('ct').value,
+    pmc:document.getElementById('pm').value,
+    consultant:document.getElementById('cs').value,
+    reportDate:document.getElementById('dt').value,
+    reportNumber:document.getElementById('rn').value,
+    area:document.getElementById('az').value,
+    shift:document.getElementById('sh').value,
+    submittedBy:document.getElementById('sb').value,
+    projectTime:document.getElementById('ptime').value,
+    elapsedDays:document.getElementById('edays').value,
+    weather:wxSel,
+    temperature:document.getElementById('tmp').value,
+    temperatureMin:document.getElementById('tmpmin').value,
+    humidity:document.getElementById('hum').value,
+    workStoppage:document.getElementById('ws').value,
+    toolboxTalk:document.getElementById('tbt').value,
+    toolboxTopic:document.getElementById('tbt2').value,
+    toolboxAttendees:document.getElementById('tba').value,
+    activities:actD,
+    plannedTomorrow:document.getElementById('pt').value,
+    labour:lab.join('\n'),totalLabour:document.getElementById('gtl').textContent,
+    staff:stf.join('\n'),totalStaff:document.getElementById('gts').textContent,
+    equipment:eq.join('\n'),materials:mat.join('\n'),
+    incidents:inc.join('\n'),issues:iss.join('\n'),
+    mobRequested:document.getElementById('mob').value,
+    additionalNotes:document.getElementById('an').value
+  };
+}
+
+async function gen(){
+  const d=collect();
+  if(!d.projectName||!d.contractor||!d.submittedBy){alert('Please fill in Project Name, Contractor, and Submitted By before generating.');go(0);return;}
+  lastData=d;
+  document.getElementById('mf').style.display='none';
+  document.getElementById('lov').classList.add('show');
+  try{
+    const r=await fetch('/generate-dpr',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    const res=await r.json();
+    document.getElementById('lov').classList.remove('show');
+    if(res.success){document.getElementById('rcn').textContent=res.report;document.getElementById('rw').classList.add('show');}
+    else{alert('Error: '+res.error);document.getElementById('mf').style.display='block';}
+  }catch(e){
+    document.getElementById('lov').classList.remove('show');
+    document.getElementById('mf').style.display='block';
+    alert('Connection error. Make sure the server is running.');
+  }
+}
+
+async function dlWord(){
+  if(!lastData){alert('Please generate a report first.');return;}
+  const btn=document.getElementById('btnWord');
+  btn.textContent='⏳ Building Word doc...';btn.disabled=true;
+  try{
+    const r=await fetch('/generate-word',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(lastData)});
+    if(r.ok){
+      const blob=await r.blob();
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;
+      a.download=`DPR_${lastData.projectName?.replace(/[^a-zA-Z0-9]/g,'_')||'Report'}_${lastData.reportDate||'date'}_No${lastData.reportNumber||''}.docx`;
+      a.click();URL.revokeObjectURL(url);
+      btn.textContent='✓ Downloaded';
+      setTimeout(()=>{btn.textContent='⬇ Download Word';btn.disabled=false;},3000);
+    } else {
+      const e=await r.json().catch(()=>({error:'Unknown error'}));
+      alert('Word generation failed: '+(e.error||'Unknown error'));
+      btn.textContent='⬇ Download Word';btn.disabled=false;
+    }
+  }catch(e){
+    alert('Connection error: '+e.message);
+    btn.textContent='⬇ Download Word';btn.disabled=false;
+  }
+}
+
+function cpyRpt(){
+  navigator.clipboard.writeText(document.getElementById('rcn').textContent).then(()=>{
+    const b=document.querySelector('.bcpy');b.textContent='✓ Copied!';
+    setTimeout(()=>b.textContent='Copy to clipboard',2000);
+  });
+}
+function newRpt(){document.getElementById('rw').classList.remove('show');document.getElementById('mf').style.display='block';window.scrollTo(0,0);}
+
+document.getElementById('dt').valueAsDate=new Date();
+rActs();rAlc();updNav();
+</script>
+</body>
+</html>
