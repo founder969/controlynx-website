@@ -1174,7 +1174,23 @@ function renderPanel(i) {
     renderIssues, renderSignoff
   ];
   mc.innerHTML = renderers[i]();
-  bindPanel(i);
+  // Bind panel-specific events
+  if (i === 0) bindIdentity();
+  if (i === 1) bindWeather();
+  if (i === 7) {
+    const ta = document.getElementById('f_tomorrowPlan');
+    if (ta) ta.addEventListener('input', () => { STATE.data.activities.tomorrowPlan = ta.value; autoSave(); });
+  }
+  if (i === 5) {
+    ['mobilisation','demobilisation'].forEach(f => {
+      const el = document.getElementById('f_'+f);
+      if (el) el.addEventListener('input', () => { STATE.data.equipment[f] = el.value; autoSave(); });
+    });
+  }
+  if (i === 10) {
+    const el = document.getElementById('f_finalSubmittedBy');
+    if (el) el.addEventListener('input', () => { STATE.data.identity.submittedBy = el.value; autoSave(); });
+  }
   updateProgress();
 }
 
@@ -2393,19 +2409,60 @@ function renderIssueCard(iss, i) {
 }
 
 // ─── 11. SIGN-OFF ──────────────────────────────────────────────────────────
+function getTabStatus(i) {
+  // If manually marked, use that
+  if (STATE.tabStatus[i] === 'ntr') return 'ntr';
+
+  const d = STATE.data;
+  switch(i) {
+    case 0: // Identity
+      return (d.identity.projectName && d.identity.contractor && d.identity.startDate) ? 'complete' : 'empty';
+    case 1: // Weather
+      if (d.weather.ntr) return 'ntr';
+      return d.weather.condition ? 'complete' : 'empty';
+    case 2: // Safety
+      if (d.safety.ntrSor && d.safety.ntrNcr && d.safety.ntrIncident && d.safety.ntrWalk) return 'ntr';
+      return (d.safety.toolboxConducted) ? 'complete' : 'empty';
+    case 3: // Labour
+      const mainTotal = d.labour.mainContractor.trades.reduce((a,t)=>a+(parseInt(t.count)||0),0);
+      const subTotal = d.labour.subcontractors.reduce((a,s)=>a+s.trades.reduce((b,t)=>b+(parseInt(t.count)||0),0),0);
+      return (mainTotal + subTotal) > 0 ? 'complete' : 'empty';
+    case 4: // Staffing
+      const staffMain = d.staffing.mainContractor.positions.reduce((a,p)=>a+(parseInt(p.count)||0),0);
+      const staffSub = d.staffing.subcontractors.reduce((a,s)=>a+s.positions.reduce((b,p)=>b+(parseInt(p.count)||0),0),0);
+      return (staffMain + staffSub) > 0 ? 'complete' : 'empty';
+    case 5: // Equipment
+      if (d.equipment.ntr) return 'ntr';
+      return d.equipment.items.length > 0 ? 'complete' : 'empty';
+    case 6: // Materials
+      if (d.materials.ntr) return 'ntr';
+      return d.materials.items.length > 0 ? 'complete' : 'empty';
+    case 7: // Activities
+      return d.activities.items.length > 0 ? 'complete' : 'empty';
+    case 8: // Allocation
+      return d.allocation.items.some(a => a && a.trades && a.trades.length > 0) ? 'complete' : 'empty';
+    case 9: // Issues
+      if (d.issues.ntr) return 'ntr';
+      return d.issues.items.length > 0 ? 'complete' : 'empty';
+    default:
+      return STATE.tabStatus[i] || 'empty';
+  }
+}
+
 function renderSignoff() {
   const tabs = TABS.slice(0,10);
-  const allReady = STATE.tabStatus.slice(0,10).every(s => s === 'complete' || s === 'ntr');
+  const statuses = tabs.map((t,i) => getTabStatus(i));
+  const allReady = statuses.every(s => s === 'complete' || s === 'ntr');
   return `
   <div class="section-header">
     <div class="section-title">Review & Submit</div>
-    <div class="section-desc">Planner/PCE reviews all sections before final submission. All tabs must be confirmed before submitting.</div>
+    <div class="section-desc">Planner/PCE reviews all sections before final submission. Click any tab to go back and edit.</div>
   </div>
   <div class="card">
     <div class="card-title">Submission checklist</div>
     <div class="review-grid">
       ${tabs.map((t,i) => {
-        const s = STATE.tabStatus[i];
+        const s = statuses[i];
         let icon = '○', cls = 'rs-empty', label = 'Not filled';
         if (s === 'complete') { icon = '✓'; cls = 'rs-complete'; label = 'Complete'; }
         else if (s === 'ntr') { icon = '—'; cls = 'rs-ntr'; label = 'Nothing to report'; }
@@ -2420,8 +2477,11 @@ function renderSignoff() {
   </div>
   ${!allReady ? `
   <div class="card" style="background:var(--red-dim);border-color:rgba(255,77,77,0.3)">
-    <div style="font-size:13px;color:var(--red)">⚠ Some tabs are not yet confirmed. Please complete all sections or mark them as "Nothing to report" before submitting.</div>
-  </div>` : ''}
+    <div style="font-size:13px;color:var(--red)">⚠ Some tabs still need attention. Click any incomplete tab above to go back and fill it, or mark it as "Nothing to report".</div>
+  </div>` : `
+  <div class="card" style="background:var(--green-dim);border-color:rgba(0,196,140,0.3)">
+    <div style="font-size:13px;color:var(--green)">✓ All sections confirmed. Ready to submit.</div>
+  </div>`}
   <div class="card">
     <div class="card-title">Submission details</div>
     <div class="form-grid">
@@ -2434,11 +2494,11 @@ function renderSignoff() {
         <input type="text" value="Planner / Project Controls Engineer" readonly style="color:var(--white-3)">
       </div>
       <div class="field">
-        <label>Report Reference <span class="auto-badge" style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
+        <label>Report Reference <span style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
         <div class="auto-value">${calcReportNo()}</div>
       </div>
       <div class="field">
-        <label>Report Date <span class="auto-badge" style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
+        <label>Report Date <span style="font-size:9px;padding:1px 5px;background:var(--cyan-dim);border:1px solid var(--cyan-border);border-radius:4px;color:var(--cyan)">AUTO</span></label>
         <div class="auto-value">${getReportDate()}</div>
       </div>
     </div>
@@ -2448,199 +2508,10 @@ function renderSignoff() {
       Submit Daily Report → Generate PDF & AI Analysis
     </button>
     <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--white-4)">
-      Submission triggers: External PDF → Email to PM, Site Manager, CM, DC · Internal AI narrative → Controlynx dashboard · 3 Excel exports generated
+      Submission triggers: External PDF → Email to distribution list · Internal AI narrative → Controlynx dashboard · 3 Excel exports
     </div>
   </div>`;
 }
-
-// ─── BIND PANEL ────────────────────────────────────────────────────────────
-function bindPanel(i) {
-  if (i === 0) bindIdentity();
-  if (i === 1) bindWeather();
-  if (i === 7) {
-    const ta = document.getElementById('f_tomorrowPlan');
-    if (ta) ta.addEventListener('input', () => { STATE.data.activities.tomorrowPlan = ta.value; autoSave(); });
-  }
-  if (i === 5) {
-    ['mobilisation','demobilisation'].forEach(f => {
-      const el = document.getElementById('f_'+f);
-      if (el) el.addEventListener('input', () => { STATE.data.equipment[f] = el.value; autoSave(); });
-    });
-  }
-}
-
-// ─── INTERACTION HANDLERS ─────────────────────────────────────────────────
-
-function toggleNtr(section) {
-  STATE.data[section].ntr = !STATE.data[section].ntr;
-  if (STATE.data[section].ntr) STATE.tabStatus[STATE.currentTab] = 'ntr';
-  renderPanel(STATE.currentTab);
-}
-
-function toggleNtrSafety(sub) {
-  STATE.data.safety['ntr'+sub.charAt(0).toUpperCase()+sub.slice(1)] = !STATE.data.safety['ntr'+sub.charAt(0).toUpperCase()+sub.slice(1)];
-  renderPanel(STATE.currentTab);
-}
-
-function toggleGroup(id) {
-  const body = document.getElementById('group_'+id);
-  const chev = document.getElementById('chev_'+id);
-  if (!body) return;
-  const hidden = body.style.display === 'none';
-  body.style.display = hidden ? '' : 'none';
-  if (chev) chev.textContent = hidden ? '▼' : '▶';
-  if (chev) chev.classList.toggle('open', hidden);
-}
-
-// Labour / Staffing helpers
-function addTrade(group, subIdx) {
-  const name = prompt('Trade name:');
-  if (!name) return;
-  if (group === 'main') STATE.data.labour.mainContractor.trades.push({name, count:0});
-  else STATE.data.labour.subcontractors[subIdx].trades.push({name, count:0});
-  renderPanel(STATE.currentTab);
-}
-
-function addPosition(group, subIdx) {
-  const name = prompt('Position:');
-  if (!name) return;
-  if (group === 'main') STATE.data.staffing.mainContractor.positions.push({name, count:0});
-  else STATE.data.staffing.subcontractors[subIdx].positions.push({name, count:0});
-  renderPanel(STATE.currentTab);
-}
-
-function addSubcontractor(section) {
-  const name = prompt('Subcontractor name:');
-  if (!name) return;
-  if (section === 'labour') STATE.data.labour.subcontractors.push({name, trades:[]});
-  else STATE.data.staffing.subcontractors.push({name, positions:[]});
-  renderPanel(STATE.currentTab);
-}
-
-function removeSubcontractor(section, idx) {
-  if (!confirm('Remove this subcontractor?')) return;
-  STATE.data[section].subcontractors.splice(idx, 1);
-  renderPanel(STATE.currentTab);
-}
-
-function removeTrade(group, section, idx, subIdx) {
-  if (group === 'main') STATE.data[section].mainContractor[section==='labour'?'trades':'positions'].splice(idx, 1);
-  else STATE.data[section].subcontractors[subIdx][section==='labour'?'trades':'positions'].splice(idx, 1);
-  renderPanel(STATE.currentTab);
-}
-
-function adjustCount(group, section, idx, subIdx, delta) {
-  const arr = group === 'main' ? STATE.data[section].mainContractor[section==='labour'?'trades':'positions'] : STATE.data[section].subcontractors[subIdx][section==='labour'?'trades':'positions'];
-  arr[idx].count = Math.max(0, (parseInt(arr[idx].count)||0) + delta);
-  renderPanel(STATE.currentTab);
-}
-
-function setCount(group, section, idx, subIdx, val) {
-  const arr = group === 'main' ? STATE.data[section].mainContractor[section==='labour'?'trades':'positions'] : STATE.data[section].subcontractors[subIdx][section==='labour'?'trades':'positions'];
-  arr[idx].count = Math.max(0, parseInt(val)||0);
-}
-
-// Equipment
-function addEquipment() {
-  STATE.data.equipment.items.push({name:'',plantNo:'',status:'working',breakdownHrs:''});
-  renderPanel(STATE.currentTab);
-}
-function removeEquipment(i) { STATE.data.equipment.items.splice(i,1); renderPanel(STATE.currentTab); }
-function updateEquipment(i, field, val) { STATE.data.equipment.items[i][field] = val; autoSave(); }
-function setEqStatus(i, status) { STATE.data.equipment.items[i].status = status; renderPanel(STATE.currentTab); }
-
-// Materials
-function addMaterial() {
-  STATE.data.materials.items.push({description:'',category:'civil',unit:'no.',qty:'',dnRef:'',supplier:'',status:'accepted'});
-  renderPanel(STATE.currentTab);
-}
-function removeMaterial(i) { STATE.data.materials.items.splice(i,1); renderPanel(STATE.currentTab); }
-function updateMaterial(i, field, val) { STATE.data.materials.items[i][field] = val; autoSave(); }
-function setMatStatus(i, status) { STATE.data.materials.items[i].status = status; renderPanel(STATE.currentTab); }
-
-// Activities
-function addActivity() {
-  // New activities expand by default so engineer sees the form immediately
-  STATE.data.activities.items.push({description:'',floor:'',discipline:'',zone:'',progress:0,status:'ontrack',actualStart:getReportDate(),actualFinish:null,p6Id:null,confidence:null,expanded:true});
-  STATE.data.allocation.items.push({trades:[],unit:'m²',plannedQty:'',achievedQty:'',expanded:true});
-  renderPanel(STATE.currentTab);
-  // Scroll to new activity
-  setTimeout(() => {
-    const last = document.querySelectorAll('.activity-card');
-    if (last.length) last[last.length-1].scrollIntoView({behavior:'smooth',block:'start'});
-  }, 100);
-}
-function removeActivity(i) {
-  STATE.data.activities.items.splice(i,1);
-  STATE.data.allocation.items.splice(i,1);
-  renderPanel(STATE.currentTab);
-}
-function updateActivity(i, field, val) { STATE.data.activities.items[i][field] = val; autoSave(); }
-function updateActivityProgress(i, val) {
-  val = Math.min(100, Math.max(0, parseInt(val)||0));
-  STATE.data.activities.items[i].progress = val;
-  const el = document.getElementById('prog_'+i);
-  if (el) el.textContent = val + '%';
-  if (val === 100) {
-    STATE.data.activities.items[i].status = 'complete';
-    STATE.data.activities.items[i].actualFinish = getReportDate();
-    renderPanel(STATE.currentTab);
-  }
-  autoSave();
-}
-function setActivityStatus(i, status) {
-  STATE.data.activities.items[i].status = status;
-  if (status === 'complete') { STATE.data.activities.items[i].progress = 100; STATE.data.activities.items[i].actualFinish = getReportDate(); }
-  renderPanel(STATE.currentTab);
-}
-
-// Allocation
-function addAllocTrade(actIdx) {
-  const name = prompt('Trade name (e.g. Block mason, Steel fixer):');
-  if (!name) return;
-  if (!STATE.data.allocation.items[actIdx]) STATE.data.allocation.items[actIdx] = {trades:[],unit:'m²',plannedQty:'',achievedQty:''};
-  STATE.data.allocation.items[actIdx].trades.push({name, inhouse:0, hired:0, supplier:''});
-  renderPanel(STATE.currentTab);
-}
-function removeAllocTrade(actIdx, ti) {
-  STATE.data.allocation.items[actIdx].trades.splice(ti,1);
-  renderPanel(STATE.currentTab);
-}
-function adjustAllocTrade(actIdx, ti, delta) {
-  STATE.data.allocation.items[actIdx].trades[ti].count = Math.max(0,(parseInt(STATE.data.allocation.items[actIdx].trades[ti].count)||0)+delta);
-  renderPanel(STATE.currentTab);
-}
-function setAllocTrade(actIdx, ti, val) {
-  STATE.data.allocation.items[actIdx].trades[ti].count = Math.max(0,parseInt(val)||0);
-}
-function updateAlloc(actIdx, field, val) {
-  if (!STATE.data.allocation.items[actIdx]) STATE.data.allocation.items[actIdx] = {trades:[],unit:'m²',plannedQty:'',achievedQty:''};
-  STATE.data.allocation.items[actIdx][field] = val;
-  renderPanel(STATE.currentTab);
-}
-
-// Issues
-function addIssue() {
-  STATE.data.issues.items.push({description:'',category:'Access',severity:'medium',responsible:'',targetDate:'',status:'open',impact:'tbc'});
-  renderPanel(STATE.currentTab);
-}
-function removeIssue(i) { STATE.data.issues.items.splice(i,1); renderPanel(STATE.currentTab); }
-function updateIssue(i, field, val) { STATE.data.issues.items[i][field] = val; autoSave(); }
-function setIssueSeverity(i, sev) {
-  STATE.data.issues.items[i].severity = sev;
-  renderPanel(STATE.currentTab);
-}
-
-// Safety helpers
-function addSor() { STATE.data.safety.sors.push({ref:'',description:'',issuedTo:'',status:'open'}); renderPanel(STATE.currentTab); }
-function removeSor(i) { STATE.data.safety.sors.splice(i,1); renderPanel(STATE.currentTab); }
-function updateSor(i,f,v) { STATE.data.safety.sors[i][f]=v; autoSave(); }
-function addNcr() { STATE.data.safety.ncrs.push({ref:'',description:'',trade:'',targetDate:'',status:'open'}); renderPanel(STATE.currentTab); }
-function removeNcr(i) { STATE.data.safety.ncrs.splice(i,1); renderPanel(STATE.currentTab); }
-function updateNcr(i,f,v) { STATE.data.safety.ncrs[i][f]=v; autoSave(); }
-function addIncident() { STATE.data.safety.incidents.push({type:'nearmiss',description:'',action:'',responsible:''}); renderPanel(STATE.currentTab); }
-function removeIncident(i) { STATE.data.safety.incidents.splice(i,1); renderPanel(STATE.currentTab); }
-function updateIncident(i,f,v) { STATE.data.safety.incidents[i][f]=v; autoSave(); }
 
 // ─── AUTO SAVE ────────────────────────────────────────────────────────────
 let saveTimer;
