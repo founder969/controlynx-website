@@ -58,7 +58,7 @@ app.post('/api/auth/signin', async (req, res) => {
       id:           data.user.id,
       email:        data.user.email,
       full_name:    profile?.full_name || data.user.email,
-      role:         profile?.role || 'engineer',
+      role:         profile?.role || data.user.user_metadata?.role || 'planner',
       organization: profile?.organizations || null
     }
   });
