@@ -75,13 +75,17 @@ app.post('/api/auth/signup', async (req, res) => {
   const planLimits = { starter:{max_projects:1,max_users:5}, professional:{max_projects:5,max_users:15}, enterprise:{max_projects:999,max_users:9999} };
   const limits = planLimits[plan] || planLimits.starter;
 
-  // 1. Create Supabase auth user
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email, password,
-    email_confirm: true,
-    user_metadata: { full_name, role: role || 'planner' }
+  // 1. Create user with standard signUp (works with anon key)
+  const { data: authData, error: authError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { full_name, role: role || 'planner' },
+      emailRedirectTo: null
+    }
   });
   if (authError) return res.status(400).json({ error: authError.message });
+  if (!authData.user) return res.status(400).json({ error: 'Failed to create user account.' });
 
   // 2. Create organisation
   const { data: org, error: orgError } = await supabase
@@ -90,7 +94,7 @@ app.post('/api/auth/signup', async (req, res) => {
     .select().single();
   if (orgError) return res.status(400).json({ error: orgError.message });
 
-  // 3. Update profile with org + role
+  // 3. Upsert profile with org + role
   await supabase.from('profiles').upsert({
     id: authData.user.id,
     full_name,
