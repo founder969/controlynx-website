@@ -14,6 +14,12 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
+// Admin client using service role key — bypasses RLS for server-side operations
+const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+);
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true }));
 
@@ -87,15 +93,15 @@ app.post('/api/auth/signup', async (req, res) => {
   if (authError) return res.status(400).json({ error: authError.message });
   if (!authData.user) return res.status(400).json({ error: 'Failed to create user account.' });
 
-  // 2. Create organisation
-  const { data: org, error: orgError } = await supabase
+  // 2. Create organisation (use admin client to bypass RLS)
+  const { data: org, error: orgError } = await supabaseAdmin
     .from('organizations')
     .insert({ name: org_name, plan: plan || 'starter', max_projects: limits.max_projects, max_users: limits.max_users })
     .select().single();
   if (orgError) return res.status(400).json({ error: orgError.message });
 
-  // 3. Upsert profile with org + role
-  await supabase.from('profiles').upsert({
+  // 3. Upsert profile with org + role (use admin client to bypass RLS)
+  await supabaseAdmin.from('profiles').upsert({
     id: authData.user.id,
     full_name,
     role: role || 'planner',
