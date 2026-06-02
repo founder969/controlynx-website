@@ -187,7 +187,7 @@ app.get('/api/projects', requireAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('projects')
     .select('*')
-    .eq('organization_id', req.profile.organization_id)
+    .eq('organization_id', orgId)
     .eq('is_active', true)
     .order('created_at', { ascending: false });
   if (error) return res.status(400).json({ error: error.message });
@@ -198,7 +198,7 @@ app.get('/api/projects/:id', requireAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('projects').select('*')
     .eq('id', req.params.id)
-    .eq('organization_id', req.profile.organization_id)
+    .eq('organization_id', orgId)
     .single();
   if (error) return res.status(404).json({ error: 'Not found' });
   res.json(data);
@@ -215,24 +215,34 @@ app.post('/api/projects', requireAuth, async (req, res) => {
       .insert({ name: orgName, plan, max_projects: meta.max_projects || 1, max_users: meta.max_users || 5 })
       .select().single();
     if (newOrg) {
-      const { data: newProfile } = await supabase.from('profiles').upsert({
+      await supabase.from('profiles').upsert({
         id: req.user.id,
         full_name: meta.full_name || req.user.email,
         role: meta.role || 'planner',
         organization_id: newOrg.id,
         is_active: true
-      }).select('*, organizations(*)').single();
+      });
+      const { data: newProfile } = await supabase
+        .from('profiles')
+        .select('*, organizations(*)')
+        .eq('id', req.user.id)
+        .single();
       req.profile = newProfile;
     }
   }
 
-  if (!['planner','admin'].includes(req.profile?.role)) {
+  // Get role from profile OR fall back to user metadata
+  const userRole = req.profile?.role || req.user.user_metadata?.role || 'planner';
+  if (!['planner','admin'].includes(userRole)) {
     return res.status(403).json({ error: 'Only Planners can create projects' });
   }
+  const orgId = req.profile?.organization_id;
+  if (!orgId) return res.status(400).json({ error: 'No organisation found. Please contact support.' });
+
   const { count } = await supabase
     .from('projects')
     .select('*', { count: 'exact', head: true })
-    .eq('organization_id', req.profile.organization_id)
+    .eq('organization_id', orgId)
     .eq('is_active', true);
   const max = req.profile?.organizations?.max_projects || 1;
   if (count >= max) {
@@ -240,7 +250,7 @@ app.post('/api/projects', requireAuth, async (req, res) => {
   }
   const { data, error } = await supabase
     .from('projects')
-    .insert({ ...req.body, organization_id: req.profile.organization_id })
+    .insert({ ...req.body, organization_id: orgId })
     .select().single();
   if (error) return res.status(400).json({ error: error.message });
   await supabase.from('project_members').insert({ project_id: data.id, user_id: req.user.id, role: req.profile.role });
@@ -251,7 +261,7 @@ app.patch('/api/projects/:id', requireAuth, async (req, res) => {
   const { data, error } = await supabase
     .from('projects').update(req.body)
     .eq('id', req.params.id)
-    .eq('organization_id', req.profile.organization_id)
+    .eq('organization_id', orgId)
     .select().single();
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);
@@ -300,7 +310,7 @@ app.get('/api/projects/:projectId/today', requireAuth, async (req, res) => {
     const carriedAlloc = prev?.allocation_items?.filter((_, i) => prev.activities_items?.[i]?.status !== 'complete') || [];
     const { data: newRep, error } = await supabase
       .from('daily_reports')
-      .insert({ project_id: req.params.projectId, organization_id: req.profile.organization_id, report_number: repNo, report_date: today, activities_items: carriedActs, allocation_items: carriedAlloc })
+      .insert({ project_id: req.params.projectId, organization_id: orgId, report_number: repNo, report_date: today, activities_items: carriedActs, allocation_items: carriedAlloc })
       .select().single();
     if (error) return res.status(400).json({ error: error.message });
     report = newRep;
