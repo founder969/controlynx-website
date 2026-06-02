@@ -81,32 +81,61 @@ app.post('/api/auth/signup', async (req, res) => {
   const planLimits = { starter:{max_projects:1,max_users:5}, professional:{max_projects:5,max_users:15}, enterprise:{max_projects:999,max_users:9999} };
   const limits = planLimits[plan] || planLimits.starter;
 
-  // 1. Create user with standard signUp (works with anon key)
+  // 1. Create user with standard signUp
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { full_name, role: role || 'planner' },
+      data: { full_name, role: role || 'planner', org_name, plan: plan || 'starter' },
       emailRedirectTo: null
     }
   });
   if (authError) return res.status(400).json({ error: authError.message });
   if (!authData.user) return res.status(400).json({ error: 'Failed to create user account.' });
 
-  // 2. Create organisation (use admin client to bypass RLS)
-  const { data: org, error: orgError } = await supabaseAdmin
-    .from('organizations')
-    .insert({ name: org_name, plan: plan || 'starter', max_projects: limits.max_projects, max_users: limits.max_users })
-    .select().single();
-  if (orgError) return res.status(400).json({ error: orgError.message });
+  // 2. Use Supabase service role via REST API to bypass RLS
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL;
 
-  // 3. Upsert profile with org + role (use admin client to bypass RLS)
-  await supabaseAdmin.from('profiles').upsert({
-    id: authData.user.id,
-    full_name,
-    role: role || 'planner',
-    organization_id: org.id,
-    is_active: true
+  // Create organization via direct REST call with service key
+  const orgRes = await fetch(`${supabaseUrl}/rest/v1/organizations`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': serviceKey,
+      'Authorization': `Bearer ${serviceKey}`,
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify({
+      name: org_name,
+      plan: plan || 'starter',
+      max_projects: limits.max_projects,
+      max_users: limits.max_users
+    })
+  });
+  const orgData = await orgRes.json();
+  if (!orgRes.ok || !orgData[0]) {
+    console.error('Org creation error:', orgData);
+    return res.status(400).json({ error: 'Failed to create organization.' });
+  }
+  const org = orgData[0];
+
+  // Create profile via direct REST call with service key
+  await fetch(`${supabaseUrl}/rest/v1/profiles`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': serviceKey,
+      'Authorization': `Bearer ${serviceKey}`,
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify({
+      id: authData.user.id,
+      full_name,
+      role: role || 'planner',
+      organization_id: org.id,
+      is_active: true
+    })
   });
 
   res.json({ success: true, message: 'Account created successfully.' });
