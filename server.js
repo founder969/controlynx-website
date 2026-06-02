@@ -87,11 +87,14 @@ async function requireAuth(req, res, next) {
 
 // ── Health ───────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
+  const sk = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
   res.json({
     status: 'ok',
     service: 'Controlynx API v2.0',
     supabase: !!process.env.SUPABASE_URL,
-    service_key: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+    service_key: !!sk,
+    service_key_prefix: sk.substring(0, 20),
+    anon_key_prefix: (process.env.SUPABASE_ANON_KEY || '').substring(0, 20)
   });
 });
 
