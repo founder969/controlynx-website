@@ -327,25 +327,22 @@ async function step3Create() {
     const data = await res.json();
     if (!res.ok) { showErr('err3', data.error || 'Sign up failed. Please try again.'); btn.disabled=false; btn.innerHTML='Start Free Trial →'; return; }
 
-    // 2. Use token from signup if available, otherwise do separate signin
-    if (data.token) {
-      localStorage.setItem('cx_token',   data.token);
-      localStorage.setItem('cx_refresh', data.refresh_token || '');
-      localStorage.setItem('cx_user',    JSON.stringify(data.user));
-    } else {
-      // Fallback: separate signin
-      const signinRes = await fetch('/api/auth/signin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, password: formData.password })
-      });
-      const signinData = await signinRes.json();
-      if (signinRes.ok) {
-        localStorage.setItem('cx_token',   signinData.token);
-        localStorage.setItem('cx_refresh', signinData.refresh_token);
-        localStorage.setItem('cx_user',    JSON.stringify(signinData.user));
-      }
+    // Always do a separate signin after signup to get a fresh token + profile
+    const signinRes = await fetch('/api/auth/signin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: formData.email, password: formData.password })
+    });
+    const signinData = await signinRes.json();
+    if (!signinRes.ok) {
+      showErr('err3', signinData.error || 'Account created but sign in failed. Please go to login.');
+      btn.disabled=false; btn.innerHTML='Start Free Trial →'; return;
     }
+    localStorage.setItem('cx_token',   signinData.token);
+    localStorage.setItem('cx_refresh', signinData.refresh_token || '');
+    localStorage.setItem('cx_user',    JSON.stringify(signinData.user));
+    // Clear any stale project data so setup wizard always shows
+    localStorage.removeItem('cx_project');
 
     btn.innerHTML = '✓ Account created! Redirecting…';
     btn.style.background = 'var(--green)';
