@@ -57,6 +57,45 @@ app.post('/api/auth/signin', async (req, res) => {
     .select('*, organizations(*)')
     .eq('id', data.user.id)
     .single();
+  // If no profile exists yet, create org + profile from metadata (first login after signup)
+  if (!profile) {
+    const meta = data.user.user_metadata || {};
+    const orgName = meta.org_name || 'My Organisation';
+    const userRole = meta.role || 'planner';
+    const plan = meta.plan || 'starter';
+    const maxProjects = meta.max_projects || 1;
+    const maxUsers = meta.max_users || 5;
+
+    // Create org
+    const { data: newOrg } = await supabase
+      .from('organizations')
+      .insert({ name: orgName, plan, max_projects: maxProjects, max_users: maxUsers })
+      .select().single();
+
+    // Create profile
+    if (newOrg) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        full_name: meta.full_name || data.user.email,
+        role: userRole,
+        organization_id: newOrg.id,
+        is_active: true
+      });
+    }
+
+    return res.json({
+      token:         data.session.access_token,
+      refresh_token: data.session.refresh_token,
+      user: {
+        id:           data.user.id,
+        email:        data.user.email,
+        full_name:    meta.full_name || data.user.email,
+        role:         userRole,
+        organization: newOrg || null
+      }
+    });
+  }
+
   res.json({
     token:         data.session.access_token,
     refresh_token: data.session.refresh_token,
@@ -82,61 +121,24 @@ app.post('/api/auth/signup', async (req, res) => {
   const limits = planLimits[plan] || planLimits.starter;
 
   // 1. Create user with standard signUp
+  // Store org_name and plan in user metadata — profile will be created on first signin
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { full_name, role: role || 'planner', org_name, plan: plan || 'starter' },
+      data: {
+        full_name,
+        role: role || 'planner',
+        org_name,
+        plan: plan || 'starter',
+        max_projects: limits.max_projects,
+        max_users: limits.max_users
+      },
       emailRedirectTo: null
     }
   });
   if (authError) return res.status(400).json({ error: authError.message });
   if (!authData.user) return res.status(400).json({ error: 'Failed to create user account.' });
-
-  // 2. Use Supabase service role via REST API to bypass RLS
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-  const supabaseUrl = process.env.SUPABASE_URL;
-
-  // Create organization via direct REST call with service key
-  const orgRes = await fetch(`${supabaseUrl}/rest/v1/organizations`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': serviceKey,
-      'Authorization': `Bearer ${serviceKey}`,
-      'Prefer': 'return=representation'
-    },
-    body: JSON.stringify({
-      name: org_name,
-      plan: plan || 'starter',
-      max_projects: limits.max_projects,
-      max_users: limits.max_users
-    })
-  });
-  const orgData = await orgRes.json();
-  if (!orgRes.ok || !orgData[0]) {
-    console.error('Org creation error:', orgData);
-    return res.status(400).json({ error: 'Failed to create organization.' });
-  }
-  const org = orgData[0];
-
-  // Create profile via direct REST call with service key
-  await fetch(`${supabaseUrl}/rest/v1/profiles`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': serviceKey,
-      'Authorization': `Bearer ${serviceKey}`,
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({
-      id: authData.user.id,
-      full_name,
-      role: role || 'planner',
-      organization_id: org.id,
-      is_active: true
-    })
-  });
 
   res.json({ success: true, message: 'Account created successfully.' });
 });
