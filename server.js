@@ -65,45 +65,6 @@ app.post('/api/auth/signin', async (req, res) => {
     .select('*, organizations(*)')
     .eq('id', data.user.id)
     .single();
-  // If no profile exists yet, create org + profile from metadata (first login after signup)
-  if (!profile) {
-    const meta = data.user.user_metadata || {};
-    const orgName = meta.org_name || 'My Organisation';
-    const userRole = meta.role || 'planner';
-    const plan = meta.plan || 'starter';
-    const maxProjects = meta.max_projects || 1;
-    const maxUsers = meta.max_users || 5;
-
-    // Create org
-    const { data: newOrg } = await supabase
-      .from('organizations')
-      .insert({ name: orgName, plan, max_projects: maxProjects, max_users: maxUsers })
-      .select().single();
-
-    // Create profile
-    if (newOrg) {
-      await supabase.from('profiles').upsert({
-        id: data.user.id,
-        full_name: meta.full_name || data.user.email,
-        role: userRole,
-        organization_id: newOrg.id,
-        is_active: true
-      });
-    }
-
-    return res.json({
-      token:         data.session.access_token,
-      refresh_token: data.session.refresh_token,
-      user: {
-        id:           data.user.id,
-        email:        data.user.email,
-        full_name:    meta.full_name || data.user.email,
-        role:         userRole,
-        organization: newOrg || null
-      }
-    });
-  }
-
   res.json({
     token:         data.session.access_token,
     refresh_token: data.session.refresh_token,
@@ -205,39 +166,21 @@ app.get('/api/projects/:id', requireAuth, async (req, res) => {
 });
 
 app.post('/api/projects', requireAuth, async (req, res) => {
-  // If profile doesn't exist yet, create org + profile from user metadata first
+  // Profile and org are created automatically by Supabase trigger on signup
+  // If profile still missing (race condition), retry once
   if (!req.profile) {
-    const meta = req.user.user_metadata || {};
-    const orgName = meta.org_name || 'My Organisation';
-    const plan = meta.plan || 'starter';
-    const { data: newOrg } = await supabase
-      .from('organizations')
-      .insert({ name: orgName, plan, max_projects: meta.max_projects || 1, max_users: meta.max_users || 5 })
-      .select().single();
-    if (newOrg) {
-      await supabase.from('profiles').upsert({
-        id: req.user.id,
-        full_name: meta.full_name || req.user.email,
-        role: meta.role || 'planner',
-        organization_id: newOrg.id,
-        is_active: true
-      });
-      const { data: newProfile } = await supabase
-        .from('profiles')
-        .select('*, organizations(*)')
-        .eq('id', req.user.id)
-        .single();
-      req.profile = newProfile;
-    }
+    const { data: retryProfile } = await supabase
+      .from('profiles').select('*, organizations(*)')
+      .eq('id', req.user.id).single();
+    req.profile = retryProfile;
   }
 
-  // Get role from profile OR fall back to user metadata
   const userRole = req.profile?.role || req.user.user_metadata?.role || 'planner';
   if (!['planner','admin'].includes(userRole)) {
     return res.status(403).json({ error: 'Only Planners can create projects' });
   }
   const orgId = req.profile?.organization_id;
-  if (!orgId) return res.status(400).json({ error: 'No organisation found. Please contact support.' });
+  if (!orgId) return res.status(400).json({ error: 'No organisation found. Please sign out and sign in again.' });
 
   const { count } = await supabase
     .from('projects')
