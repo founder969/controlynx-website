@@ -30,16 +30,24 @@ async function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'No token' });
   }
   const token = header.split(' ')[1];
-  const { data: { user }, error } = await supabase.auth.getUser(token);
-  if (error || !user) return res.status(401).json({ error: 'Invalid token' });
-  req.user = user;
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*, organizations(*)')
-    .eq('id', user.id)
-    .single();
-  req.profile = profile;
-  next();
+  if (!token || token === 'null' || token === 'undefined') {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+  try {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data?.user) return res.status(401).json({ error: 'Invalid token' });
+    req.user = data.user;
+    // Profile may not exist yet for brand new users — don't fail
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('*, organizations(*)')
+      .eq('id', data.user.id)
+      .single();
+    req.profile = profile || null;
+    next();
+  } catch(e) {
+    return res.status(401).json({ error: 'Authentication error' });
+  }
 }
 
 // ── Health ───────────────────────────────────────────────────
@@ -181,6 +189,27 @@ app.get('/api/projects/:id', requireAuth, async (req, res) => {
 });
 
 app.post('/api/projects', requireAuth, async (req, res) => {
+  // If profile doesn't exist yet, create org + profile from user metadata first
+  if (!req.profile) {
+    const meta = req.user.user_metadata || {};
+    const orgName = meta.org_name || 'My Organisation';
+    const plan = meta.plan || 'starter';
+    const { data: newOrg } = await supabase
+      .from('organizations')
+      .insert({ name: orgName, plan, max_projects: meta.max_projects || 1, max_users: meta.max_users || 5 })
+      .select().single();
+    if (newOrg) {
+      const { data: newProfile } = await supabase.from('profiles').upsert({
+        id: req.user.id,
+        full_name: meta.full_name || req.user.email,
+        role: meta.role || 'planner',
+        organization_id: newOrg.id,
+        is_active: true
+      }).select('*, organizations(*)').single();
+      req.profile = newProfile;
+    }
+  }
+
   if (!['planner','admin'].includes(req.profile?.role)) {
     return res.status(403).json({ error: 'Only Planners can create projects' });
   }
