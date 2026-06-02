@@ -148,7 +148,23 @@ app.post('/api/auth/signup', async (req, res) => {
   if (authError) return res.status(400).json({ error: authError.message });
   if (!authData.user) return res.status(400).json({ error: 'Failed to create user account.' });
 
-  res.json({ success: true, message: 'Account created successfully.' });
+  // Return session if available (email confirmation disabled)
+  if (authData.session) {
+    res.json({
+      success: true,
+      token: authData.session.access_token,
+      refresh_token: authData.session.refresh_token,
+      user: {
+        id: authData.user.id,
+        email: authData.user.email,
+        full_name: full_name,
+        role: role || 'planner',
+        organization: null
+      }
+    });
+  } else {
+    res.json({ success: true, message: 'Account created successfully.' });
+  }
 });
 
 app.post('/api/auth/signout', requireAuth, async (req, res) => {
