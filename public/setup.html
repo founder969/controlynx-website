@@ -145,7 +145,7 @@ const ROLE_LABELS = {
 };
 
 function updateSteps() {
-  [1,2,3,4,5].forEach(i => {
+  [1,2,3,4,5,6].forEach(i => {
     const el = document.getElementById('si'+i);
     if (!el) return;
     el.className = 'step-item' + (i===currentStep?' active':i<currentStep?' done':'');
@@ -162,6 +162,7 @@ function render() {
   else if (currentStep === 3) c.innerHTML = step3HTML();
   else if (currentStep === 4) { c.innerHTML = step4HTML(); initMap(); }
   else if (currentStep === 5) c.innerHTML = step5HTML();
+  else if (currentStep === 6) c.innerHTML = step6HTML();
 }
 
 // ── STEP 1: Project Information ──────────────────────────────────────────
@@ -375,7 +376,7 @@ function step4HTML() {
       <span id="coordShow" style="font-family:var(--mono);font-size:12px;color:${project.siteCoords?'var(--green)':'var(--w4)'};flex:1">${project.siteCoords || 'Click the map to pin your site'}</span>
     </div>
   </div>
-  <button class="btn-primary" onclick="currentStep=5;render()">Continue → Review</button>
+  <button class="btn-primary" onclick="currentStep=5;render()">Continue → P6 Schedule</button>
   <button class="btn-secondary" onclick="currentStep=3;render()">← Back</button>`;
 }
 
@@ -432,7 +433,132 @@ function useGPS() {
 }
 
 // ── STEP 5: Review & Create ──────────────────────────────────────────────
+
+// ── STEP 5: P6 Schedule Upload ───────────────────────────────
 function step5HTML() {
+  const uploaded = window._p6Uploaded || false;
+  return `
+  <div class="section-title">P6 Schedule <span style="font-size:12px;color:var(--w3);font-weight:400">Optional — can be added later</span></div>
+  <div class="section-sub">Upload your Primavera P6 XER file to pre-load activities into the DPR. Your team will select from real schedule activities instead of typing manually.</div>
+  <div class="error" id="errP6"></div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">What this does</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="color:var(--cyan);font-size:16px;flex-shrink:0">✓</span>
+        <span style="font-size:12px;color:var(--w2)">Populates cascading dropdowns in Activities tab — Floor → Discipline → Activity</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="color:var(--cyan);font-size:16px;flex-shrink:0">✓</span>
+        <span style="font-size:12px;color:var(--w2)">Links daily progress to Activity IDs for weekly P6 export</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="color:var(--cyan);font-size:16px;flex-shrink:0">✓</span>
+        <span style="font-size:12px;color:var(--w2)">Generates planned vs actual comparison for delay detection</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <span style="color:var(--cyan);font-size:16px;flex-shrink:0">✓</span>
+        <span style="font-size:12px;color:var(--w2)">Weekly export file ready to import back into P6 in 2 minutes</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="p6UploadCard">
+    <div class="card-title">Upload XER file</div>
+    <div id="p6DropZone" style="border:1.5px dashed var(--border2);border-radius:10px;padding:32px;text-align:center;cursor:pointer;transition:all .2s;margin-top:10px"
+         onclick="document.getElementById('p6FileInput').click()"
+         ondragover="event.preventDefault();this.style.borderColor='var(--cyan)'"
+         ondragleave="this.style.borderColor='var(--border2)'"
+         ondrop="handleP6Drop(event)">
+      <div style="font-size:28px;margin-bottom:8px">📋</div>
+      <div style="font-size:13px;color:var(--w2);margin-bottom:4px">Drop your XER file here or click to browse</div>
+      <div style="font-size:11px;color:var(--w4)">Primavera P6 XER format · typically exported from P6 → File → Export</div>
+    </div>
+    <input type="file" id="p6FileInput" accept=".xer" style="display:none" onchange="handleP6File(this.files[0])">
+    <div id="p6Status" style="margin-top:10px;font-size:12px;color:var(--w3);display:none"></div>
+  </div>
+
+  <div id="p6Success" style="display:${uploaded?'flex':'none'};align-items:center;gap:10px;background:var(--green-dim);border:0.5px solid rgba(0,196,140,0.3);border-radius:10px;padding:14px;margin-bottom:14px">
+    <span style="color:var(--green);font-size:20px">✓</span>
+    <div>
+      <div style="font-size:13px;font-weight:600;color:var(--green)" id="p6SuccessMsg">P6 schedule uploaded</div>
+      <div style="font-size:11px;color:var(--w3)" id="p6SuccessDetail"></div>
+    </div>
+    <button onclick="resetP6Upload()" style="margin-left:auto;font-size:11px;color:var(--w3);background:none;border:0.5px solid var(--border2);border-radius:6px;padding:4px 10px;cursor:pointer">Replace</button>
+  </div>
+
+  <button class="btn-primary" onclick="currentStep=6;render()">Continue → Review</button>
+  <button class="btn-secondary" onclick="currentStep=4;render()">← Back</button>
+  `;
+}
+
+async function handleP6File(file) {
+  if (!file) return;
+  if (!file.name.toLowerCase().endsWith('.xer')) {
+    document.getElementById('errP6').textContent = 'Please upload a .xer file exported from Primavera P6.';
+    document.getElementById('errP6').classList.add('show');
+    return;
+  }
+  const status = document.getElementById('p6Status');
+  status.style.display = 'block';
+  status.textContent = 'Reading file…';
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      status.textContent = 'Parsing XER format…';
+      const text = e.target.result;
+
+      // Store for upload after project creation
+      window._p6XerContent = text;
+      window._p6FileName   = file.name;
+
+      // Quick client-side validation
+      if (!text.includes('%T') || !text.includes('TASK')) {
+        throw new Error('File does not appear to be a valid P6 XER export. Check the file and try again.');
+      }
+
+      // Count activities for preview
+      const taskMatches = (text.match(/%R/g) || []).length;
+      status.textContent = '';
+
+      document.getElementById('p6DropZone').style.display = 'none';
+      const success = document.getElementById('p6Success');
+      success.style.display = 'flex';
+      document.getElementById('p6SuccessMsg').textContent = 'P6 schedule ready to import';
+      document.getElementById('p6SuccessDetail').textContent = `${file.name} · ~${taskMatches} rows detected · Will import after project creation`;
+      window._p6Uploaded = true;
+      window._p6ReadyToUpload = true;
+
+    } catch(err) {
+      status.textContent = '';
+      document.getElementById('errP6').textContent = err.message;
+      document.getElementById('errP6').classList.add('show');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function handleP6Drop(event) {
+  event.preventDefault();
+  document.getElementById('p6DropZone').style.borderColor = 'var(--border2)';
+  const file = event.dataTransfer.files[0];
+  if (file) handleP6File(file);
+}
+
+function resetP6Upload() {
+  window._p6Uploaded = false;
+  window._p6XerContent = null;
+  window._p6FileName = null;
+  window._p6ReadyToUpload = false;
+  document.getElementById('p6DropZone').style.display = 'block';
+  document.getElementById('p6Success').style.display = 'none';
+  document.getElementById('p6FileInput').value = '';
+}
+
+
+function step6HTML() {
   const dur = project.startDate && project.plannedFinish
     ? Math.ceil((new Date(project.plannedFinish)-new Date(project.startDate))/86400000) + ' days'
     : '—';
@@ -510,9 +636,29 @@ async function createProject() {
 
     // Store project ID for the DPR
     localStorage.setItem('cx_project', JSON.stringify(data));
-    btn.innerHTML = '✓ Project created! Opening your first report…';
+    // Upload P6 XER if one was prepared
+    if (window._p6ReadyToUpload && window._p6XerContent && project.id) {
+      try {
+        btn.innerHTML = '↑ Uploading P6 schedule…';
+        const p6Res = await fetch('/api/projects/' + project.id + '/p6/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ xer_content: window._p6XerContent })
+        });
+        const p6Data = await p6Res.json();
+        if (p6Data.success) {
+          btn.innerHTML = '✓ Project created + ' + p6Data.activities_imported + ' P6 activities imported!';
+        } else {
+          btn.innerHTML = '✓ Project created! (P6 upload failed — you can retry in settings)';
+        }
+      } catch(e) {
+        btn.innerHTML = '✓ Project created! (P6 upload failed — you can retry in settings)';
+      }
+    } else {
+      btn.innerHTML = '✓ Project created! Opening your first report…';
+    }
     btn.style.background = 'var(--green)';
-    setTimeout(() => window.location.href = '/dpr', 1500);
+    setTimeout(() => window.location.href = '/dpr', 1800);
 
   } catch(e) {
     document.getElementById('err5').textContent = 'Connection error. Please try again.';

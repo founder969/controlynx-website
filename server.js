@@ -447,6 +447,267 @@ Write 4 sections: 1) DAY SUMMARY 2) PRODUCTIVITY ANALYSIS 3) ISSUES & RISKS 4) T
   } catch(e) { console.error('AI error:', e.message); }
 }
 
+
+// ── XER Parser ───────────────────────────────────────────────
+// Parses Primavera P6 XER format into structured activity objects
+function parseXER(text) {
+  const lines   = text.split(/\r?\n/);
+  const tables  = {};
+  let curTable  = null;
+  let curFields = [];
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (!line || line === '%E') continue;
+
+    if (line.startsWith('%T')) {
+      curTable  = line.slice(2).trim();
+      tables[curTable] = [];
+      curFields = [];
+    } else if (line.startsWith('%F')) {
+      curFields = line.slice(2).trim().split('\t');
+    } else if (line.startsWith('%R') && curTable) {
+      const vals = line.slice(2).trim().split('\t');
+      const row  = {};
+      curFields.forEach((f, i) => { row[f] = (vals[i] || '').trim(); });
+      tables[curTable].push(row);
+    }
+  }
+
+  // Extract key tables
+  const taskTable    = tables['TASK']    || [];
+  const wbsTable     = tables['PROJWBS'] || [];
+  const rsrcTable    = tables['TASKRSRC']|| [];
+  const projectTable = tables['PROJECT'] || [];
+
+  // Build WBS lookup: wbs_id → wbs_name + path
+  const wbsMap = {};
+  wbsTable.forEach(w => {
+    wbsMap[w.wbs_id] = {
+      name:      w.wbs_name || '',
+      shortName: w.wbs_short_name || w.wbs_name || '',
+      parentId:  w.parent_wbs_id || null
+    };
+  });
+
+  // Build resource lookup: task_id → resource names
+  const rsrcMap = {};
+  rsrcTable.forEach(r => {
+    if (!rsrcMap[r.task_id]) rsrcMap[r.task_id] = [];
+    rsrcMap[r.task_id].push(r.rsrc_id || '');
+  });
+
+  // Project info
+  const proj = projectTable[0] || {};
+
+  // Parse activities
+  const activities = taskTable
+    .filter(t => t.task_type !== 'TT_Mile') // exclude milestones
+    .map(t => {
+      const wbs = wbsMap[t.wbs_id] || {};
+      // Extract floor/discipline hints from WBS name or activity name
+      const wbsName   = wbs.name || '';
+      const actName   = t.task_name || '';
+      const combined  = (wbsName + ' ' + actName).toLowerCase();
+
+      // Heuristic floor detection from common naming patterns
+      let floor = wbs.shortName || '';
+
+      // Heuristic discipline detection
+      const discKeywords = {
+        'Civil':       ['civil','concrete','rebar','formwork','earthwork','excavat','backfill','grout','pile'],
+        'Structural':  ['structural','steel','column','beam','slab','wall','core','shear','frame'],
+        'MEP':         ['mep','mechanical','electrical','plumbing','hvac','duct','pipe','conduit','cable','tray'],
+        'Architecture':['architec','finish','cladding','facade','curtain','window','door','tile','paint','plaster'],
+        'Fit-out':     ['fit-out','fitout','fit out','ceiling','partition','flooring','joinery','kitchen'],
+        'External':    ['external','landscape','hardscape','road','parking','drainage','utility','infrastructure'],
+        'Safety':      ['safety','hse','fire','protection'],
+      };
+
+      let discipline = '';
+      for (const [disc, keywords] of Object.entries(discKeywords)) {
+        if (keywords.some(k => combined.includes(k))) { discipline = disc; break; }
+      }
+
+      return {
+        activity_id:    t.task_code || t.task_id,
+        description:    t.task_name || '',
+        wbs_id:         t.wbs_id    || '',
+        wbs_name:       wbsName,
+        floor:          floor,
+        discipline:     discipline,
+        planned_start:  t.target_start_date  || t.early_start_date  || '',
+        planned_finish: t.target_end_date    || t.early_end_date    || '',
+        duration:       parseInt(t.target_drtn_hr_cnt || t.remain_drtn_hr_cnt || '0') / 8 || 0,
+        percent_complete: parseFloat(t.phys_complete_pct || t.act_complete_pct || '0') || 0,
+        status:         t.status_code || '',
+        resources:      (rsrcMap[t.task_id] || []).join(', ')
+      };
+    });
+
+  return {
+    project_name: proj.proj_short_name || proj.proj_id || 'Imported Project',
+    activity_count: activities.length,
+    activities
+  };
+}
+
+// ── P6 / XER Routes ──────────────────────────────────────────
+
+// Upload XER file — parse and store activities
+app.post('/api/projects/:projectId/p6/upload', requireAuth, async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    const { xer_content } = req.body; // base64 or raw text sent from client
+
+    if (!xer_content) return res.status(400).json({ error: 'No XER content provided.' });
+
+    // Decode if base64
+    let text = xer_content;
+    if (!text.includes('%T') && !text.includes('%F')) {
+      try { text = Buffer.from(xer_content, 'base64').toString('utf8'); } catch(e) {}
+    }
+    if (!text.includes('%T')) return res.status(400).json({ error: 'Invalid XER file format.' });
+
+    const parsed = parseXER(text);
+    if (!parsed.activities.length) {
+      return res.status(400).json({ error: 'No activities found in XER file. Check file format.' });
+    }
+
+    // Delete existing activities for this project
+    await db('DELETE', 'p6_activities', { eq: { project_id: projectId } }).catch(() => {});
+
+    // Insert new activities in batches of 50
+    const batchSize = 50;
+    const acts = parsed.activities.map(a => ({
+      project_id:       projectId,
+      organization_id:  req.profile?.organization_id,
+      activity_id:      a.activity_id,
+      description:      a.description,
+      wbs_id:           a.wbs_id,
+      wbs_name:         a.wbs_name,
+      floor:            a.floor,
+      discipline:       a.discipline,
+      planned_start:    a.planned_start  || null,
+      planned_finish:   a.planned_finish || null,
+      duration:         a.duration       || 0,
+      percent_complete: a.percent_complete || 0,
+      resources:        a.resources      || '',
+      imported_at:      new Date().toISOString()
+    }));
+
+    let inserted = 0;
+    for (let i = 0; i < acts.length; i += batchSize) {
+      const batch = acts.slice(i, i + batchSize);
+      await db('POST', 'p6_activities', { body: batch });
+      inserted += batch.length;
+    }
+
+    // Update project with p6_uploaded flag
+    await db('PATCH', 'projects', {
+      eq:   { id: projectId },
+      body: { p6_uploaded: true, p6_imported_at: new Date().toISOString() }
+    }).catch(() => {});
+
+    res.json({
+      success:         true,
+      project_name:    parsed.project_name,
+      activities_imported: inserted,
+      message:         `${inserted} activities imported from P6 schedule.`
+    });
+  } catch(e) {
+    console.error('P6 upload:', e.message);
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Get activity library for DPR dropdowns
+app.get('/api/projects/:projectId/p6/activities', requireAuth, async (req, res) => {
+  try {
+    const acts = await db('GET', 'p6_activities', {
+      eq:    { project_id: req.params.projectId },
+      order: 'activity_id.asc'
+    });
+    res.json(acts || []);
+  } catch(e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Weekly P6 progress export — CSV ready for import back into P6
+app.get('/api/projects/:projectId/p6/export', requireAuth, async (req, res) => {
+  try {
+    const projectId = req.params.projectId;
+
+    // Get all activities with their latest reported progress from daily reports
+    const acts = await db('GET', 'p6_activities', {
+      eq:    { project_id: projectId },
+      order: 'activity_id.asc'
+    });
+
+    // Get last 7 days of submitted reports to find latest progress per activity
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const reports = await db('GET', 'daily_reports', {
+      eq:    { project_id: projectId, status: 'submitted' },
+      order: 'report_date.desc'
+    }).catch(() => []);
+
+    // Build progress map: activity_id → latest % complete
+    const progressMap = {};
+    for (const report of reports) {
+      const items = report.activities_items || [];
+      for (const item of items) {
+        if (item.activity_id && !progressMap[item.activity_id]) {
+          progressMap[item.activity_id] = {
+            pct:            item.progress || 0,
+            status:         item.status   || 'ontrack',
+            actual_start:   item.started_at   || '',
+            actual_finish:  item.status === 'complete' ? report.report_date : '',
+            report_date:    report.report_date
+          };
+        }
+      }
+    }
+
+    // Generate CSV
+    const headers = [
+      'task_code',
+      'task_name',
+      'phys_complete_pct',
+      'act_start_date',
+      'act_end_date',
+      'status_code',
+      'remain_drtn_hr_cnt'
+    ];
+
+    const rows = acts.map(a => {
+      const prog    = progressMap[a.activity_id] || {};
+      const pct     = prog.pct || a.percent_complete || 0;
+      const daysRem = pct >= 100 ? 0 : Math.round(a.duration * (1 - pct / 100));
+      return [
+        a.activity_id,
+        `"${(a.description || '').replace(/"/g, '""')}"`,
+        pct,
+        prog.actual_start  || '',
+        prog.actual_finish || '',
+        prog.status === 'complete' ? 'TK_Complete' : pct > 0 ? 'TK_Active' : 'TK_NotStart',
+        daysRem * 8 // P6 stores hours
+      ].join(',');
+    });
+
+    const csv = [headers.join(','), ...rows].join('\n');
+    const filename = `P6_Progress_Export_${new Date().toISOString().split('T')[0]}.csv`;
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(csv);
+  } catch(e) {
+    console.error('P6 export:', e.message);
+    res.status(400).json({ error: e.message });
+  }
+});
+
 // ── Page routes ──────────────────────────────────────────────
 app.get('/login',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 app.get('/login.html',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));

@@ -2100,13 +2100,29 @@ function renderActivities() {
   <div class="card" style="background:var(--bg-3);border-color:rgba(139,92,246,0.2)">
     <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--white-3)">
       <span style="font-size:16px">📋</span>
-      <span>No P6 schedule uploaded yet. Activities are available as manual entries until the Planner uploads the XER file in Project Setup.</span>
+      <div style="flex:1">
+        <div>No P6 schedule uploaded yet. Activities are available as manual entries until the Planner uploads the XER file.</div>
+        ${STATE.role === 'planner' || STATE.role === 'admin' ? `
+        <div style="margin-top:8px">
+          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;background:rgba(139,92,246,0.12);border:0.5px solid rgba(139,92,246,0.3);border-radius:6px;padding:5px 10px;font-size:11px;font-weight:600;color:rgba(139,92,246,1)">
+            <span>↑ Upload XER file</span>
+            <input type="file" accept=".xer" style="display:none" onchange="uploadP6XER(this.files[0])">
+          </label>
+        </div>` : ''}
+      </div>
     </div>
   </div>` : `
   <div class="card" style="background:var(--bg-3);border-color:rgba(0,196,140,0.2)">
-    <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--green)">
-      <span>✓</span>
-      <span>${p6Lib.length} P6 activities loaded. Select Floor → Discipline → Activity to log progress.</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--green)">
+        <span>✓</span>
+        <span>${p6Lib.length} P6 activities loaded. Select Floor → Discipline → Activity to log progress.</span>
+      </div>
+      ${STATE.role === 'planner' || STATE.role === 'admin' ? `
+      <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--white-3);flex-shrink:0">
+        <span>↑ Update</span>
+        <input type="file" accept=".xer" style="display:none" onchange="uploadP6XER(this.files[0])">
+      </label>` : ''}
     </div>
   </div>`}
   ${d.items.map((act,i) => renderActivityCard(act,i,floors,disciplines,p6Lib)).join('')}
@@ -2862,10 +2878,15 @@ function reportToState(report) {
 // Load today's report from server (creates new one if needed)
 async function loadTodayReport() {
   const project = (() => { try { return JSON.parse(localStorage.getItem('cx_project')||'{}'); } catch(e){ return {}; } })();
+  const token = localStorage.getItem('cx_token');
   if (!project.id) {
-    // No project set — fall back to localStorage
-    loadDraftLocal();
-    init();
+    if (token) {
+      // Logged in but no project — redirect to setup
+      window.location.href = '/setup';
+      return;
+    }
+    // Not logged in — redirect to login
+    window.location.href = '/login.html';
     return;
   }
   STATE.projectId = project.id;
@@ -2881,13 +2902,29 @@ async function loadTodayReport() {
   STATE.data.identity.reportPrefix = project.report_prefix || 'DPR';
   STATE.data.identity.siteCoords   = project.site_lat ? project.site_lat + ', ' + project.site_lng : '';
 
-  try {
-    const report = await apiCall('GET', '/api/projects/' + project.id + '/today');
-    if (report && report.id) {
-      reportToState(report);
-      showToast('Report loaded — ' + report.report_number, true);
-    }
-  } catch(e) {
+  // Load P6 activity library (parallel with report fetch)
+  const [reportResult, p6Result] = await Promise.allSettled([
+    apiCall('GET', '/api/projects/' + project.id + '/today'),
+    apiCall('GET', '/api/projects/' + project.id + '/p6/activities')
+  ]);
+
+  if (p6Result.status === 'fulfilled' && Array.isArray(p6Result.value) && p6Result.value.length > 0) {
+    STATE.p6Library = p6Result.value.map(a => ({
+      id:          a.activity_id,
+      description: a.description,
+      wbs:         a.wbs_name,
+      floor:       a.floor       || '',
+      discipline:  a.discipline  || '',
+      plannedStart: a.planned_start  || '',
+      plannedFinish: a.planned_finish || '',
+      duration:    a.duration    || 0
+    }));
+  }
+
+  if (reportResult.status === 'fulfilled' && reportResult.value && reportResult.value.id) {
+    reportToState(reportResult.value);
+    showToast('Report loaded — ' + reportResult.value.report_number, true);
+  } else if (reportResult.status === 'rejected') {
     loadDraftLocal();
     init();
     return;
@@ -2978,6 +3015,76 @@ STATE.reportDate   = null;
 
 // Load report from server or fall back to local draft
 loadTodayReport();
+
+// ── P6 XER Upload from DPR ────────────────────────────────────
+async function uploadP6XER(file) {
+  if (!file || !STATE.projectId) return;
+  if (!file.name.toLowerCase().endsWith('.xer')) {
+    showToast('Please upload a .xer file from Primavera P6', false);
+    return;
+  }
+  showToast('Reading XER file…', true);
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      const text = e.target.result;
+      if (!text.includes('%T') || !text.includes('TASK')) {
+        showToast('Invalid XER file format', false); return;
+      }
+      showToast('Uploading to server…', true);
+      const token = localStorage.getItem('cx_token');
+      const res = await fetch('/api/projects/' + STATE.projectId + '/p6/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ xer_content: text })
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('✓ ' + data.activities_imported + ' P6 activities imported. Refreshing…', true);
+        // Reload p6 library
+        const acts = await apiCall('GET', '/api/projects/' + STATE.projectId + '/p6/activities');
+        if (Array.isArray(acts)) {
+          STATE.p6Library = acts.map(a => ({
+            id: a.activity_id, description: a.description,
+            wbs: a.wbs_name, floor: a.floor || '', discipline: a.discipline || '',
+            plannedStart: a.planned_start || '', plannedFinish: a.planned_finish || '',
+            duration: a.duration || 0
+          }));
+          setTimeout(() => { init(); }, 800);
+        }
+      } else {
+        showToast('P6 upload failed: ' + (data.error || 'Unknown error'), false);
+      }
+    } catch(err) {
+      showToast('Upload error: ' + err.message, false);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── P6 Weekly Export ──────────────────────────────────────────
+async function exportP6Progress() {
+  if (!STATE.projectId) return;
+  const token = localStorage.getItem('cx_token');
+  showToast('Generating P6 export…', true);
+  try {
+    const res = await fetch('/api/projects/' + STATE.projectId + '/p6/export', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) { showToast('Export failed', false); return; }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'P6_Progress_Export_' + new Date().toISOString().split('T')[0] + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('✓ P6 export downloaded', true);
+  } catch(err) {
+    showToast('Export error: ' + err.message, false);
+  }
+}
+
 </script>
 </body>
 </html>

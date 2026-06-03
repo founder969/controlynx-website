@@ -1,6 +1,6 @@
 # CONTROLYNX — Master Architecture & Product Blueprint
 > **Single source of truth. Read this before building anything.**
-> Last updated: June 2026 | Version: 2.0
+> Last updated: June 2026 | Version: 2.1
 
 ---
 
@@ -51,7 +51,7 @@ Site Engineer (5 min)
 | DPR Form | 11-tab structured daily data collection | ✅ Built |
 | Multi-user sync | Supabase real-time, role-separated | ✅ Built |
 | Auth flow | Signup → setup → DPR | ✅ Built |
-| P6 XER upload | Parse Primavera activities into DB | ⏳ Next |
+| P6 XER upload | Parse Primavera activities into DB | ✅ Done |
 | PDF generation | Client-format external report (Puppeteer) | ⏳ Next |
 | AI narrative | Internal 4-section summary (Claude API) | ⏳ Next |
 | Email dispatch | Auto-email to distribution list (Resend) | ⏳ Next |
