@@ -23,7 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 // ── Core DB helper — uses service role key, bypasses all RLS ─
 // This is the ONLY way we talk to the database from the server.
 // It always works regardless of RLS policies or key format.
-async function db(method, table, opts = {}) {
+async function db(method, table, opts = {}, userToken = null) {
+  // Always use service role key — RLS is disabled, service key has full access
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
   const base = process.env.SUPABASE_URL + '/rest/v1/' + table;
 
@@ -72,12 +73,13 @@ async function requireAuth(req, res, next) {
   try {
     const { data, error } = await supabase.auth.getUser(token);
     if (error || !data?.user) return res.status(401).json({ error: 'Invalid token' });
-    req.user = data.user;
+    req.user  = data.user;
+    req.token = token; // store for db reads
     req.profile = await db('GET', 'profiles', {
       eq: { id: data.user.id },
       select: '*,organizations(*)',
       single: true
-    });
+    }, token);
     next();
   } catch(e) {
     console.error('requireAuth:', e.message);
