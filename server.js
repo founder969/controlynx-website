@@ -96,8 +96,29 @@ app.get('/api/health', (req, res) => {
     supabase: !!process.env.SUPABASE_URL,
     service_key: !!sk,
     service_key_prefix: sk.substring(0, 20),
-    anon_key_prefix: (process.env.SUPABASE_ANON_KEY || '').substring(0, 20)
+    anon_key_prefix: (process.env.SUPABASE_ANON_KEY || '').substring(0, 20),
+    service_key_suffix: sk.substring(sk.length - 10),
+    url: process.env.SUPABASE_URL
   });
+});
+
+// ── DB Test ───────────────────────────────────────────────────
+app.get('/api/dbtest', async (req, res) => {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL + '/rest/v1/profiles?limit=1';
+  try {
+    const r = await fetch(url, {
+      headers: {
+        'apikey': key,
+        'Authorization': 'Bearer ' + key,
+        'Accept': 'application/json'
+      }
+    });
+    const text = await r.text();
+    res.json({ status: r.status, ok: r.ok, url, response: text.substring(0, 200) });
+  } catch(e) {
+    res.json({ error: e.message });
+  }
 });
 
 // ── Sign Up ──────────────────────────────────────────────────
