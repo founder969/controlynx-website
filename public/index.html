@@ -3127,31 +3127,35 @@ function uploadP6XER(file) {
         showToast('Large file — uploading in ' + totalChunks + ' parts…', true);
 
         function sendChunk(idx) {
+          // Read token fresh each time in case it was refreshed
+          var currentToken = localStorage.getItem('cx_token');
+          if (!currentToken) { showToast('Session expired. Please sign in again.', false); return; }
+
           if (idx >= totalChunks) {
-            // All chunks sent — trigger processing
             showToast('Processing schedule…', true);
             fetch('/api/projects/' + STATE.projectId + '/p6/process', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-              body: JSON.stringify({ session_id: sessionId })
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentToken },
+              body: JSON.stringify({ session_id: sessionId, total_chunks: totalChunks })
             })
             .then(function(r) { return r.json(); })
             .then(function(data) { handleP6UploadResult(data); })
             .catch(function(err) { showToast('Processing error: ' + err.message, false); });
             return;
           }
-          const chunk = base64.slice(idx * CHUNK_SIZE, (idx + 1) * CHUNK_SIZE);
+          var chunk = base64.slice(idx * CHUNK_SIZE, (idx + 1) * CHUNK_SIZE);
+          showToast('Uploading part ' + (idx+1) + ' of ' + totalChunks + '…', true);
           fetch('/api/projects/' + STATE.projectId + '/p6/chunk', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + currentToken },
             body: JSON.stringify({ session_id: sessionId, chunk_index: idx, total_chunks: totalChunks, chunk_data: chunk })
           })
-          .then(function(r) { return r.json(); })
-          .then(function() {
-            showToast('Uploading part ' + (idx+1) + ' of ' + totalChunks + '…', true);
-            sendChunk(idx + 1);
+          .then(function(r) {
+            if (!r.ok) { return r.text().then(function(t){ throw new Error('Chunk ' + (idx+1) + ' failed: ' + t.substring(0,100)); }); }
+            return r.json();
           })
-          .catch(function(err) { showToast('Upload error on part ' + (idx+1) + ': ' + err.message, false); });
+          .then(function() { sendChunk(idx + 1); })
+          .catch(function(err) { showToast('Upload error: ' + err.message, false); });
         }
         sendChunk(0);
       }

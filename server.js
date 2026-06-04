@@ -87,6 +87,23 @@ async function requireAuth(req, res, next) {
   }
 }
 
+// ── Lightweight auth — token check only, no profile lookup ──────
+async function requireAuthLight(req, res, next) {
+  const header = req.headers.authorization || '';
+  const token  = header.startsWith('Bearer ') ? header.slice(7).trim() : '';
+  if (!token || token === 'null' || token === 'undefined') {
+    return res.status(401).json({ error: 'No token provided' });
+  }
+  try {
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data?.user) return res.status(401).json({ error: 'Invalid token' });
+    req.user = data.user;
+    next();
+  } catch(e) {
+    return res.status(401).json({ error: 'Auth error' });
+  }
+}
+
 // ── Health ───────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   const sk = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -556,7 +573,7 @@ function parseXER(text) {
 
 // Upload XER file — parse and store activities
 // Chunked XER upload — stores chunks in Supabase to handle Vercel serverless instances
-app.post('/api/projects/:projectId/p6/chunk', requireAuth, async (req, res) => {
+app.post('/api/projects/:projectId/p6/chunk', requireAuthLight, async (req, res) => {
   const { projectId } = req.params;
   const { session_id, chunk_index, total_chunks, chunk_data } = req.body || {};
   if (!session_id || chunk_index === undefined || !chunk_data) {
@@ -575,7 +592,7 @@ app.post('/api/projects/:projectId/p6/chunk', requireAuth, async (req, res) => {
 });
 
 // Process assembled XER after all chunks received
-app.post('/api/projects/:projectId/p6/process', requireAuth, async (req, res) => {
+app.post('/api/projects/:projectId/p6/process', requireAuthLight, async (req, res) => {
   const { projectId } = req.params;
   const { session_id, total_chunks } = req.body || {};
   if (!session_id) return res.status(400).json({ error: 'No session ID provided.' });
