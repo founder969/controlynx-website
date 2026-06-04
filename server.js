@@ -7,8 +7,6 @@ require('dotenv').config();
 const express = require('express');
 const path    = require('path');
 const { createClient } = require('@supabase/supabase-js');
-const multer  = require('multer');
-const upload  = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -557,23 +555,25 @@ function parseXER(text) {
 // ── P6 / XER Routes ──────────────────────────────────────────
 
 // Upload XER file — parse and store activities
-app.post('/api/projects/:projectId/p6/upload', requireAuth, upload.single('xer_file'), async (req, res) => {
+app.post('/api/projects/:projectId/p6/upload', requireAuth, async (req, res) => {
   try {
     const { projectId } = req.params;
 
-    // Support both multipart file upload AND JSON body (legacy)
+    // Accept base64-encoded XER content sent as JSON
+    // Client must base64-encode the file before sending
+    const { xer_base64, xer_content } = req.body || {};
+
     let text = '';
-    if (req.file) {
-      // Multipart upload — try common encodings
-      text = req.file.buffer.toString('utf8');
-      if (!text.includes('%T')) text = req.file.buffer.toString('latin1');
-      if (!text.includes('%T')) text = req.file.buffer.toString('utf16le');
-    } else if (req.body?.xer_content) {
-      // Legacy JSON body
-      text = req.body.xer_content;
-      if (!text.includes('%T')) {
-        try { text = Buffer.from(req.body.xer_content, 'base64').toString('utf8'); } catch(e) {}
-      }
+
+    if (xer_base64) {
+      // Preferred: base64 encoded — safe for all file contents
+      try {
+        text = Buffer.from(xer_base64, 'base64').toString('utf8');
+        if (!text.includes('%T')) text = Buffer.from(xer_base64, 'base64').toString('latin1');
+      } catch(e) { text = ''; }
+    } else if (xer_content) {
+      // Legacy: raw text (may fail on special chars)
+      text = xer_content;
     }
 
     if (!text || !text.includes('%T')) {

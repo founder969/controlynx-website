@@ -3087,13 +3087,12 @@ async function uploadP6XER(file) {
       }
       showToast('Uploading to server…', true);
       const token = localStorage.getItem('cx_token');
-      const formData = new FormData();
-      const blob = new Blob([text], { type: 'text/plain' });
-      formData.append('xer_file', blob, 'schedule.xer');
+      // Encode as base64 to safely transmit XER content through JSON
+      const xer_base64 = btoa(unescape(encodeURIComponent(text)));
       const res = await fetch('/api/projects/' + STATE.projectId + '/p6/upload', {
         method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + token },
-        body: formData
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ xer_base64 })
       });
       const data = await res.json();
       if (data.success) {
