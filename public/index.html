@@ -3101,9 +3101,13 @@ async function uploadP6XER(file) {
         const acts = await apiCall('GET', '/api/projects/' + STATE.projectId + '/p6/activities');
         if (Array.isArray(acts)) {
           STATE.p6Library = acts.map(a => ({
-            id: a.activity_id, description: a.description,
-            wbs: a.wbs_name, floor: a.floor || '', discipline: a.discipline || '',
-            plannedStart: a.planned_start || '', plannedFinish: a.planned_finish || '',
+            id: a.activity_id,
+            description: a.activity_name || a.description || a.activity_id,
+            wbs: a.wbs_name || a.wbs_code || '',
+            floor: a.floor || '',
+            discipline: a.discipline || '',
+            plannedStart: a.planned_start || '',
+            plannedFinish: a.planned_finish || '',
             duration: a.duration || 0
           }));
           setTimeout(() => { init(); }, 800);

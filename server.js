@@ -592,18 +592,19 @@ app.post('/api/projects/:projectId/p6/upload', requireAuth, async (req, res) => 
     const batchSize = 50;
     const acts = parsed.activities.map(a => ({
       project_id:       projectId,
-      organization_id:  req.profile?.organization_id,
       activity_id:      a.activity_id,
+      activity_name:    a.description,
       description:      a.description,
-      wbs_id:           a.wbs_id,
-      wbs_name:         a.wbs_name,
-      floor:            a.floor,
-      discipline:       a.discipline,
+      wbs_code:         a.wbs_id        || '',
+      wbs_name:         a.wbs_name      || '',
+      floor:            a.floor         || '',
+      discipline:       a.discipline    || '',
       planned_start:    a.planned_start  || null,
       planned_finish:   a.planned_finish || null,
       duration:         a.duration       || 0,
       percent_complete: a.percent_complete || 0,
       resources:        a.resources      || '',
+      search_text:      (a.activity_id + ' ' + a.description + ' ' + (a.wbs_name||'')).toLowerCase(),
       imported_at:      new Date().toISOString()
     }));
 
