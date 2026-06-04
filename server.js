@@ -212,6 +212,35 @@ app.post('/api/auth/signin', async (req, res) => {
   });
 });
 
+// ── Refresh Token ────────────────────────────────────────────
+app.post('/api/auth/refresh', async (req, res) => {
+  const { refresh_token } = req.body || {};
+  if (!refresh_token) return res.status(400).json({ error: 'No refresh token' });
+  try {
+    const { data, error } = await supabase.auth.refreshSession({ refresh_token });
+    if (error || !data?.session) return res.status(401).json({ error: 'Session expired. Please sign in again.' });
+    // Get profile with new token
+    const profile = await db('GET', 'profiles', {
+      eq: { id: data.user.id },
+      select: '*,organizations(*)',
+      single: true
+    }).catch(() => null);
+    res.json({
+      token:         data.session.access_token,
+      refresh_token: data.session.refresh_token,
+      user: {
+        id:           data.user.id,
+        email:        data.user.email,
+        full_name:    profile?.full_name || data.user.email,
+        role:         profile?.role || data.user.user_metadata?.role || 'planner',
+        organization: profile?.organizations || null
+      }
+    });
+  } catch(e) {
+    res.status(401).json({ error: 'Refresh failed: ' + e.message });
+  }
+});
+
 // ── Sign Out ─────────────────────────────────────────────────
 app.post('/api/auth/signout', requireAuth, async (req, res) => {
   await supabase.auth.signOut().catch(() => {});

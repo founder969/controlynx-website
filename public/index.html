@@ -2817,13 +2817,47 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 function getToken() { return localStorage.getItem('cx_token') || ''; }
 
+async function refreshTokenIfNeeded() {
+  const refresh = localStorage.getItem('cx_refresh');
+  if (!refresh) return false;
+  try {
+    const r = await fetch('/api/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: refresh })
+    });
+    if (!r.ok) return false;
+    const d = await r.json();
+    if (d.token) {
+      localStorage.setItem('cx_token',   d.token);
+      localStorage.setItem('cx_refresh', d.refresh_token || refresh);
+      localStorage.setItem('cx_user',    JSON.stringify(d.user));
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
 async function apiCall(method, path, body) {
   const opts = {
     method,
     headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() }
   };
   if (body) opts.body = JSON.stringify(body);
-  const r = await fetch(path, opts);
+  let r = await fetch(path, opts);
+  // Auto-refresh on 401
+  if (r.status === 401) {
+    const refreshed = await refreshTokenIfNeeded();
+    if (refreshed) {
+      opts.headers['Authorization'] = 'Bearer ' + getToken();
+      r = await fetch(path, opts);
+    } else {
+      // Token refresh failed — redirect to login
+      localStorage.clear();
+      window.location.href = '/login.html';
+      return {};
+    }
+  }
   return r.json();
 }
 
@@ -3082,6 +3116,8 @@ function uploadP6XER(file) {
   const reader = new FileReader();
   reader.onerror = function() { showToast('Failed to read file', false); };
   reader.onload = function(e) {
+    // Refresh token before upload to avoid expiry mid-upload
+    refreshTokenIfNeeded().then(function() {
     try {
       const bytes = new Uint8Array(e.target.result);
 
@@ -3162,6 +3198,7 @@ function uploadP6XER(file) {
     } catch(err) {
       showToast('Upload error: ' + err.message, false);
     }
+    }); // end refreshTokenIfNeeded
   };
   reader.readAsArrayBuffer(file);
 }
