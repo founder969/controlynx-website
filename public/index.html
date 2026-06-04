@@ -3071,66 +3071,81 @@ STATE.reportDate   = null;
 loadTodayReport();
 
 // ── P6 XER Upload from DPR ────────────────────────────────────
-async function uploadP6XER(file) {
+function uploadP6XER(file) {
   if (!file || !STATE.projectId) return;
   if (!file.name.toLowerCase().endsWith('.xer')) {
     showToast('Please upload a .xer file from Primavera P6', false);
     return;
   }
-  showToast('Reading XER file…', true);
-  try {
-    // Use ArrayBuffer to handle any encoding (UTF-8, Latin-1, Windows-1252)
-    const arrayBuffer = await file.arrayBuffer();
-    const uint8 = new Uint8Array(arrayBuffer);
+  showToast('Reading ' + file.name + '…', true);
 
-    // Convert to base64 in chunks to avoid call stack limits on large files
-    let binary = '';
-    const chunkSize = 8192;
-    for (let i = 0; i < uint8.length; i += chunkSize) {
-      binary += String.fromCharCode.apply(null, uint8.subarray(i, i + chunkSize));
-    }
-    const xer_base64 = btoa(binary);
+  const reader = new FileReader();
+  reader.onerror = function() { showToast('Failed to read file', false); };
+  reader.onload = function(e) {
+    try {
+      const bytes = new Uint8Array(e.target.result);
 
-    // Quick validation — decode first 2KB to check format
-    const preview = new TextDecoder('utf-8', { fatal: false }).decode(uint8.slice(0, 2048));
-    if (!preview.includes('%T') && !preview.includes('%F')) {
-      showToast('Invalid XER file. Please export from Primavera P6 → File → Export → XER format.', false);
-      return;
-    }
-
-    showToast('Uploading ' + file.name + '…', true);
-    const token = localStorage.getItem('cx_token');
-    const res = await fetch('/api/projects/' + STATE.projectId + '/p6/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ xer_base64 })
-    });
-    const data = await res.json();
-    if (data.success) {
-      showToast('✓ ' + data.activities_imported + ' P6 activities imported. Refreshing…', true);
-      const acts = await apiCall('GET', '/api/projects/' + STATE.projectId + '/p6/activities');
-      if (Array.isArray(acts)) {
-        STATE.p6Library = acts.map(a => ({
-          id: a.activity_id,
-          description: a.activity_name || a.description || a.activity_id,
-          wbs: a.wbs_name || a.wbs_code || '',
-          floor: a.floor || '',
-          discipline: a.discipline || '',
-          plannedStart: a.planned_start || '',
-          plannedFinish: a.planned_finish || '',
-          duration: a.duration || 0
-        }));
-        setTimeout(() => { init(); }, 800);
+      // Manual base64 — handles all byte values, no btoa needed
+      const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+      let base64 = '';
+      for (let i = 0; i < bytes.length; i += 3) {
+        const b0 = bytes[i], b1 = bytes[i+1]||0, b2 = bytes[i+2]||0;
+        base64 += CHARS[b0>>2];
+        base64 += CHARS[((b0&3)<<4)|(b1>>4)];
+        base64 += i+1 < bytes.length ? CHARS[((b1&15)<<2)|(b2>>6)] : '=';
+        base64 += i+2 < bytes.length ? CHARS[b2&63] : '=';
       }
-    } else {
-      showToast('P6 upload failed: ' + (data.error || 'Unknown error'), false);
+
+      // Validate first 2KB
+      let preview = '';
+      for (let j = 0; j < Math.min(2048, bytes.length); j++) preview += String.fromCharCode(bytes[j]);
+      if (!preview.includes('%T') && !preview.includes('%F')) {
+        showToast('Invalid XER file. Export from P6 → File → Export → XER format.', false);
+        return;
+      }
+
+      showToast('Uploading ' + file.name + ' (' + (bytes.length/1024).toFixed(0) + ' KB)…', true);
+      const token = localStorage.getItem('cx_token');
+      fetch('/api/projects/' + STATE.projectId + '/p6/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ xer_base64: base64 })
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data.success) {
+          showToast('✓ ' + data.activities_imported + ' P6 activities imported', true);
+          apiCall('GET', '/api/projects/' + STATE.projectId + '/p6/activities')
+          .then(function(acts) {
+            if (Array.isArray(acts) && acts.length > 0) {
+              STATE.p6Library = acts.map(function(a) {
+                return {
+                  id: a.activity_id,
+                  description: a.activity_name || a.description || a.activity_id,
+                  wbs: a.wbs_name || a.wbs_code || '',
+                  floor: a.floor || '',
+                  discipline: a.discipline || '',
+                  plannedStart: a.planned_start || '',
+                  plannedFinish: a.planned_finish || '',
+                  duration: a.duration || 0
+                };
+              });
+              setTimeout(function() { init(); }, 500);
+            }
+          });
+        } else {
+          showToast('Upload failed: ' + (data.error || 'Unknown error'), false);
+        }
+      })
+      .catch(function(err) { showToast('Upload error: ' + err.message, false); });
+
+    } catch(err) {
+      showToast('Upload error: ' + err.message, false);
     }
-  } catch(err) {
-    showToast('Upload error: ' + err.message, false);
-  }
+  };
+  reader.readAsArrayBuffer(file);
 }
 
-// ── P6 Weekly Export ──────────────────────────────────────────
 async function exportP6Progress() {
   if (!STATE.projectId) return;
   const token = localStorage.getItem('cx_token');

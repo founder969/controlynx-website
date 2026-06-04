@@ -506,30 +506,46 @@ async function handleP6File(file) {
   status.style.display = 'block';
   status.textContent = 'Reading file…';
 
+  // Use FileReader — works everywhere, no async/await needed at top level
   const reader = new FileReader();
-  reader.onload = async (e) => {
+  reader.onerror = function() {
+    status.textContent = '';
+    document.getElementById('errP6').textContent = 'Failed to read file.';
+    document.getElementById('errP6').classList.add('show');
+  };
+  reader.onload = function(e) {
     try {
-      status.textContent = 'Parsing XER format…';
-      const text = e.target.result;
+      const arrayBuffer = e.target.result;
+      const bytes = new Uint8Array(arrayBuffer);
 
-      // Store for upload after project creation
-      window._p6XerContent = text;
-      window._p6FileName   = file.name;
+      // Manual base64 encode — handles all byte values, no btoa needed
+      const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+      let base64 = '';
+      for (let i = 0; i < bytes.length; i += 3) {
+        const b0 = bytes[i], b1 = bytes[i+1]||0, b2 = bytes[i+2]||0;
+        base64 += CHARS[b0>>2];
+        base64 += CHARS[((b0&3)<<4)|(b1>>4)];
+        base64 += i+1 < bytes.length ? CHARS[((b1&15)<<2)|(b2>>6)] : '=';
+        base64 += i+2 < bytes.length ? CHARS[b2&63] : '=';
+      }
+      window._p6XerBase64 = base64;
+      window._p6FileName  = file.name;
 
-      // Quick client-side validation
-      if (!text.includes('%T') || !text.includes('TASK')) {
+      // Validate using latin1 preview of first 2KB
+      var preview = '';
+      for (var j = 0; j < Math.min(2048, bytes.length); j++) {
+        preview += String.fromCharCode(bytes[j]);
+      }
+      if (!preview.includes('%T') || !preview.includes('%R')) {
         throw new Error('File does not appear to be a valid P6 XER export. Check the file and try again.');
       }
 
-      // Count activities for preview
-      const taskMatches = (text.match(/%R/g) || []).length;
       status.textContent = '';
-
       document.getElementById('p6DropZone').style.display = 'none';
-      const success = document.getElementById('p6Success');
+      var success = document.getElementById('p6Success');
       success.style.display = 'flex';
       document.getElementById('p6SuccessMsg').textContent = 'P6 schedule ready to import';
-      document.getElementById('p6SuccessDetail').textContent = `${file.name} · ~${taskMatches} rows detected · Will import after project creation`;
+      document.getElementById('p6SuccessDetail').textContent = file.name + ' · ' + (bytes.length / 1024).toFixed(0) + ' KB · Will import after project creation';
       window._p6Uploaded = true;
       window._p6ReadyToUpload = true;
 
@@ -539,7 +555,7 @@ async function handleP6File(file) {
       document.getElementById('errP6').classList.add('show');
     }
   };
-  reader.readAsText(file);
+  reader.readAsArrayBuffer(file);
 }
 
 function handleP6Drop(event) {
@@ -643,11 +659,10 @@ async function createProject() {
       try {
         btn.innerHTML = '↑ Uploading P6 schedule…';
         // Encode as base64 for safe Vercel-compatible JSON transport
-        const p6Base64 = btoa(unescape(encodeURIComponent(window._p6XerContent)));
         const p6Res = await fetch('/api/projects/' + project.id + '/p6/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ xer_base64: p6Base64 })
+          body: JSON.stringify({ xer_base64: window._p6XerBase64 })
         });
         const p6Data = await p6Res.json();
         if (p6Data.success) {
