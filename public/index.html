@@ -2098,7 +2098,7 @@ function renderActivities() {
     <div class="section-title">Activities Performed Today</div>
     <div class="section-desc">Select activities from the loaded P6 schedule. Activities carry forward daily until marked Complete.</div>
   </div>
-  ${p6Lib.length === 0 ? `
+  ${p6Total === 0 ? `
   <div class="card" style="background:var(--bg-3);border-color:rgba(139,92,246,0.2)">
     <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--white-3)">
       <span style="font-size:16px">📋</span>
@@ -2118,7 +2118,7 @@ function renderActivities() {
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
       <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--green)">
         <span>✓</span>
-        <span>${p6Lib.length} P6 activities loaded. Select Floor → Discipline → Activity to log progress.</span>
+        <span>${p6Total} P6 activities loaded from your schedule. Select Floor → Discipline → Activity to log progress.</span>
       </div>
       ${STATE.role === 'planner' || STATE.role === 'admin' ? `
       <label style="display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-size:11px;color:var(--white-3);flex-shrink:0">
@@ -2990,23 +2990,15 @@ async function loadTodayReport() {
   STATE.data.identity.reportPrefix = project.report_prefix || 'DPR';
   STATE.data.identity.siteCoords   = project.site_lat ? project.site_lat + ', ' + project.site_lng : '';
 
-  // Load P6 activity library (parallel with report fetch)
+  // Load report + P6 structure in parallel (structure is fast, avoids loading all 5000 activities)
   const [reportResult, p6Result] = await Promise.allSettled([
     apiCall('GET', '/api/projects/' + project.id + '/today'),
-    apiCall('GET', '/api/projects/' + project.id + '/p6/activities')
+    apiCall('GET', '/api/projects/' + project.id + '/p6/structure')
   ]);
 
-  if (p6Result.status === 'fulfilled' && Array.isArray(p6Result.value) && p6Result.value.length > 0) {
-    STATE.p6Library = p6Result.value.map(a => ({
-      id:          a.activity_id,
-      description: a.description,
-      wbs:         a.wbs_name,
-      floor:       a.floor       || '',
-      discipline:  a.discipline  || '',
-      plannedStart: a.planned_start  || '',
-      plannedFinish: a.planned_finish || '',
-      duration:    a.duration    || 0
-    }));
+  if (p6Result.status === 'fulfilled' && p6Result.value && p6Result.value.total > 0) {
+    STATE.p6Structure = p6Result.value; // { floors, disciplines, wbs, total }
+    STATE.p6Library = []; // loaded on demand via search
   }
 
   if (reportResult.status === 'fulfilled' && reportResult.value && reportResult.value.id) {

@@ -727,14 +727,51 @@ async function processXERUpload(projectId, base64, orgId, res) {
   }
 }
 
-// Get activity library for DPR dropdowns
+// Get activity library for DPR dropdowns — supports search query and pagination
 app.get('/api/projects/:projectId/p6/activities', requireAuth, async (req, res) => {
   try {
-    const acts = await db('GET', 'p6_activities', {
-      eq:    { project_id: req.params.projectId },
-      order: 'activity_id.asc'
+    const { search, limit = 100, offset = 0 } = req.query;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const base = process.env.SUPABASE_URL + '/rest/v1/p6_activities';
+
+    let url = base + '?project_id=eq.' + req.params.projectId + '&order=activity_id.asc';
+
+    // Text search across activity_id, activity_name, wbs_name, floor, discipline
+    if (search && search.trim()) {
+      const q = encodeURIComponent(search.trim().toLowerCase());
+      url += '&or=(activity_id.ilike.*' + q + '*,activity_name.ilike.*' + q + '*,wbs_name.ilike.*' + q + '*,floor.ilike.*' + q + '*,discipline.ilike.*' + q + '*)';
+    }
+
+    url += '&limit=' + Math.min(parseInt(limit) || 100, 500);
+    url += '&offset=' + (parseInt(offset) || 0);
+
+    const r = await fetch(url, {
+      headers: { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
     });
-    res.json(acts || []);
+    const data = await r.json();
+    res.json(Array.isArray(data) ? data : []);
+  } catch(e) {
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Get unique values for cascading dropdowns (floors, disciplines, wbs levels)
+app.get('/api/projects/:projectId/p6/structure', requireAuth, async (req, res) => {
+  try {
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    // Get distinct floors
+    const floorsUrl = process.env.SUPABASE_URL + '/rest/v1/p6_activities?project_id=eq.' + req.params.projectId + '&select=floor,discipline,wbs_name&limit=5000';
+    const r = await fetch(floorsUrl, {
+      headers: { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' }
+    });
+    const data = await r.json();
+    if (!Array.isArray(data)) return res.json({ floors: [], disciplines: [], wbs: [] });
+
+    const floors = [...new Set(data.map(a => a.floor).filter(Boolean))].sort();
+    const disciplines = [...new Set(data.map(a => a.discipline).filter(Boolean))].sort();
+    const wbs = [...new Set(data.map(a => a.wbs_name).filter(Boolean))].sort();
+
+    res.json({ floors, disciplines, wbs, total: data.length });
   } catch(e) {
     res.status(400).json({ error: e.message });
   }
