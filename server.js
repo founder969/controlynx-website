@@ -17,8 +17,8 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 
 // ── Core DB helper — uses service role key, bypasses all RLS ─
 // This is the ONLY way we talk to the database from the server.
@@ -555,35 +555,64 @@ function parseXER(text) {
 // ── P6 / XER Routes ──────────────────────────────────────────
 
 // Upload XER file — parse and store activities
+// Store XER chunks in memory keyed by upload session
+const xerChunks = {};
+
+// Chunked XER upload — handles large files that exceed Vercel 4.5MB limit
+app.post('/api/projects/:projectId/p6/chunk', requireAuth, async (req, res) => {
+  const { projectId } = req.params;
+  const { session_id, chunk_index, total_chunks, chunk_data } = req.body || {};
+  if (!session_id || chunk_index === undefined || !chunk_data) {
+    return res.status(400).json({ error: 'Invalid chunk data' });
+  }
+  if (!xerChunks[session_id]) xerChunks[session_id] = { chunks: {}, total: total_chunks, projectId };
+  xerChunks[session_id].chunks[chunk_index] = chunk_data;
+  res.json({ received: chunk_index, total: total_chunks });
+});
+
+// Process assembled XER after all chunks received
+app.post('/api/projects/:projectId/p6/process', requireAuth, async (req, res) => {
+  const { projectId } = req.params;
+  const { session_id } = req.body || {};
+  if (!session_id || !xerChunks[session_id]) {
+    return res.status(400).json({ error: 'Session not found. Please upload again.' });
+  }
+  const session = xerChunks[session_id];
+  // Assemble chunks in order
+  const base64 = Object.keys(session.chunks).sort((a,b)=>a-b).map(k=>session.chunks[k]).join('');
+  delete xerChunks[session_id];
+  // Process as normal upload
+  req.body = { xer_base64: base64 };
+  // Fall through to main upload handler
+  return processXERUpload(projectId, base64, req.profile?.organization_id, res);
+});
+
 app.post('/api/projects/:projectId/p6/upload', requireAuth, async (req, res) => {
   try {
     const { projectId } = req.params;
-
-    // Accept base64-encoded XER content sent as JSON
-    // Client must base64-encode the file before sending
     const { xer_base64, xer_content } = req.body || {};
-
-    let text = '';
-
-    if (xer_base64) {
-      // Decode binary base64 — try multiple encodings
-      const buf = Buffer.from(xer_base64, 'base64');
-      // Try UTF-8 first
-      text = buf.toString('utf8');
-      // If UTF-8 produces garbage, try latin1 (Windows-1252 compatible)
-      if (!text.includes('%T') || !text.includes('%F')) {
-        text = buf.toString('latin1');
-      }
-      // Still no luck — try binary
-      if (!text.includes('%T') || !text.includes('%F')) {
-        text = buf.toString('binary');
-      }
-    } else if (xer_content) {
-      text = xer_content;
+    let base64 = xer_base64 || '';
+    if (!base64 && xer_content) {
+      // Legacy raw text — encode it
+      base64 = Buffer.from(xer_content).toString('base64');
     }
+    if (!base64) return res.status(400).json({ error: 'No XER content provided.' });
+    return processXERUpload(projectId, base64, req.profile?.organization_id, res);
+  } catch(e) {
+    console.error('P6 upload:', e.message);
+    res.status(400).json({ error: e.message });
+  }
+});
+
+async function processXERUpload(projectId, base64, orgId, res) {
+  try {
+    const buf = Buffer.from(base64, 'base64');
+    let text = buf.toString('utf8');
+    if (!text.includes('%T') || !text.includes('%F')) text = buf.toString('latin1');
+    if (!text.includes('%T') || !text.includes('%F')) text = buf.toString('binary');
 
     if (!text || !text.includes('%T')) {
-      return res.status(400).json({ error: 'Invalid XER file. Please export from Primavera P6 → File → Export → XER format.' });
+      return res.status(400).json({ error: 'Invalid XER file. Export from Primavera P6 → File → Export → XER format.' });
     }
 
     const parsed = parseXER(text);
@@ -634,10 +663,10 @@ app.post('/api/projects/:projectId/p6/upload', requireAuth, async (req, res) => 
       message:         `${inserted} activities imported from P6 schedule.`
     });
   } catch(e) {
-    console.error('P6 upload:', e.message);
+    console.error('P6 process:', e.message);
     res.status(400).json({ error: e.message });
   }
-});
+}
 
 // Get activity library for DPR dropdowns
 app.get('/api/projects/:projectId/p6/activities', requireAuth, async (req, res) => {
