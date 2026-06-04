@@ -555,36 +555,49 @@ function parseXER(text) {
 // ── P6 / XER Routes ──────────────────────────────────────────
 
 // Upload XER file — parse and store activities
-// Store XER chunks in memory keyed by upload session
-const xerChunks = {};
-
-// Chunked XER upload — handles large files that exceed Vercel 4.5MB limit
+// Chunked XER upload — stores chunks in Supabase to handle Vercel serverless instances
 app.post('/api/projects/:projectId/p6/chunk', requireAuth, async (req, res) => {
   const { projectId } = req.params;
   const { session_id, chunk_index, total_chunks, chunk_data } = req.body || {};
   if (!session_id || chunk_index === undefined || !chunk_data) {
     return res.status(400).json({ error: 'Invalid chunk data' });
   }
-  if (!xerChunks[session_id]) xerChunks[session_id] = { chunks: {}, total: total_chunks, projectId };
-  xerChunks[session_id].chunks[chunk_index] = chunk_data;
+  // Store chunk in p6_activities table temporarily using a special marker
+  // Use a dedicated xer_chunks table via direct REST
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL + '/rest/v1/xer_chunks';
+  await fetch(url, {
+    method: 'POST',
+    headers: { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ session_id, chunk_index, total_chunks, project_id: projectId, chunk_data, created_at: new Date().toISOString() })
+  });
   res.json({ received: chunk_index, total: total_chunks });
 });
 
 // Process assembled XER after all chunks received
 app.post('/api/projects/:projectId/p6/process', requireAuth, async (req, res) => {
   const { projectId } = req.params;
-  const { session_id } = req.body || {};
-  if (!session_id || !xerChunks[session_id]) {
-    return res.status(400).json({ error: 'Session not found. Please upload again.' });
+  const { session_id, total_chunks } = req.body || {};
+  if (!session_id) return res.status(400).json({ error: 'No session ID provided.' });
+
+  try {
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const url = process.env.SUPABASE_URL + '/rest/v1/xer_chunks?session_id=eq.' + session_id + '&order=chunk_index.asc&limit=200';
+    const r = await fetch(url, { headers: { 'apikey': key, 'Authorization': 'Bearer ' + key, 'Accept': 'application/json' } });
+    const chunks = await r.json();
+    if (!Array.isArray(chunks) || chunks.length === 0) {
+      return res.status(400).json({ error: 'Chunks not found. Please upload again.' });
+    }
+    // Assemble
+    const base64 = chunks.sort((a,b) => a.chunk_index - b.chunk_index).map(c => c.chunk_data).join('');
+    // Clean up chunks
+    await fetch(process.env.SUPABASE_URL + '/rest/v1/xer_chunks?session_id=eq.' + session_id, {
+      method: 'DELETE', headers: { 'apikey': key, 'Authorization': 'Bearer ' + key }
+    });
+    return processXERUpload(projectId, base64, req.profile?.organization_id, res);
+  } catch(e) {
+    res.status(500).json({ error: 'Assembly failed: ' + e.message });
   }
-  const session = xerChunks[session_id];
-  // Assemble chunks in order
-  const base64 = Object.keys(session.chunks).sort((a,b)=>a-b).map(k=>session.chunks[k]).join('');
-  delete xerChunks[session_id];
-  // Process as normal upload
-  req.body = { xer_base64: base64 };
-  // Fall through to main upload handler
-  return processXERUpload(projectId, base64, req.profile?.organization_id, res);
 });
 
 app.post('/api/projects/:projectId/p6/upload', requireAuth, async (req, res) => {

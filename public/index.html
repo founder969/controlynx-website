@@ -3109,8 +3109,8 @@ function uploadP6XER(file) {
       showToast('Uploading ' + file.name + ' (' + sizeMB + ' MB)…', true);
 
       // Vercel limit is 4.5MB per request — chunk if larger than 3MB
-      const CHUNK_SIZE = 3 * 1024 * 1024; // 3MB chunks in base64 chars
-      if (base64.length <= CHUNK_SIZE) {
+      const CHUNK_SIZE = 2 * 1024 * 1024; // 2MB chunks — base64 expands to ~2.7MB, safely under Vercel 4.5MB limit
+      if (base64.length <= CHUNK_SIZE) { // base64 length check
         // Small file — send directly
         fetch('/api/projects/' + STATE.projectId + '/p6/upload', {
           method: 'POST',
