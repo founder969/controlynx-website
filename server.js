@@ -695,8 +695,8 @@ async function processXERUpload(projectId, base64, orgId, res) {
       discipline:       a.discipline    || '',
       planned_start:    a.planned_start  || null,
       planned_finish:   a.planned_finish || null,
-      duration:         a.duration       || 0,
-      percent_complete: a.percent_complete || 0,
+      duration:         Math.round(a.duration || 0),
+      percent_complete: Math.round(a.percent_complete || 0),
       resources:        a.resources      || '',
       search_text:      (a.activity_id + ' ' + a.description + ' ' + (a.wbs_name||'')).toLowerCase(),
       imported_at:      new Date().toISOString()
