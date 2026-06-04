@@ -3078,48 +3078,56 @@ async function uploadP6XER(file) {
     return;
   }
   showToast('Reading XER file…', true);
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const text = e.target.result;
-      if (!text.includes('%T') || !text.includes('TASK')) {
-        showToast('Invalid XER file format', false); return;
-      }
-      showToast('Uploading to server…', true);
-      const token = localStorage.getItem('cx_token');
-      // Encode as base64 to safely transmit XER content through JSON
-      const xer_base64 = btoa(unescape(encodeURIComponent(text)));
-      const res = await fetch('/api/projects/' + STATE.projectId + '/p6/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ xer_base64 })
-      });
-      const data = await res.json();
-      if (data.success) {
-        showToast('✓ ' + data.activities_imported + ' P6 activities imported. Refreshing…', true);
-        // Reload p6 library
-        const acts = await apiCall('GET', '/api/projects/' + STATE.projectId + '/p6/activities');
-        if (Array.isArray(acts)) {
-          STATE.p6Library = acts.map(a => ({
-            id: a.activity_id,
-            description: a.activity_name || a.description || a.activity_id,
-            wbs: a.wbs_name || a.wbs_code || '',
-            floor: a.floor || '',
-            discipline: a.discipline || '',
-            plannedStart: a.planned_start || '',
-            plannedFinish: a.planned_finish || '',
-            duration: a.duration || 0
-          }));
-          setTimeout(() => { init(); }, 800);
-        }
-      } else {
-        showToast('P6 upload failed: ' + (data.error || 'Unknown error'), false);
-      }
-    } catch(err) {
-      showToast('Upload error: ' + err.message, false);
+  try {
+    // Use ArrayBuffer to handle any encoding (UTF-8, Latin-1, Windows-1252)
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8 = new Uint8Array(arrayBuffer);
+
+    // Convert to base64 in chunks to avoid call stack limits on large files
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < uint8.length; i += chunkSize) {
+      binary += String.fromCharCode.apply(null, uint8.subarray(i, i + chunkSize));
     }
-  };
-  reader.readAsText(file);
+    const xer_base64 = btoa(binary);
+
+    // Quick validation — decode first 2KB to check format
+    const preview = new TextDecoder('utf-8', { fatal: false }).decode(uint8.slice(0, 2048));
+    if (!preview.includes('%T') && !preview.includes('%F')) {
+      showToast('Invalid XER file. Please export from Primavera P6 → File → Export → XER format.', false);
+      return;
+    }
+
+    showToast('Uploading ' + file.name + '…', true);
+    const token = localStorage.getItem('cx_token');
+    const res = await fetch('/api/projects/' + STATE.projectId + '/p6/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ xer_base64 })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✓ ' + data.activities_imported + ' P6 activities imported. Refreshing…', true);
+      const acts = await apiCall('GET', '/api/projects/' + STATE.projectId + '/p6/activities');
+      if (Array.isArray(acts)) {
+        STATE.p6Library = acts.map(a => ({
+          id: a.activity_id,
+          description: a.activity_name || a.description || a.activity_id,
+          wbs: a.wbs_name || a.wbs_code || '',
+          floor: a.floor || '',
+          discipline: a.discipline || '',
+          plannedStart: a.planned_start || '',
+          plannedFinish: a.planned_finish || '',
+          duration: a.duration || 0
+        }));
+        setTimeout(() => { init(); }, 800);
+      }
+    } else {
+      showToast('P6 upload failed: ' + (data.error || 'Unknown error'), false);
+    }
+  } catch(err) {
+    showToast('Upload error: ' + err.message, false);
+  }
 }
 
 // ── P6 Weekly Export ──────────────────────────────────────────

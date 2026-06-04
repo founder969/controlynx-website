@@ -566,13 +566,19 @@ app.post('/api/projects/:projectId/p6/upload', requireAuth, async (req, res) => 
     let text = '';
 
     if (xer_base64) {
-      // Preferred: base64 encoded — safe for all file contents
-      try {
-        text = Buffer.from(xer_base64, 'base64').toString('utf8');
-        if (!text.includes('%T')) text = Buffer.from(xer_base64, 'base64').toString('latin1');
-      } catch(e) { text = ''; }
+      // Decode binary base64 — try multiple encodings
+      const buf = Buffer.from(xer_base64, 'base64');
+      // Try UTF-8 first
+      text = buf.toString('utf8');
+      // If UTF-8 produces garbage, try latin1 (Windows-1252 compatible)
+      if (!text.includes('%T') || !text.includes('%F')) {
+        text = buf.toString('latin1');
+      }
+      // Still no luck — try binary
+      if (!text.includes('%T') || !text.includes('%F')) {
+        text = buf.toString('binary');
+      }
     } else if (xer_content) {
-      // Legacy: raw text (may fail on special chars)
       text = xer_content;
     }
 
