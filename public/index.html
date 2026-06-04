@@ -929,6 +929,7 @@ input, select, textarea { outline: none; }
 
 <!-- HEADER -->
 <header class="header">
+  <a href="/projects" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--white-3);padding:4px 8px;border:0.5px solid var(--border);border-radius:var(--r-sm);margin-right:4px;flex-shrink:0" title="Projects Hub">← Hub</a>
   <a class="logo" href="#">
     <div class="logo-icon">
       <svg viewBox="0 0 30 30" fill="none" width="18" height="18">
@@ -1035,6 +1036,7 @@ const TABS = [
   { id:'activities', label:'Activities',  icon:'📋', roles:['engineer','planner'] },
   { id:'allocation', label:'Allocation',  icon:'⚙', roles:['engineer','planner'] },
   { id:'issues',     label:'Issues',      icon:'⚠', roles:['engineer','planner'] },
+  { id:'photos',     label:'Photos',      icon:'📷', roles:['engineer','safety','planner','admin'] },
   { id:'sign-off',   label:'Sign-off',    icon:'✅', roles:['planner'] }
 ];
 
@@ -1215,7 +1217,7 @@ function renderPanel(i) {
     renderIdentity, renderWeather, renderSafety,
     renderLabour, renderStaffing, renderEquipment,
     renderMaterials, renderActivities, renderAllocation,
-    renderIssues, renderSignoff
+    renderIssues, renderPhotos, renderSignoff
   ];
   mc.innerHTML = renderers[i]();
   // Bind panel-specific events
@@ -2509,6 +2511,58 @@ function getTabStatus(i) {
   }
 }
 
+
+// ─── 11. PHOTOS ────────────────────────────────────────────────────────────
+function renderPhotos() {
+  const d = STATE.data.photos || { items: [] };
+  return `
+  <div class="section-header">
+    <div class="section-title">Progress Photos</div>
+    <div class="section-desc">Upload site progress photos. Photos are attached to the daily report and included in the PDF.</div>
+  </div>
+  <div id="photoGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px">
+    ${(d.items||[]).map((p,i) => `
+    <div style="background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-md);overflow:hidden;position:relative">
+      ${p.dataUrl ? `<img src="${p.dataUrl}" style="width:100%;height:120px;object-fit:cover;display:block">` : `<div style="width:100%;height:120px;background:var(--bg-3);display:flex;align-items:center;justify-content:center;font-size:28px">📷</div>`}
+      <div style="padding:8px">
+        <div style="font-size:11px;color:var(--white-2);margin-bottom:4px">${p.caption || 'No caption'}</div>
+        <div style="font-size:10px;color:var(--white-4)">${p.location || ''}</div>
+      </div>
+      <button onclick="removePhoto(${i})" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);border:none;color:#fff;border-radius:50%;width:22px;height:22px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
+    </div>`).join('')}
+    <label style="background:var(--bg-card);border:1.5px dashed var(--border2);border-radius:var(--r-md);display:flex;flex-direction:column;align-items:center;justify-content:center;height:160px;cursor:pointer;gap:6px">
+      <span style="font-size:28px">+</span>
+      <span style="font-size:12px;color:var(--white-3)">Add photo</span>
+      <input type="file" accept="image/*" multiple style="display:none" onchange="addPhotos(this.files)">
+    </label>
+  </div>
+  <div style="margin-top:8px;padding:12px;background:var(--bg-3);border-radius:var(--r-md);font-size:12px;color:var(--white-3)">
+    📷 ${(d.items||[]).length} photo${(d.items||[]).length !== 1 ? 's' : ''} attached to this report
+  </div>`;
+}
+
+function addPhotos(files) {
+  if (!files || !files.length) return;
+  const items = STATE.data.photos.items || [];
+  let loaded = 0;
+  Array.from(files).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      items.push({ dataUrl: e.target.result, caption: file.name.replace(/\.[^.]+$/, ''), location: '', timestamp: new Date().toISOString() });
+      STATE.data.photos.items = items;
+      loaded++;
+      if (loaded === files.length) { autoSave(); renderPanel(STATE.currentTab); }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function removePhoto(i) {
+  STATE.data.photos.items.splice(i, 1);
+  autoSave();
+  renderPanel(STATE.currentTab);
+}
+
 function renderSignoff() {
   const tabs = TABS.slice(0,10);
   const statuses = tabs.map((t,i) => getTabStatus(i));
@@ -2881,8 +2935,8 @@ async function loadTodayReport() {
   const token = localStorage.getItem('cx_token');
   if (!project.id) {
     if (token) {
-      // Logged in but no project — redirect to setup
-      window.location.href = '/setup';
+      // Logged in but no project — go to projects hub
+      window.location.href = '/projects';
       return;
     }
     // Not logged in — redirect to login
@@ -3033,10 +3087,13 @@ async function uploadP6XER(file) {
       }
       showToast('Uploading to server…', true);
       const token = localStorage.getItem('cx_token');
+      const formData = new FormData();
+      const blob = new Blob([text], { type: 'text/plain' });
+      formData.append('xer_file', blob, 'schedule.xer');
       const res = await fetch('/api/projects/' + STATE.projectId + '/p6/upload', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ xer_content: text })
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: formData
       });
       const data = await res.json();
       if (data.success) {

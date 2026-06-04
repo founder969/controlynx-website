@@ -7,6 +7,8 @@ require('dotenv').config();
 const express = require('express');
 const path    = require('path');
 const { createClient } = require('@supabase/supabase-js');
+const multer  = require('multer');
+const upload  = multer({ storage: multer.memoryStorage(), limits: { fileSize: 50 * 1024 * 1024 } });
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -555,19 +557,28 @@ function parseXER(text) {
 // ── P6 / XER Routes ──────────────────────────────────────────
 
 // Upload XER file — parse and store activities
-app.post('/api/projects/:projectId/p6/upload', requireAuth, async (req, res) => {
+app.post('/api/projects/:projectId/p6/upload', requireAuth, upload.single('xer_file'), async (req, res) => {
   try {
     const { projectId } = req.params;
-    const { xer_content } = req.body; // base64 or raw text sent from client
 
-    if (!xer_content) return res.status(400).json({ error: 'No XER content provided.' });
-
-    // Decode if base64
-    let text = xer_content;
-    if (!text.includes('%T') && !text.includes('%F')) {
-      try { text = Buffer.from(xer_content, 'base64').toString('utf8'); } catch(e) {}
+    // Support both multipart file upload AND JSON body (legacy)
+    let text = '';
+    if (req.file) {
+      // Multipart upload — try common encodings
+      text = req.file.buffer.toString('utf8');
+      if (!text.includes('%T')) text = req.file.buffer.toString('latin1');
+      if (!text.includes('%T')) text = req.file.buffer.toString('utf16le');
+    } else if (req.body?.xer_content) {
+      // Legacy JSON body
+      text = req.body.xer_content;
+      if (!text.includes('%T')) {
+        try { text = Buffer.from(req.body.xer_content, 'base64').toString('utf8'); } catch(e) {}
+      }
     }
-    if (!text.includes('%T')) return res.status(400).json({ error: 'Invalid XER file format.' });
+
+    if (!text || !text.includes('%T')) {
+      return res.status(400).json({ error: 'Invalid XER file. Please export from Primavera P6 → File → Export → XER format.' });
+    }
 
     const parsed = parseXER(text);
     if (!parsed.activities.length) {
@@ -709,6 +720,7 @@ app.get('/api/projects/:projectId/p6/export', requireAuth, async (req, res) => {
 });
 
 // ── Page routes ──────────────────────────────────────────────
+app.get('/projects',     (req, res) => res.sendFile(path.join(__dirname, 'public', 'projects.html')));
 app.get('/login',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 app.get('/login.html',   (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 app.get('/signup',       (req, res) => res.sendFile(path.join(__dirname, 'public', 'signup.html')));

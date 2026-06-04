@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controlynx — Projects Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Figtree:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080D14;--bg-2:#0C1220;--bg-3:#101828;--bg-card:#0F1A27;
+  --border:#1A2D40;--border-2:#1F3347;
+  --cyan:#00D4FF;--cyan-dim:rgba(0,212,255,0.1);--cyan-border:rgba(0,212,255,0.2);
+  --green:#00C48C;--green-dim:rgba(0,196,140,0.1);
+  --amber:#F4A030;--amber-dim:rgba(244,160,48,0.1);
+  --red:#FF4D4D;--red-dim:rgba(255,77,77,0.1);
+  --white:#F0F4F8;--white-2:#B8C5D0;--white-3:#6B7F8E;--white-4:#3A4F60;
+  --mono:'JetBrains Mono',monospace;--sans:'Figtree',sans-serif;--display:'Syne',sans-serif;
+  --r-sm:6px;--r-md:10px;--r-lg:16px;--r-xl:20px;
+}
+html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--white);-webkit-font-smoothing:antialiased}
+a{text-decoration:none;color:inherit}
+button{font-family:var(--sans);cursor:pointer;border:none;outline:none}
+
+/* NAV */
+nav{height:60px;background:rgba(8,13,20,0.95);border-bottom:0.5px solid var(--border);display:flex;align-items:center;padding:0 5%;gap:16px;position:sticky;top:0;z-index:100;backdrop-filter:blur(20px)}
+.nav-logo{display:flex;align-items:center;gap:9px}
+.nav-wordmark{font-family:var(--display);font-size:16px;font-weight:800;color:var(--white)}
+.nav-wordmark span{color:var(--cyan)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.nav-user{font-size:13px;color:var(--white-3)}
+.nav-signout{font-size:12px;color:var(--white-4);padding:5px 10px;border:0.5px solid var(--border-2);border-radius:var(--r-sm);transition:all .18s;background:transparent}
+.nav-signout:hover{color:var(--white-2);border-color:var(--white-4)}
+
+/* MAIN */
+.main{max-width:1200px;margin:0 auto;padding:40px 5%}
+
+/* HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px;gap:16px;flex-wrap:wrap}
+.page-title{font-family:var(--display);font-size:28px;font-weight:800;color:var(--white);margin-bottom:4px}
+.page-sub{font-size:14px;color:var(--white-3)}
+.btn-new{display:inline-flex;align-items:center;gap:7px;height:42px;padding:0 18px;background:var(--cyan);color:var(--bg);border-radius:var(--r-md);font-size:14px;font-weight:700;transition:all .18s}
+.btn-new:hover{background:#1DE0FF;transform:translateY(-1px)}
+
+/* PLAN BAR */
+.plan-bar{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-lg);padding:16px 20px;margin-bottom:28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.plan-info{flex:1}
+.plan-name{font-size:12px;font-weight:600;color:var(--cyan);font-family:var(--mono);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.plan-usage{font-size:13px;color:var(--white-2)}
+.plan-bar-track{flex:2;min-width:200px}
+.plan-bar-bg{height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden}
+.plan-bar-fill{height:100%;border-radius:3px;transition:width .5s ease;background:linear-gradient(90deg,var(--cyan),rgba(0,212,255,0.5))}
+.plan-bar-fill.warn{background:linear-gradient(90deg,var(--amber),rgba(244,160,48,0.5))}
+.plan-bar-fill.full{background:linear-gradient(90deg,var(--red),rgba(255,77,77,0.5))}
+.btn-upgrade{height:34px;padding:0 14px;background:transparent;border:0.5px solid var(--amber);color:var(--amber);border-radius:var(--r-sm);font-size:12px;font-weight:600;transition:all .18s}
+.btn-upgrade:hover{background:var(--amber-dim)}
+
+/* PROJECT GRID */
+.project-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.project-card{background:var(--bg-card);border:0.5px solid var(--border);border-radius:var(--r-xl);padding:20px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.project-card:hover{border-color:var(--cyan-border);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,212,255,0.07)}
+.project-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),transparent);transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.project-card:hover::before{transform:scaleX(1)}
+.pc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px}
+.pc-name{font-family:var(--display);font-size:16px;font-weight:700;color:var(--white);line-height:1.3}
+.pc-status{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:4px;font-family:var(--mono);flex-shrink:0}
+.pc-status.active{background:var(--green-dim);color:var(--green)}
+.pc-status.setup{background:var(--cyan-dim);color:var(--cyan)}
+.pc-meta{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.pc-meta-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--white-3)}
+.pc-meta-label{color:var(--white-4);width:72px;flex-shrink:0;font-size:11px}
+.pc-divider{height:0.5px;background:var(--border);margin:12px 0}
+.pc-footer{display:flex;align-items:center;justify-content:space-between}
+.pc-last-report{font-size:11px;font-family:var(--mono);color:var(--white-4)}
+.pc-open-btn{font-size:12px;font-weight:600;color:var(--cyan);background:var(--cyan-dim);border:0.5px solid var(--cyan-border);border-radius:var(--r-sm);padding:5px 10px;transition:all .18s}
+.pc-open-btn:hover{background:rgba(0,212,255,0.2)}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:80px 20px}
+.empty-icon{font-size:48px;margin-bottom:16px}
+.empty-title{font-family:var(--display);font-size:22px;font-weight:700;color:var(--white);margin-bottom:8px}
+.empty-sub{font-size:14px;color:var(--white-3);margin-bottom:24px}
+
+/* WELCOME MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(4px)}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--bg-card);border:0.5px solid var(--border-2);border-radius:var(--r-xl);padding:36px;max-width:500px;width:90%;text-align:center;position:relative}
+.modal-logo{margin:0 auto 20px;width:56px;height:56px}
+.modal-title{font-family:var(--display);font-size:24px;font-weight:800;color:var(--white);margin-bottom:10px}
+.modal-sub{font-size:14px;color:var(--white-2);line-height:1.65;margin-bottom:28px}
+.modal-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;text-align:left}
+.modal-step{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--bg-3);border-radius:var(--r-md)}
+.modal-step-num{width:22px;height:22px;background:var(--cyan-dim);border:0.5px solid var(--cyan-border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--cyan);flex-shrink:0}
+.modal-step-text{font-size:13px;color:var(--white-2);line-height:1.4}
+.modal-cta{width:100%;height:46px;background:var(--cyan);color:var(--bg);border-radius:var(--r-md);font-size:15px;font-weight:700;border:none;cursor:pointer;transition:all .18s}
+.modal-cta:hover{background:#1DE0FF}
+
+/* LOADING */
+.loading{display:flex;align-items:center;justify-content:center;padding:80px;gap:10px;color:var(--white-3);font-size:14px}
+.spin{width:18px;height:18px;border:2px solid var(--border-2);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:600px){
+  .plan-bar{flex-direction:column;align-items:stretch}
+  .page-header{flex-direction:column}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
+      <rect x="2" y="2" width="26" height="26" rx="2.5" stroke="#00D4FF" stroke-width="1.2" transform="rotate(45 15 15)" fill="none"/>
+      <path d="M11 8C7 8 4.5 11 4.5 15C4.5 19 7 22 11 22" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <line x1="14" y1="8" x2="24" y2="22" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+      <line x1="24" y1="8" x2="14" y2="22" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span class="nav-wordmark">Controlynx<span>.ai</span></span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user" id="navUser"></span>
+    <button class="nav-signout" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<!-- Welcome Modal -->
+<div class="modal-overlay" id="welcomeModal">
+  <div class="modal">
+    <svg class="modal-logo" viewBox="0 0 30 30" fill="none">
+      <rect x="2" y="2" width="26" height="26" rx="2.5" stroke="#00D4FF" stroke-width="1.2" transform="rotate(45 15 15)" fill="none"/>
+      <path d="M11 8C7 8 4.5 11 4.5 15C4.5 19 7 22 11 22" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <line x1="14" y1="8" x2="24" y2="22" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+      <line x1="24" y1="8" x2="14" y2="22" stroke="#00D4FF" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div class="modal-title">Welcome to Controlynx</div>
+    <div class="modal-sub">You are ready to take control of your projects. Here is how to get started in 3 steps.</div>
+    <div class="modal-steps">
+      <div class="modal-step"><div class="modal-step-num">1</div><div class="modal-step-text"><strong>Create your first project</strong> — add project details, team members, and distribution list</div></div>
+      <div class="modal-step"><div class="modal-step-num">2</div><div class="modal-step-text"><strong>Upload your P6 schedule</strong> — activities auto-load into the daily report form</div></div>
+      <div class="modal-step"><div class="modal-step-num">3</div><div class="modal-step-text"><strong>Start your first daily report</strong> — your team fills in 5 minutes, AI generates the narrative</div></div>
+    </div>
+    <button class="modal-cta" onclick="closeWelcome()">Create My First Project →</button>
+  </div>
+</div>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Projects Hub</div>
+      <div class="page-sub" id="pageSubText">All your active projects</div>
+    </div>
+    <button class="btn-new" id="btnNewProject" onclick="newProject()">
+      <span style="font-size:18px;line-height:1">+</span> New Project
+    </button>
+  </div>
+
+  <div class="plan-bar" id="planBar" style="display:none">
+    <div class="plan-info">
+      <div class="plan-name" id="planName">Professional</div>
+      <div class="plan-usage" id="planUsage">Loading…</div>
+    </div>
+    <div class="plan-bar-track">
+      <div class="plan-bar-bg"><div class="plan-bar-fill" id="planFill" style="width:0%"></div></div>
+    </div>
+    <button class="btn-upgrade" id="btnUpgrade" style="display:none" onclick="window.location.href='/pricing'">Upgrade Plan ↑</button>
+  </div>
+
+  <div id="projectsContainer">
+    <div class="loading"><div class="spin"></div> Loading projects…</div>
+  </div>
+</main>
+
+<script>
+const token = localStorage.getItem('cx_token');
+const user  = (() => { try { return JSON.parse(localStorage.getItem('cx_user')||'{}'); } catch(e){ return {}; } })();
+
+if (!token) window.location.href = '/login.html';
+
+// Set nav user name
+document.getElementById('navUser').textContent = user.full_name || user.email || '';
+
+async function loadProjects() {
+  try {
+    const res  = await fetch('/api/projects', { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || 'Failed to load projects'); return; }
+
+    // Get org info for plan limits
+    const meRes  = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+    const meData = await meRes.json();
+    const org    = meData.organization || {};
+
+    renderPlanBar(data.length, org);
+    renderProjects(data, org);
+
+    // Show welcome modal if no projects
+    if (data.length === 0) {
+      document.getElementById('welcomeModal').classList.remove('hidden');
+    } else {
+      document.getElementById('welcomeModal').classList.add('hidden');
+    }
+  } catch(e) {
+    showError('Connection error. Please refresh.');
+  }
+}
+
+function renderPlanBar(count, org) {
+  const max  = org.max_projects || 1;
+  const plan = org.plan || 'starter';
+  const pct  = Math.round((count / max) * 100);
+
+  document.getElementById('planBar').style.display   = 'flex';
+  document.getElementById('planName').textContent    = plan.charAt(0).toUpperCase() + plan.slice(1) + ' Plan';
+  document.getElementById('planUsage').textContent   = `${count} of ${max} project${max !== 1 ? 's' : ''} used`;
+  document.getElementById('pageSubText').textContent = `${count} active project${count !== 1 ? 's' : ''}`;
+
+  const fill = document.getElementById('planFill');
+  fill.style.width = Math.min(pct, 100) + '%';
+  fill.className   = 'plan-bar-fill' + (pct >= 100 ? ' full' : pct >= 80 ? ' warn' : '');
+
+  if (pct >= 80) document.getElementById('btnUpgrade').style.display = 'block';
+  if (pct >= 100) document.getElementById('btnNewProject').style.opacity = '0.4';
+}
+
+function renderProjects(projects, org) {
+  const container = document.getElementById('projectsContainer');
+  if (!projects.length) {
+    container.innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">🏗</div>
+      <div class="empty-title">No projects yet</div>
+      <div class="empty-sub">Create your first project to start generating daily reports</div>
+      <button class="btn-new" onclick="newProject()" style="margin:0 auto">+ Create First Project</button>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="project-grid">${projects.map(p => projectCard(p)).join('')}</div>`;
+}
+
+function projectCard(p) {
+  const lastReport = p.last_report_date ? formatDate(p.last_report_date) : 'No reports yet';
+  const startDate  = p.start_date ? formatDate(p.start_date) : '—';
+  const endDate    = p.planned_finish ? formatDate(p.planned_finish) : '—';
+  return `
+  <div class="project-card" onclick="openProject('${p.id}')">
+    <div class="pc-header">
+      <div class="pc-name">${escHtml(p.name)}</div>
+      <span class="pc-status active">● Active</span>
+    </div>
+    <div class="pc-meta">
+      <div class="pc-meta-row"><span class="pc-meta-label">Client</span>${escHtml(p.client || '—')}</div>
+      <div class="pc-meta-row"><span class="pc-meta-label">Contractor</span>${escHtml(p.contractor || '—')}</div>
+      <div class="pc-meta-row"><span class="pc-meta-label">Contract</span>${escHtml(p.contract_number || '—')}</div>
+      <div class="pc-meta-row"><span class="pc-meta-label">Start</span>${startDate}</div>
+      <div class="pc-meta-row"><span class="pc-meta-label">Finish</span>${endDate}</div>
+    </div>
+    <div class="pc-divider"></div>
+    <div class="pc-footer">
+      <span class="pc-last-report">Last report: ${lastReport}</span>
+      <button class="pc-open-btn" onclick="event.stopPropagation();openProject('${p.id}')">Open →</button>
+    </div>
+  </div>`;
+}
+
+function openProject(projectId) {
+  // Store selected project and go to DPR for now
+  // Future: go to /project/:id controlling hub
+  fetch('/api/projects/' + projectId, { headers: { 'Authorization': 'Bearer ' + token } })
+    .then(r => r.json())
+    .then(project => {
+      localStorage.setItem('cx_project', JSON.stringify(project));
+      window.location.href = '/dpr';
+    })
+    .catch(() => { window.location.href = '/dpr'; });
+}
+
+function newProject() {
+  const max     = parseInt(document.getElementById('planUsage').textContent.split(' of ')[1]) || 1;
+  const current = parseInt(document.getElementById('planUsage').textContent.split(' of ')[0]) || 0;
+  if (current >= max) {
+    alert('You have reached your plan limit of ' + max + ' project(s). Please upgrade to add more projects.');
+    return;
+  }
+  localStorage.removeItem('cx_project');
+  window.location.href = '/setup';
+}
+
+function closeWelcome() {
+  document.getElementById('welcomeModal').classList.add('hidden');
+  newProject();
+}
+
+function signOut() {
+  fetch('/api/auth/signout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + token } }).catch(() => {});
+  localStorage.clear();
+  window.location.href = '/login.html';
+}
+
+function showError(msg) {
+  document.getElementById('projectsContainer').innerHTML = `<div style="text-align:center;padding:60px;color:var(--red)">${msg}</div>`;
+}
+
+function formatDate(d) {
+  if (!d) return '—';
+  try { return new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' }); } catch(e) { return d; }
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+loadProjects();
+</script>
+</body>
+</html>
