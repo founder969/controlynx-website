@@ -2086,10 +2086,12 @@ function renderMaterialRow(m, i) {
 // ─── 8. ACTIVITIES ─────────────────────────────────────────────────────────
 function renderActivities() {
   const d = STATE.data.activities;
-  const p6Lib = STATE.data.p6Library || [];
-  // Build floor list from p6 library or defaults
-  const floors = p6Lib.length > 0
-    ? [...new Set(p6Lib.map(a => a.floor).filter(Boolean))].sort()
+  const p6Lib = STATE.p6Library || [];
+  const p6Structure = STATE.p6Structure || null;
+  const p6Total = p6Structure ? p6Structure.total : p6Lib.length;
+  // Build floor list from p6 structure or defaults
+  const floors = p6Total > 0
+    ? (p6Structure?.floors?.length > 0 ? p6Structure.floors : [...new Set(p6Lib.map(a => a.floor).filter(Boolean))].sort())
     : ['Basement','Ground Floor','Level 1','Level 2','Level 3','Level 4','Level 5','Level 6','Level 7','Level 8','Level 9','Level 10','Level 11','Level 12','Roof'];
   const disciplines = ['Civil / Substructure','Structural / Superstructure','Civil Finishes','MEP Installation','MEP Finishes','Fit-Out','External Works','Other'];
 
